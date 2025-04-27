@@ -5,6 +5,9 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@/three/webgpu": [
+        "./node_modules/three/build/three.webgpu"
       ]
     }
   },
