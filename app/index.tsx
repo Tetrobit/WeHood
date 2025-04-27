@@ -3,7 +3,6 @@ import * as THREE from "three";
 // import { color, fog, float, positionWorld, triNoise3D, positionView, normalWorld, uniform } from 'three/build/three.tsl';
 import { loadObjAsync, Renderer } from "expo-three";
 import { ExpoWebGLRenderingContext, GLView } from "expo-gl";
-import '.';
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   Gesture,
@@ -14,6 +13,7 @@ import { useSharedValue } from "react-native-reanimated";
 import { ActivityIndicator, Dimensions, StyleSheet, Text, View } from "react-native";
 import Cloud from "@/components/cloud";
 import { LinearGradient } from "expo-linear-gradient";
+import Neighbourhood from "@/components/neighbourhood";
 
 const App = () => {
   const [gl, setGl] = React.useState<ExpoWebGLRenderingContext|null>(null);
@@ -113,67 +113,59 @@ const App = () => {
   }, [gl]);
 
   return (
-    
-    <GestureHandlerRootView>
-      {/* <LinearGradient colors={['#f26f8b', '#fdc859']}> */}
-      {/* <LinearGradient colors={['#393790', '#df729d']}> */}
-      <LinearGradient colors={['#323f94', '#5ab8db']}>
-      {/* <LinearGradient colors={['#df729d', '#393790']}> */}
+    <LinearGradient colors={['#323f94', '#5ab8db']}>
+    {/* <LinearGradient colors={['#f26f8b', '#fdc859']}> */}
+    {/* <LinearGradient colors={['#393790', '#df729d']}> */}
+    {/* <LinearGradient colors={['#df729d', '#393790']}> */}
       <SafeAreaView style={styles.view}>
-          {/* <Cloud/> */}
-          <View style={styles.header}>
-            <View style={styles.titleContainer}>
-              <View style={styles.leftFigure}>
-                <View style={{...styles.figuresWrapper, ...styles.leftFiguresWrapper}}>
-                  <View style={styles.figuresWrapperRel}>
-                    <View style={{...styles.block, ...styles.blockL1}} />
-                    <View style={{...styles.block, ...styles.blockL2}} />
-                    <View style={{...styles.block, ...styles.blockL3}} />
-                    <View style={{...styles.block, ...styles.blockL4}} />
-                  </View>
-                </View>
-              </View>
-              <Text style={styles.titleText}>Мой район</Text>
-              <View style={styles.rightFigure}>
-                <View style={{...styles.figuresWrapper, ...styles.rightFiguresWrapper}}>
-                  <View style={styles.figuresWrapperRel}>
-                    <View style={{...styles.block, ...styles.blockR1}} />
-                    <View style={{...styles.block, ...styles.blockR2}} />
-                    <View style={{...styles.block, ...styles.blockR3}} />
-                    <View style={{...styles.block, ...styles.blockR4}} />
-                  </View>
+        {/* <Cloud/> */}
+        <View style={styles.header}>
+          <View style={styles.titleContainer}>
+            <View style={styles.leftFigure}>
+              <View style={{...styles.figuresWrapper, ...styles.leftFiguresWrapper}}>
+                <View style={styles.figuresWrapperRel}>
+                  <View style={{...styles.block, ...styles.blockL1}} />
+                  <View style={{...styles.block, ...styles.blockL2}} />
+                  <View style={{...styles.block, ...styles.blockL3}} />
+                  <View style={{...styles.block, ...styles.blockL4}} />
                 </View>
               </View>
             </View>
-            { loading && <ActivityIndicator size="large" color="#ffffff55" /> }
+            <Text style={styles.titleText}>Мой район</Text>
+            <View style={styles.rightFigure}>
+              <View style={{...styles.figuresWrapper, ...styles.rightFiguresWrapper}}>
+                <View style={styles.figuresWrapperRel}>
+                  <View style={{...styles.block, ...styles.blockR1}} />
+                  <View style={{...styles.block, ...styles.blockR2}} />
+                  <View style={{...styles.block, ...styles.blockR3}} />
+                  <View style={{...styles.block, ...styles.blockR4}} />
+                </View>
+              </View>
+            </View>
           </View>
-          <GestureDetector gesture={pan}>
-            <GLView
-              onContextCreate={gl => setGl(gl)}
-              style={{ ...styles.canvas }}
+          { loading && <ActivityIndicator size="large" color="#ffffff55" /> }
+        </View>
+        <View>
+
+        </View>
+          <Neighbourhood
+            width={Dimensions.get('screen').width}
+            height={Dimensions.get('screen').height}
+            onLoad={() => setLoading(false)}
             />
-          </GestureDetector> 
-        </SafeAreaView>
-      </LinearGradient>
-    </GestureHandlerRootView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 };
 
 const blockWidth = 15;
 const blockPad = 3;
 
-console.log(Dimensions.get('screen').height);
 
 const styles = StyleSheet.create({
   view: {
     height: '100%',
     paddingTop: 45
-  },
-  canvas: {
-    position: 'absolute',
-    bottom: 0,
-    width: Dimensions.get('screen').width,
-    height: Dimensions.get('screen').height,
   },
   header: {
     boxSizing: 'border-box',
