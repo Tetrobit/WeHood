@@ -11,7 +11,7 @@ import {
   GestureHandlerRootView,
 } from 'react-native-gesture-handler';
 import { useSharedValue } from "react-native-reanimated";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Dimensions, StyleSheet, Text, View } from "react-native";
 import Cloud from "@/components/cloud";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -42,13 +42,12 @@ const App = () => {
 
     (async () => {
       const scene = new THREE.Scene();
-      const camera = new THREE.OrthographicCamera();
-      
+      const camera = new THREE.OrthographicCamera(-1, 1, 1, 1 - gl.drawingBufferHeight * 0.0017);
 
       camera.rotateX(-0.5);
-      camera.position.y = 1.0;
+      camera.position.y = 1.25;
       camera.position.z = 2;
-  
+
       const renderer = new Renderer({ gl });
       renderer.setSize(gl.drawingBufferWidth, gl.drawingBufferHeight);
 
@@ -152,7 +151,7 @@ const App = () => {
             <GLView
               onContextCreate={gl => setGl(gl)}
               style={{ ...styles.canvas }}
-              />
+            />
           </GestureDetector> 
         </SafeAreaView>
       </LinearGradient>
@@ -163,6 +162,8 @@ const App = () => {
 const blockWidth = 15;
 const blockPad = 3;
 
+console.log(Dimensions.get('screen').height);
+
 const styles = StyleSheet.create({
   view: {
     height: '100%',
@@ -171,8 +172,8 @@ const styles = StyleSheet.create({
   canvas: {
     position: 'absolute',
     bottom: 0,
-    width: '100%',
-    height: 400
+    width: Dimensions.get('screen').width,
+    height: Dimensions.get('screen').height,
   },
   header: {
     boxSizing: 'border-box',
