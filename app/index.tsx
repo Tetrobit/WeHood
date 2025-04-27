@@ -10,107 +10,64 @@ import {
   GestureHandlerRootView,
 } from 'react-native-gesture-handler';
 import { useSharedValue } from "react-native-reanimated";
-import { ActivityIndicator, Dimensions, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Dimensions, StyleSheet, Text, View, TextInput, TouchableOpacity, Platform } from "react-native";
 import Cloud from "@/components/cloud";
 import { LinearGradient } from "expo-linear-gradient";
 import Neighbourhood from "@/components/neighbourhood";
 
 const App = () => {
-  const [gl, setGl] = React.useState<ExpoWebGLRenderingContext|null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [isLogin, setIsLogin] = React.useState(true);
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
 
-  const pressed = useSharedValue<boolean>(false);
-  const offset = useSharedValue<number>(0);
+  const handleSubmit = () => {
+    // Здесь будет логика авторизации
+    console.log('Submit:', { email, password });
+  };
 
-  const pan = Gesture.Pan()
-    .onBegin(() => {
-      pressed.value = true;
-    })
-    .onChange((event) => {
-      offset.value = event.translationX;
-    })
-    .onFinalize(() => {
-      pressed.value = false;
-      offset.value = 0;
-    });
+  const handleVKAuth = () => {
+    // Здесь будет логика авторизации через ВК
+    console.log('VK Auth');
+  };
 
-  React.useLayoutEffect(() => {
-    let request_id = 0;
-    let timeout_id: any = 0;
-
-    if (!gl) return () => {};
-
-    (async () => {
-      const scene = new THREE.Scene();
-      const camera = new THREE.OrthographicCamera(-1, 1, 1, 1 - gl.drawingBufferHeight * 0.0017);
-
-      camera.rotateX(-0.5);
-      camera.position.y = 1.25;
-      camera.position.z = 2;
-
-      const renderer = new Renderer({ gl });
-      renderer.setSize(gl.drawingBufferWidth, gl.drawingBufferHeight);
-
-      const ground = await loadObjAsync({
-        asset: require('../assets/models/neighborhood.obj'),
-        mtlAsset: require('../assets/models/neighborhood.mtl'),
-      }).catch(err => console.error(err));
-
-      const light = new THREE.DirectionalLight(0xffffff, 15);
-      light.position.y = 4;
-      light.position.z = 1;
-      light.rotateX(0.75);
-
-      light.castShadow = true
-
-      const groundWrapper = new THREE.Group();
-      groundWrapper.add(ground);
-      groundWrapper.position.y = -5;
-
-      groundWrapper.scale.multiply(new THREE.Vector3(0.05, 0.05, 0.05));
-      groundWrapper.rotateY(0.5);
-
-      scene.add(groundWrapper);
-      scene.add(light);
-      scene.add(camera);
-
-      let groundShake = 0;
-      let groundShakeTimeStart = 0;
-
-      const render = (time: number) => {
-        // timeout_id = setTimeout(() => {
-          request_id = requestAnimationFrame(render);
-        // }, 1000 / 20);
-
-        let finalValue = 0.75 + 1 / (1 + Math.exp(-offset.value / 100)) - 0.5;
-        groundWrapper.rotation.y += (finalValue - groundWrapper.rotation.y) * 0.05;
-        if (!groundShake) {
-          groundWrapper.position.y += -groundWrapper.position.y * 0.03;
-          if (Math.abs(groundWrapper.position.y) < 0.05) {
-            groundShake = 1;
-            groundShakeTimeStart = time;
-            setLoading(false);
-          }
-        } else {
-          groundWrapper.position.y += -Math.sin((time - groundShakeTimeStart) * 0.0015) * 0.001;
-        }
-
-        renderer.render(scene, camera);
-        gl.endFrameEXP();
-      };
-
-      request_id = requestAnimationFrame(render);
-    })();
-
-    return () => {
-      if (request_id) {
-        cancelAnimationFrame(request_id);
-      }
-      if (timeout_id) {
-        clearTimeout(timeout_id);
-      }
-    }
-  }, [gl]);
+  const AuthForm = () => (
+    <View style={styles.authContainer}>
+      <View style={styles.authForm}>
+        <Text style={styles.authTitle}>{isLogin ? 'Вход' : 'Регистрация'}</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor="#ffffff88"
+          value={email}
+          // onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Пароль"
+          placeholderTextColor="#ffffff88"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+          <Text style={styles.submitButtonText}>
+            {isLogin ? 'Войти' : 'Зарегистрироваться'}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.vkButton} onPress={handleVKAuth}>
+          <Text style={styles.vkButtonText}>Войти через ВКонтакте</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
+          <Text style={styles.switchText}>
+            {isLogin ? 'Нет аккаунта? Зарегистрируйтесь' : 'Уже есть аккаунт? Войдите'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 
   return (
     <LinearGradient colors={['#323f94', '#5ab8db']}>
@@ -145,14 +102,13 @@ const App = () => {
           </View>
           { loading && <ActivityIndicator size="large" color="#ffffff55" /> }
         </View>
-        <View>
-
-        </View>
-          <Neighbourhood
-            width={Dimensions.get('screen').width}
-            height={Dimensions.get('screen').height}
-            onLoad={() => setLoading(false)}
-            />
+        <AuthForm />
+        <Neighbourhood
+          width={Dimensions.get('screen').width}
+          height={Dimensions.get('screen').height}
+          onLoad={() => setLoading(false)}
+          styles={styles.neighbourhood}
+        />
       </SafeAreaView>
     </LinearGradient>
   );
@@ -166,6 +122,11 @@ const styles = StyleSheet.create({
   view: {
     height: '100%',
     paddingTop: 45
+  },
+  neighbourhood: {
+    top: 320,
+    position: 'absolute',
+    zIndex: -1,
   },
   header: {
     boxSizing: 'border-box',
@@ -249,7 +210,70 @@ const styles = StyleSheet.create({
   titleText: {
     color: 'white',
     fontSize: 20,
-  }
+  },
+  authContainer: {
+    width: '100%',
+    position: 'absolute',
+    marginTop: 100,
+    marginBottom: 50,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    zIndex: 1
+  },
+  authForm: {
+    width: '100%',
+    maxWidth: 400,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    padding: 20,
+    borderRadius: 10,
+    backdropFilter: 'blur(10px)',
+  },
+  authTitle: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  input: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 5,
+    padding: 15,
+    marginBottom: 15,
+    color: 'white',
+    fontSize: 16,
+  },
+  submitButton: {
+    backgroundColor: '#ffffff',
+    padding: 15,
+    borderRadius: 5,
+    marginBottom: 15,
+  },
+  submitButtonText: {
+    color: '#000',
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  vkButton: {
+    backgroundColor: '#4C75A3',
+    padding: 15,
+    borderRadius: 5,
+    marginBottom: 15,
+  },
+  vkButtonText: {
+    color: 'white',
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  switchText: {
+    color: 'white',
+    textAlign: 'center',
+    fontSize: 14,
+  },
 })
 
 export default App;

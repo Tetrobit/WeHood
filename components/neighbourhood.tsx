@@ -18,6 +18,7 @@ declare type NeighbourhoodProps = {
     width: number;
     height: number;
     onLoad?: Function;
+    styles?: any;
 };
 
 const Neighbourhood = (props: NeighbourhoodProps) => {
@@ -117,23 +118,15 @@ const Neighbourhood = (props: NeighbourhoodProps) => {
   }, [gl]);
 
   return (
-    
     <GestureHandlerRootView>
         <GestureDetector gesture={pan}>
             <GLView
                 onContextCreate={gl => setGl(gl)}
-                style={{ width: props.width, height: props.height, ...styles.canvas }}
+                style={{ width: props.width, height: props.height, ...props.styles }}
             />
         </GestureDetector>
     </GestureHandlerRootView>
   );
 };
-
-const styles = StyleSheet.create({
-  canvas: {
-    position: 'absolute',
-    bottom: 0,
-  },
-})
 
 export default Neighbourhood;
