@@ -14,6 +14,7 @@ import { ActivityIndicator, Dimensions, StyleSheet, Text, View, TextInput, Touch
 import Cloud from "@/components/cloud";
 import { LinearGradient } from "expo-linear-gradient";
 import Neighbourhood from "@/components/neighbourhood";
+import VKLogo from "@/components/vk-logo";
 
 const App = () => {
   const [loading, setLoading] = React.useState(true);
@@ -58,7 +59,9 @@ const App = () => {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.vkButton} onPress={handleVKAuth}>
-          <Text style={styles.vkButtonText}>Войти через ВКонтакте</Text>
+<VKLogo width={40} />
+          <Text style={styles.vkButtonText}>Продолжить с VK</Text>
+<View style={{width: 40}}></View>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
           <Text style={styles.switchText}>
@@ -363,12 +366,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   vkButton: {
-    backgroundColor: '#4C75A3',
-    padding: 15,
+    backgroundColor: '#000',
+    padding: 7,
+    paddingTop: 7,
+    paddingBottom: 7,
     borderRadius: 5,
     marginBottom: 15,
+display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   vkButtonText: {
+marginLeft: 10,
     color: 'white',
     textAlign: 'center',
     fontSize: 16,
