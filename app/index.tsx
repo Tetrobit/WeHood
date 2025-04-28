@@ -21,6 +21,7 @@ const App = () => {
   const [isLogin, setIsLogin] = React.useState(true);
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
+  const [repeatPassword, setRepeatPassword] = React.useState('');
 
   const handleSubmit = () => {
     // Здесь будет логика авторизации
@@ -31,46 +32,6 @@ const App = () => {
     // Здесь будет логика авторизации через ВК
     console.log('VK Auth');
   };
-
-  const AuthForm = () => (
-    <View style={styles.authContainer}>
-      <View style={styles.authForm}>
-        <Text style={styles.authTitle}>{isLogin ? 'Вход' : 'Регистрация'}</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#ffffff88"
-          value={email}
-          // onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Пароль"
-          placeholderTextColor="#ffffff88"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>
-            {isLogin ? 'Войти' : 'Зарегистрироваться'}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.vkButton} onPress={handleVKAuth}>
-<VKLogo width={40} />
-          <Text style={styles.vkButtonText}>Продолжить с VK</Text>
-<View style={{width: 40}}></View>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-          <Text style={styles.switchText}>
-            {isLogin ? 'Нет аккаунта? Зарегистрируйтесь' : 'Уже есть аккаунт? Войдите'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
 
   return (
     <LinearGradient colors={['#323f94', '#5ab8db']}>
@@ -141,7 +102,54 @@ const App = () => {
             </View>
           </View>
                   </View>
-        <AuthForm />
+        
+        {/* Auth Form */}
+        <View style={styles.authContainer}>
+          <View style={styles.authForm}>
+            <Text style={styles.authTitle}>{isLogin ? 'Вход' : 'Регистрация'}</Text>
+            <TextInput
+              onChangeText={setEmail}
+              style={styles.input}
+              placeholder="Почта"
+              placeholderTextColor="#ffffff88"
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            <TextInput
+              onChangeText={text => setPassword(text)}
+              style={styles.input}
+              placeholder="Пароль"
+              placeholderTextColor="#ffffff88"
+              secureTextEntry
+              defaultValue={password}
+            />
+            {!isLogin && 
+              <TextInput
+                onChangeText={setRepeatPassword}
+                style={styles.input}
+                placeholder="Повторите пароль"
+                placeholderTextColor="#ffffff88"
+                secureTextEntry
+              />
+            }
+            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+              <Text style={styles.submitButtonText}>
+                {isLogin ? 'Войти' : 'Зарегистрироваться'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.vkButton} onPress={handleVKAuth}>
+              <VKLogo width={40} />
+              <Text style={styles.vkButtonText}>Продолжить с VK</Text>
+              <View style={{width: 40}}></View>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
+              <Text style={styles.switchText}>
+                {isLogin ? 'Нет аккаунта? Зарегистрируйтесь' : 'Уже есть аккаунт? Войдите'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         <Neighbourhood
           width={Dimensions.get('screen').width}
           height={Dimensions.get('screen').height}
