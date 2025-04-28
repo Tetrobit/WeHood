@@ -100,6 +100,43 @@ const App = () => {
               </View>
             </View>
           </View>
+          
+          <View style={styles.companyContainer}>
+            
+            <View style={styles.letterContainer}>
+              <View style={{...styles.figuresWrapper, ...styles.leftLetterWrapper}}>
+                <View style={styles.figuresWrapperRel}>
+                  <View style={{...styles.letterBlock, ...styles.blockT1}} />
+                  <View style={{...styles.letterBlock, ...styles.blockT2}} />
+                  <View style={{...styles.letterBlock, ...styles.blockT3}} />
+                  <View style={{...styles.letterBlock, ...styles.blockT4}} />
+                  <View style={{...styles.letterBlock, ...styles.blockT5}} />
+                </View>
+              </View>
+            </View>
+            <View style={styles.letterContainer}>
+              <View style={{...styles.figuresWrapper, ...styles.middleLetterWrapper}}>
+                <View style={styles.figuresWrapperRel}>
+                  <View style={{...styles.letterBlock, ...styles.blockE1}} />
+                  <View style={{...styles.letterBlock, ...styles.blockE2}} />
+                  <View style={{...styles.letterBlock, ...styles.blockE3}} />
+                  <View style={{...styles.letterBlock, ...styles.blockE4}} />
+                  {/* <View style={{...styles.letterBlock, ...styles.blockT5}} /> */}
+                </View>
+              </View>
+            </View>
+            <View style={styles.letterContainer}>
+              <View style={{...styles.figuresWrapper, ...styles.rightLetterWrapper}}>
+                <View style={styles.figuresWrapperRel}>
+                  <View style={{...styles.letterBlock, ...styles.blockT1}} />
+                  <View style={{...styles.letterBlock, ...styles.blockT2}} />
+                  <View style={{...styles.letterBlock, ...styles.blockT3}} />
+                  <View style={{...styles.letterBlock, ...styles.blockT4}} />
+                  <View style={{...styles.letterBlock, ...styles.blockT5}} />
+                </View>
+              </View>
+            </View>
+          </View>
           { loading && <ActivityIndicator size="large" color="#ffffff55" /> }
         </View>
         <AuthForm />
@@ -118,9 +155,13 @@ const blockWidth = 15;
 const blockPad = 3;
 
 
+const letterBlockWidth = 15;
+const letterBlockPad = 3;
+
+
 const styles = StyleSheet.create({
   view: {
-    height: '100%',
+    height: Dimensions.get('screen').height,
     paddingTop: 45
   },
   neighbourhood: {
@@ -136,6 +177,71 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingLeft: 40,
     paddingRight: 20,
+  },
+  letterBlock: {
+    position: 'absolute',
+    width: letterBlockWidth,
+    height: letterBlockWidth,
+    backgroundColor: '#fffa',
+    borderRadius: 3,
+  },
+  letterContainer: {
+    position: 'relative',
+    width: (letterBlockPad + letterBlockWidth) * 3,
+  },
+  leftLetterWrapper: {
+    left: letterBlockWidth,
+    top: -20,
+  },
+  middleLetterWrapper: {
+    left: letterBlockPad + letterBlockWidth,
+    top: -20,
+  },
+  rightLetterWrapper: {
+    left: 0,
+    top: -20,
+  },
+  companyContainer: {
+    display: 'flex',
+    justifyContent: 'flex-start',
+    color: 'white',
+    flexDirection: 'row',
+  },
+  blockE1: {
+    top: 0,
+    left: 0
+  },
+  blockE2: {
+    top: letterBlockPad + letterBlockWidth,
+    left: 0,
+  },
+  blockE3: {
+    top: letterBlockPad + letterBlockWidth,
+    left: letterBlockPad + letterBlockWidth,
+  },
+  blockE4: {
+    top: (letterBlockPad + letterBlockWidth) * 2,
+    left: 0,
+  },
+  blockT1: {
+    top: 0,
+    left: 0
+  },
+  blockT2: {
+    top: 0,
+    left: letterBlockPad + letterBlockWidth,
+  },
+  blockT3: {
+    top: 0,
+    left: (letterBlockPad + letterBlockWidth) * 2,
+  },
+  blockT4: {
+    top: letterBlockPad + letterBlockWidth,
+    left: letterBlockPad + letterBlockWidth,
+  },
+  blockT5: {
+    top: (letterBlockPad + letterBlockWidth) * 2,
+    left: letterBlockPad + letterBlockWidth,
   },
   titleContainer: {
     display: 'flex',
