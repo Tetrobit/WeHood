@@ -157,8 +157,8 @@ const blockWidth = 15;
 const blockPad = 3;
 
 
-const letterBlockWidth = 15;
-const letterBlockPad = 3;
+const letterBlockWidth = 12;
+const letterBlockPad = 2;
 
 
 const styles = StyleSheet.create({
@@ -185,11 +185,12 @@ const styles = StyleSheet.create({
     width: letterBlockWidth,
     height: letterBlockWidth,
     backgroundColor: '#fffa',
-    borderRadius: 3,
+    borderRadius: 2,
   },
   letterContainer: {
     position: 'relative',
     width: (letterBlockPad + letterBlockWidth) * 3,
+top: 7,
   },
   leftLetterWrapper: {
     left: letterBlockWidth,
