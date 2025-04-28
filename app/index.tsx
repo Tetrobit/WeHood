@@ -137,8 +137,7 @@ const App = () => {
               </View>
             </View>
           </View>
-          { loading && <ActivityIndicator size="large" color="#ffffff55" /> }
-        </View>
+                  </View>
         <AuthForm />
         <Neighbourhood
           width={Dimensions.get('screen').width}
