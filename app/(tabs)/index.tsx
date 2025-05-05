@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
 import { Card } from 'react-native-paper';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { router } from 'expo-router';
 const mockNews = [
   {
     id: '1',
@@ -22,7 +23,7 @@ export default function HomeScreen() {
       {/* Погода и локация */}
       <View style={styles.header}>
         <View style={styles.locationContainer}>
-          <TouchableOpacity onPress={() => {console.log('weather')}} style={styles.weatherContainer}>
+          <TouchableOpacity onPress={() => {router.push('/weather')}} style={styles.weatherContainer}>
             <MaterialCommunityIcons name="weather-sunny" size={40} color="#ebb010" />
             <Text style={styles.temperature}>+23</Text>
           </TouchableOpacity>

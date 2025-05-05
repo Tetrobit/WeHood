@@ -15,6 +15,7 @@ import Cloud from "@/components/cloud";
 import { LinearGradient } from "expo-linear-gradient";
 import Neighbourhood from "@/components/neighbourhood";
 import VKLogo from "@/components/vk-logo";
+import { router } from "expo-router";
 
 const App = () => {
   const [loading, setLoading] = React.useState(true);
@@ -31,6 +32,7 @@ const App = () => {
   const handleVKAuth = () => {
     // Здесь будет логика авторизации через ВК
     console.log('VK Auth');
+    router.push('/(tabs)');
   };
 
   return (
