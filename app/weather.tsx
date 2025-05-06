@@ -1,8 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, SafeAreaView, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { Feather, Fontisto, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import WeatherRain from '@/components/weather-rain';
+import { DARK_THEME, LIGHT_THEME, ThemeName } from '@/core/theme';
+import { useSetTheme, useThemeName } from '@/core/useTheme';
 
 interface WeatherMetric {
   value: string | number;
@@ -16,10 +19,13 @@ interface HourlyForecast {
 }
 
 const WeatherScreen: React.FC = () => {
+  const themeName = useThemeName();
+  const setTheme = useSetTheme();
+
   const metrics: WeatherMetric[] = [
-    { value: '13 km/h', label: 'Wind' },
-    { value: '24%', label: 'Humidity' },
-    { value: '87%', label: 'Chance of rain' },
+    { value: '13 км/ч', label: 'Ветер' },
+    { value: '24%', label: 'Влажность' },
+    { value: '87%', label: 'Дождь' },
   ];
 
   const hourlyForecast: HourlyForecast[] = [
@@ -28,6 +34,8 @@ const WeatherScreen: React.FC = () => {
     { time: '18:00', temperature: 22, icon: '🌥️' },
     { time: '23:59', temperature: 19, icon: '🌤️' },
   ];
+
+  const styles = React.useMemo(() => makeStyles(themeName), [themeName]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -38,12 +46,12 @@ const WeatherScreen: React.FC = () => {
         <View style={styles.view}>
           {/* Header */}
           <View style={styles.header}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => setTheme(themeName === DARK_THEME ? LIGHT_THEME : DARK_THEME)}>
               <Ionicons name="grid-outline" size={24} color="white" />
             </TouchableOpacity>
             <View style={styles.locationContainer}>
               <Ionicons name="location" size={18} color="white" />
-              <Text style={styles.cityText}>Minsk</Text>
+              <Text style={styles.cityText}>Вахитовский район</Text>
             </View>
             <TouchableOpacity>
               <Ionicons name="ellipsis-vertical" size={24} color="white" />
@@ -53,7 +61,7 @@ const WeatherScreen: React.FC = () => {
           {/* Updating Status */}
           <View style={styles.updatingContainer}>
             <View style={styles.updatingPill}>
-              <Text style={styles.updatingText}>• Updating</Text>
+              <Text style={styles.updatingText}>• Обновление</Text>
             </View>
           </View>
 
@@ -63,24 +71,29 @@ const WeatherScreen: React.FC = () => {
               source={require('../assets/weather-icons/thunderstorm.png')}
               style={styles.mainWeatherIcon}
             /> */}
+            <WeatherRain />
           </View>
 
           {/* Temperature and Condition */}
           <View style={styles.temperatureContainer}>
             <Text style={styles.temperature}>21°</Text>
-            <Text style={styles.condition}>Thunderstorm</Text>
-            <Text style={styles.date}>Monday, 17 May</Text>
+            <Text style={styles.condition}>Гроза</Text>
+            <Text style={styles.date}>Понедельник, 17 Мая</Text>
           </View>
 
           {/* Weather Metrics */}
           <View style={styles.metricsContainer}>
             {metrics.map((metric, index) => (
               <View key={index} style={styles.metricItem}>
-                <Ionicons 
-                  name={index === 0 ? 'speedometer-outline' : index === 1 ? 'water-outline' : 'rainy-outline'} 
-                  size={20} 
-                  color="white" 
-                />
+                {index === 0 && (
+                  <Feather name="wind" size={24} color="white" />
+                )}
+                {index === 1 && (
+                  <Ionicons name='water-outline' size={24} color="white" />
+                )}
+                {index === 2 && (
+                  <Ionicons name="rainy-outline" size={24} color="white" />
+                )}
                 <Text style={styles.metricValue}>{metric.value}</Text>
                 <Text style={styles.metricLabel}>{metric.label}</Text>
               </View>
@@ -93,13 +106,13 @@ const WeatherScreen: React.FC = () => {
       {/* Hourly Forecast */}
       <View style={styles.forecastContainer}>
         <View style={styles.forecastHeader}>
-          <Text style={styles.forecastTitle}>Today</Text>
+          <Text style={styles.forecastTitle}>Сегодня</Text>
           <TouchableOpacity 
             style={styles.daysButton}
             onPress={() => router.push('/weather-details')}
           >
-            <Text style={styles.daysButtonText}>7 days</Text>
-            <Ionicons name="chevron-forward" size={20} color="white" />
+            <Text style={styles.daysButtonText}>7 дней</Text>
+            <Ionicons name="chevron-forward" size={20} color={themeName === DARK_THEME ? 'white' : 'black'} />
           </TouchableOpacity>
         </View>
         <View style={styles.hourlyContainer}>
@@ -122,7 +135,7 @@ const WeatherScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: ThemeName) => StyleSheet.create({
   container: {
     borderRadius: 50,
     margin: 7,
@@ -143,7 +156,7 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: theme === DARK_THEME ? '#000000' : '#ffffff',
   },
   view: {
   },
@@ -234,7 +247,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   forecastTitle: {
-    color: 'white',
+    color: theme === DARK_THEME ? 'white' : 'black',
     fontSize: 18,
     fontWeight: '600',
   },
@@ -243,7 +256,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   daysButtonText: {
-    color: 'white',
+    color: theme === DARK_THEME ? 'white' : 'black',
     fontSize: 16,
     marginRight: 5,
   },
@@ -254,16 +267,16 @@ const styles = StyleSheet.create({
   },
   hourlyItem: {
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: theme === DARK_THEME ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.025)',
     borderRadius: 20,
     padding: 15,
     width: '23%',
   },
   activeHourly: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: theme === DARK_THEME ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)',
   },
   hourlyTime: {
-    color: 'white',
+    color: theme === DARK_THEME ? 'white' : 'black',
     fontSize: 14,
   },
   hourlyIcon: {
@@ -271,7 +284,7 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   hourlyTemp: {
-    color: 'white',
+    color: theme === DARK_THEME ? 'white' : 'black',
     fontSize: 16,
     fontWeight: '600',
   },
