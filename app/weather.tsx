@@ -30,101 +30,122 @@ const WeatherScreen: React.FC = () => {
   ];
 
   return (
-    <LinearGradient
-      colors={['#4A90E2', '#357ABD']}
-      style={styles.container}
-    >
-      <SafeAreaView style={styles.safeArea}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity>
-            <Ionicons name="grid-outline" size={24} color="white" />
-          </TouchableOpacity>
-          <View style={styles.locationContainer}>
-            <Ionicons name="location" size={18} color="white" />
-            <Text style={styles.cityText}>Minsk</Text>
-          </View>
-          <TouchableOpacity>
-            <Ionicons name="ellipsis-vertical" size={24} color="white" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Updating Status */}
-        <View style={styles.updatingContainer}>
-          <View style={styles.updatingPill}>
-            <Text style={styles.updatingText}>• Updating</Text>
-          </View>
-        </View>
-
-        {/* Main Weather Icon */}
-        <View style={styles.weatherIconContainer}>
-          {/* <Image 
-            source={require('../assets/weather-icons/thunderstorm.png')}
-            style={styles.mainWeatherIcon}
-          /> */}
-        </View>
-
-        {/* Temperature and Condition */}
-        <View style={styles.temperatureContainer}>
-          <Text style={styles.temperature}>21°</Text>
-          <Text style={styles.condition}>Thunderstorm</Text>
-          <Text style={styles.date}>Monday, 17 May</Text>
-        </View>
-
-        {/* Weather Metrics */}
-        <View style={styles.metricsContainer}>
-          {metrics.map((metric, index) => (
-            <View key={index} style={styles.metricItem}>
-              <Ionicons 
-                name={index === 0 ? 'speedometer-outline' : index === 1 ? 'water-outline' : 'rainy-outline'} 
-                size={20} 
-                color="white" 
-              />
-              <Text style={styles.metricValue}>{metric.value}</Text>
-              <Text style={styles.metricLabel}>{metric.label}</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <LinearGradient
+        colors={['#7C4585', '#C95792']}
+        style={styles.container}
+      >
+        <View style={styles.view}>
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity>
+              <Ionicons name="grid-outline" size={24} color="white" />
+            </TouchableOpacity>
+            <View style={styles.locationContainer}>
+              <Ionicons name="location" size={18} color="white" />
+              <Text style={styles.cityText}>Minsk</Text>
             </View>
-          ))}
-        </View>
-
-        {/* Hourly Forecast */}
-        <View style={styles.forecastContainer}>
-          <View style={styles.forecastHeader}>
-            <Text style={styles.forecastTitle}>Today</Text>
-            <TouchableOpacity 
-              style={styles.daysButton}
-              onPress={() => router.push('/weather-details')}
-            >
-              <Text style={styles.daysButtonText}>7 days</Text>
-              <Ionicons name="chevron-forward" size={20} color="white" />
+            <TouchableOpacity>
+              <Ionicons name="ellipsis-vertical" size={24} color="white" />
             </TouchableOpacity>
           </View>
-          <View style={styles.hourlyContainer}>
-            {hourlyForecast.map((hour, index) => (
-              <View 
-                key={index} 
-                style={[
-                  styles.hourlyItem,
-                  index === 1 && styles.activeHourly
-                ]}
-              >
-                <Text style={styles.hourlyTime}>{hour.time}</Text>
-                <Text style={styles.hourlyIcon}>{hour.icon}</Text>
-                <Text style={styles.hourlyTemp}>{hour.temperature}°</Text>
+
+          {/* Updating Status */}
+          <View style={styles.updatingContainer}>
+            <View style={styles.updatingPill}>
+              <Text style={styles.updatingText}>• Updating</Text>
+            </View>
+          </View>
+
+          {/* Main Weather Icon */}
+          <View style={styles.weatherIconContainer}>
+            {/* <Image 
+              source={require('../assets/weather-icons/thunderstorm.png')}
+              style={styles.mainWeatherIcon}
+            /> */}
+          </View>
+
+          {/* Temperature and Condition */}
+          <View style={styles.temperatureContainer}>
+            <Text style={styles.temperature}>21°</Text>
+            <Text style={styles.condition}>Thunderstorm</Text>
+            <Text style={styles.date}>Monday, 17 May</Text>
+          </View>
+
+          {/* Weather Metrics */}
+          <View style={styles.metricsContainer}>
+            {metrics.map((metric, index) => (
+              <View key={index} style={styles.metricItem}>
+                <Ionicons 
+                  name={index === 0 ? 'speedometer-outline' : index === 1 ? 'water-outline' : 'rainy-outline'} 
+                  size={20} 
+                  color="white" 
+                />
+                <Text style={styles.metricValue}>{metric.value}</Text>
+                <Text style={styles.metricLabel}>{metric.label}</Text>
               </View>
             ))}
           </View>
         </View>
-      </SafeAreaView>
-    </LinearGradient>
+        <View style={styles.shadow}></View>
+      </LinearGradient>
+
+      {/* Hourly Forecast */}
+      <View style={styles.forecastContainer}>
+        <View style={styles.forecastHeader}>
+          <Text style={styles.forecastTitle}>Today</Text>
+          <TouchableOpacity 
+            style={styles.daysButton}
+            onPress={() => router.push('/weather-details')}
+          >
+            <Text style={styles.daysButtonText}>7 days</Text>
+            <Ionicons name="chevron-forward" size={20} color="white" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.hourlyContainer}>
+          {hourlyForecast.map((hour, index) => (
+            <View 
+              key={index} 
+              style={[
+                styles.hourlyItem,
+                index === 1 && styles.activeHourly
+              ]}
+            >
+              <Text style={styles.hourlyTime}>{hour.time}</Text>
+              <Text style={styles.hourlyIcon}>{hour.icon}</Text>
+              <Text style={styles.hourlyTemp}>{hour.temperature}°</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    borderRadius: 50,
+    margin: 7,
+    padding: 10,
+    paddingBottom: 20,
+    zIndex: 1,
+  },
+  shadow: {
+    position: 'absolute',
+    left: '50%',
+    transform: [{ translateX: '-50%' }],
+    bottom: -10,
+    backgroundColor: '#C9579244',
+    borderRadius: 50,
+    width: '80%',
+    height: 100,
+    zIndex: -1,
   },
   safeArea: {
     flex: 1,
+    backgroundColor: '#000000',
+  },
+  view: {
   },
   header: {
     flexDirection: 'row',
