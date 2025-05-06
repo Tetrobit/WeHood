@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, SafeAreaView, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 
 interface WeatherMetric {
   value: string | number;
@@ -25,7 +26,7 @@ const WeatherScreen: React.FC = () => {
     { time: '6:00', temperature: 23, icon: '🌥️' },
     { time: '12:00', temperature: 21, icon: '⛈️' },
     { time: '18:00', temperature: 22, icon: '🌥️' },
-    { time: '24:00', temperature: 19, icon: '🌤️' },
+    { time: '23:59', temperature: 19, icon: '🌤️' },
   ];
 
   return (
@@ -89,7 +90,10 @@ const WeatherScreen: React.FC = () => {
         <View style={styles.forecastContainer}>
           <View style={styles.forecastHeader}>
             <Text style={styles.forecastTitle}>Today</Text>
-            <TouchableOpacity style={styles.daysButton}>
+            <TouchableOpacity 
+              style={styles.daysButton}
+              onPress={() => router.push('/weather-details')}
+            >
               <Text style={styles.daysButtonText}>7 days</Text>
               <Ionicons name="chevron-forward" size={20} color="white" />
             </TouchableOpacity>
