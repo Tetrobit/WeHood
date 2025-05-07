@@ -4,8 +4,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Feather, Fontisto, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import WeatherRain from '@/components/weather-rain';
-import { DARK_THEME, LIGHT_THEME, ThemeName } from '@/core/theme';
-import { useSetTheme, useThemeName } from '@/core/useTheme';
+import { DARK_THEME, LIGHT_THEME, ThemeName } from '@/core/hooks/useTheme';
+import { useSetTheme, useThemeName } from '@/core/hooks/useTheme';
+import { setStatusBarBackgroundColor } from 'expo-status-bar';
 
 interface WeatherMetric {
   value: string | number;
@@ -35,6 +36,11 @@ const WeatherScreen: React.FC = () => {
     { time: '23:59', temperature: 19, icon: '🌤️' },
   ];
 
+  const onChangeTheme = () => {
+    setTheme(themeName === DARK_THEME ? LIGHT_THEME : DARK_THEME);
+    setStatusBarBackgroundColor(themeName !== DARK_THEME ? '#000000' : '#ffffff');
+  }
+
   const styles = React.useMemo(() => makeStyles(themeName), [themeName]);
 
   return (
@@ -46,7 +52,7 @@ const WeatherScreen: React.FC = () => {
         <View style={styles.view}>
           {/* Header */}
           <View style={styles.header}>
-            <TouchableOpacity onPress={() => setTheme(themeName === DARK_THEME ? LIGHT_THEME : DARK_THEME)}>
+            <TouchableOpacity onPress={onChangeTheme}>
               <Ionicons name="grid-outline" size={24} color="white" />
             </TouchableOpacity>
             <View style={styles.locationContainer}>
@@ -67,11 +73,7 @@ const WeatherScreen: React.FC = () => {
 
           {/* Main Weather Icon */}
           <View style={styles.weatherIconContainer}>
-            {/* <Image 
-              source={require('../assets/weather-icons/thunderstorm.png')}
-              style={styles.mainWeatherIcon}
-            /> */}
-            <WeatherRain />
+            <Ionicons name="thunderstorm" size={120} color="white" />
           </View>
 
           {/* Temperature and Condition */}
@@ -148,7 +150,7 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
     left: '50%',
     transform: [{ translateX: '-50%' }],
     bottom: -10,
-    backgroundColor: '#C9579244',
+    backgroundColor: '#C9579266',
     borderRadius: 50,
     width: '80%',
     height: 100,
@@ -193,7 +195,7 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
   },
   weatherIconContainer: {
     alignItems: 'center',
-    marginTop: 30,
+    marginTop: 20,
   },
   mainWeatherIcon: {
     width: 200,
@@ -201,11 +203,11 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
   },
   temperatureContainer: {
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 0,
   },
   temperature: {
     color: 'white',
-    fontSize: 72,
+    fontSize: 90,
     fontWeight: 'bold',
   },
   condition: {
@@ -238,6 +240,10 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
     marginTop: 2,
   },
   forecastContainer: {
+    position: 'absolute',
+    width: '100%',
+    left: 0,
+    bottom: 20,
     marginTop: 40,
     paddingHorizontal: 20,
   },
@@ -248,7 +254,7 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
   },
   forecastTitle: {
     color: theme === DARK_THEME ? 'white' : 'black',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '600',
   },
   daysButton: {
@@ -267,13 +273,14 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
   },
   hourlyItem: {
     alignItems: 'center',
-    backgroundColor: theme === DARK_THEME ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.025)',
+    borderWidth: 1,
     borderRadius: 20,
+    borderColor: theme === DARK_THEME ? '#7777' : '#7771',
     padding: 15,
     width: '23%',
   },
   activeHourly: {
-    backgroundColor: theme === DARK_THEME ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)',
+    backgroundColor: theme === DARK_THEME ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.05)',
   },
   hourlyTime: {
     color: theme === DARK_THEME ? 'white' : 'black',

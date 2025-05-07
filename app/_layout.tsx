@@ -27,6 +27,13 @@ function RootLayout() {
           statusBarBackgroundColor: themeName === DARK_THEME ? '#000000' : '#ffffff'
         }}
       />
+      <Stack.Screen name="weather-details"
+        options={{
+          headerShown: false,
+          statusBarStyle: themeName === DARK_THEME ? 'light' : 'dark',
+          statusBarBackgroundColor: themeName === DARK_THEME ? '#000000' : '#ffffff'
+        }}
+      />
     </Stack>
   );
 }

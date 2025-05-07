@@ -1,12 +1,17 @@
+import { useQuery } from "@realm/react";
+import Theme from "@/core/models/theme";
+import { useRealm } from "@realm/react";
 import { Redirect } from "expo-router";
-import { useMMKVString } from "react-native-mmkv";
-import { LIGHT_THEME, THEMES } from "@/core/theme";
+import React from "react";
 
 export default function App() {
-  const [theme, setTheme] = useMMKVString('theme');
+  const [theme] = useQuery(Theme);
+  const realm = useRealm();
 
-  if (!THEMES.includes(theme!)) {
-    setTheme(LIGHT_THEME);
+  if (!theme) {
+    realm.write(() => {
+      realm.create(Theme, Theme.generate('dark'));
+    });
     return null;
   }
 
