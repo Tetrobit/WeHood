@@ -43,7 +43,7 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <View style={styles.locationContainer}>
           <TouchableOpacity onPress={() => {router.push('/weather')}} style={styles.weatherContainer}>
-            <MaterialCommunityIcons name="weather-sunny" size={40} color="#ebb010" />
+            <MaterialCommunityIcons name="weather-sunny" size={30} color="#ebb010" />
             <Text style={styles.temperature}>+23°</Text>
           </TouchableOpacity>
           <View>
@@ -140,16 +140,17 @@ const styles = StyleSheet.create({
   weatherContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 2,
-    borderRadius: 12,
+    padding: 5,
+    borderRadius: 5,
     backgroundColor: '#fff',
     elevation: 2,
     marginRight: 12,
   },
   temperature: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
-    marginLeft: 4,
+    color: '#ebb010',
+    marginLeft: 3,
   },
   location: {
     fontSize: 16,

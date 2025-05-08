@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   categoriesContainer: {
-    paddingHorizontal: 6,
+    paddingHorizontal: 16,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e5e5e5',
