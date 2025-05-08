@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Dimensions
 import { Card, Button } from 'react-native-paper';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router } from 'expo-router';
+import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
 
 const { width } = Dimensions.get('window');
 
@@ -37,6 +38,9 @@ const services: Array<{
 ];
 
 export default function HomeScreen() {
+  const theme = useThemeName();
+  const styles = makeStyles(theme);
+
   return (
     <ScrollView style={styles.container}>
       {/* Погода и локация */}
@@ -70,6 +74,7 @@ export default function HomeScreen() {
                 mode="contained" 
                 style={styles.rideButton}
                 onPress={() => {router.push('/rides' as any)}}
+                rippleColor={theme === DARK_THEME ? '#fff1' : '#fff3'}
               >
                 Найти поездку
               </Button>
@@ -119,10 +124,10 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: string) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme === DARK_THEME ? '#000' : '#f5f5f5',
   },
   header: {
     flexDirection: 'row',
@@ -130,7 +135,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 12,
     paddingVertical: 8,
-    backgroundColor: '#fff',
+    backgroundColor: theme === DARK_THEME ? '#000000' : '#fff',
     elevation: 2,
   },
   locationContainer: {
@@ -151,15 +156,16 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     paddingLeft: 6,
     borderLeftWidth: 1,
-    borderLeftColor: '#eee',
+    borderLeftColor: theme === DARK_THEME ? '#333' : '#eee',
   },
   location: {
     fontSize: 16,
     fontWeight: '600',
+    color: theme === DARK_THEME ? '#fff' : '#000',
   },
   city: {
     fontSize: 14,
-    color: '#666',
+    color: theme === DARK_THEME ? '#aaa' : '#666',
   },
   profileContainer: {
     width: 40,
@@ -176,6 +182,7 @@ const styles = StyleSheet.create({
     margin: 16,
     borderRadius: 16,
     elevation: 4,
+    backgroundColor: theme === DARK_THEME ? '#333' : '#fff',
   },
   rideContent: {
     flexDirection: 'row',
@@ -189,16 +196,18 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 8,
+    color: theme === DARK_THEME ? '#fff' : '#000',
   },
   rideSubtitle: {
     fontSize: 14,
-    color: '#666',
+    color: theme === DARK_THEME ? '#aaa' : '#666',
     lineHeight: 20,
     marginBottom: 12,
   },
   rideButton: {
     borderRadius: 8,
     marginTop: 8,
+    backgroundColor: theme === DARK_THEME ? '#555' : '#000',
   },
   carImage: {
     width: 120,
@@ -212,6 +221,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 16,
+    color: theme === DARK_THEME ? '#fff' : '#000',
   },
   servicesGrid: {
     flexDirection: 'row',
@@ -220,7 +230,7 @@ const styles = StyleSheet.create({
   },
   serviceItem: {
     width: (width - 48) / 2,
-    backgroundColor: '#fff',
+    backgroundColor: theme === DARK_THEME ? '#333' : '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -237,6 +247,7 @@ const styles = StyleSheet.create({
   serviceTitle: {
     fontSize: 14,
     fontWeight: '500',
+    color: theme === DARK_THEME ? '#fff' : '#000',
   },
   newsContainer: {
     padding: 16,
@@ -245,11 +256,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 16,
+    color: theme === DARK_THEME ? '#fff' : '#000',
   },
   newsCard: {
     marginBottom: 16,
     borderRadius: 16,
     overflow: 'hidden',
+    backgroundColor: theme === DARK_THEME ? '#333' : '#fff',
   },
   newsImage: {
     height: 160,
@@ -259,15 +272,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 12,
     marginBottom: 8,
+    color: theme === DARK_THEME ? '#fff' : '#000',
   },
   newsDescription: {
     fontSize: 14,
-    color: '#666',
+    color: theme === DARK_THEME ? '#aaa' : '#666',
     marginBottom: 8,
     lineHeight: 20,
   },
   newsTime: {
     fontSize: 12,
-    color: '#999',
+    color: theme === DARK_THEME ? '#aaa' : '#666',
   },
 });

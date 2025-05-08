@@ -26,23 +26,30 @@ export default function RootLayoutWrapper() {
 function RootLayout() {
   const themeName = useThemeName();
 
+  const themedStatusBarStyle = themeName === DARK_THEME ? 'light' : 'dark';
+  const themedStatusBarBackgroundColor = themeName === DARK_THEME ? '#000000' : '#ffffff';
+
   return (
     <Stack>
       <Stack.Screen name="index" options={{ headerShown: false, statusBarStyle: 'light', statusBarBackgroundColor: '#393790' }} />
       <Stack.Screen name="auth" options={{ headerShown: false, statusBarStyle: 'light', statusBarBackgroundColor: '#393790' }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false, statusBarStyle: 'light', statusBarBackgroundColor: '#000000' }} />
+      <Stack.Screen name="(tabs)" options={{
+        headerShown: false,
+        statusBarStyle: themedStatusBarStyle,
+        statusBarBackgroundColor: themedStatusBarBackgroundColor
+      }} />
       <Stack.Screen name="weather"
         options={{
           headerShown: false,
-          statusBarStyle: themeName === DARK_THEME ? 'light' : 'dark',
-          statusBarBackgroundColor: themeName === DARK_THEME ? '#000000' : '#ffffff'
+          statusBarStyle: themedStatusBarStyle,
+          statusBarBackgroundColor: themedStatusBarBackgroundColor
         }}
       />
       <Stack.Screen name="weather-details"
         options={{
           headerShown: false,
-          statusBarStyle: themeName === DARK_THEME ? 'light' : 'dark',
-          statusBarBackgroundColor: themeName === DARK_THEME ? '#000000' : '#ffffff'
+          statusBarStyle: themedStatusBarStyle,
+          statusBarBackgroundColor: themedStatusBarBackgroundColor
         }}
       />
     </Stack>

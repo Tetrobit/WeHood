@@ -2,6 +2,8 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'rea
 import { Card, Searchbar } from 'react-native-paper';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useState } from 'react';
+import { DARK_THEME } from '@/core/hooks/useTheme';
+import { useThemeName } from '@/core/hooks/useTheme';
 
 type Service = {
   id: string;
@@ -76,11 +78,18 @@ export default function ServicesScreen() {
     return matchesSearch && matchesCategory;
   });
 
+  const theme = useThemeName();
+  const styles = makeStyles(theme);
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Сервисы</Text>
         <Searchbar
+          iconColor={theme === DARK_THEME ? '#fff' : '#000'}
+          cursorColor={theme === DARK_THEME ? '#fff' : '#000'}
+          placeholderTextColor={theme === DARK_THEME ? '#fff' : '#000'}
+          inputStyle={{ color: theme === DARK_THEME ? '#fff' : '#000' }}
           placeholder="Поиск сервисов"
           onChangeText={setSearchQuery}
           value={searchQuery}
@@ -135,34 +144,36 @@ export default function ServicesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: string) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme === DARK_THEME ? '#000' : '#f5f5f5',
   },
   header: {
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: theme === DARK_THEME ? '#333' : '#fff',
     elevation: 2,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
+    color: theme === DARK_THEME ? '#fff' : '#000',
   },
   searchBar: {
     elevation: 0,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme === DARK_THEME ? '#444' : '#f5f5f5',
     borderRadius: 8,
+    color: theme === DARK_THEME ? '#fff' : '#000',
   },
   categoriesContainer: {
     paddingHorizontal: 16,
-    backgroundColor: '#fff',
+    backgroundColor: theme === DARK_THEME ? '#333' : '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e5e5',
+    borderBottomColor: theme === DARK_THEME ? '#444' : '#eee',
   },
   categoriesScroll: {
-    backgroundColor: '#fff',
+    backgroundColor: theme === DARK_THEME ? '#333' : '#fff',
     marginBottom: 16,
   },
   categoryButton: {
@@ -170,14 +181,14 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     marginRight: 8,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5',
   },
   categoryButtonActive: {
     backgroundColor: '#007AFF',
   },
   categoryText: {
     fontSize: 14,
-    color: '#666',
+    color: theme === DARK_THEME ? '#fff' : '#666',
   },
   categoryTextActive: {
     color: '#fff',
@@ -194,7 +205,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderRadius: 12,
     elevation: 2,
-    backgroundColor: '#fff',
+    backgroundColor: theme === DARK_THEME ? '#333' : '#fff',
   },
   serviceContent: {
     flexDirection: 'row',
@@ -215,9 +226,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 4,
+    color: theme === DARK_THEME ? '#fff' : '#000',
   },
   serviceDescription: {
     fontSize: 14,
-    color: '#666',
+    color: theme === DARK_THEME ? '#aaa' : '#666',
   },
-}); 
+});
