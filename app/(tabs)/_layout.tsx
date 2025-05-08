@@ -12,9 +12,9 @@ export default function TabsLayout() {
         tabBarActiveTintColor: theme === DARK_THEME ? '#fff' : '#007AFF',
         tabBarInactiveTintColor: theme === DARK_THEME ? '#aaa' : '#8E8E93',
         tabBarStyle: {
-          backgroundColor: theme === DARK_THEME ? '#333' : '#FFFFFF',
+          backgroundColor: theme === DARK_THEME ? '#222' : '#FFFFFF',
           borderTopWidth: 1,
-          borderColor: theme === DARK_THEME ? '#444' : '#E5E5EA',
+          borderColor: theme === DARK_THEME ? '#333' : '#E5E5EA',
         },
         headerStyle: {
           backgroundColor: theme === DARK_THEME ? '#333' : '#FFFFFF',
@@ -22,6 +22,7 @@ export default function TabsLayout() {
         headerTitleStyle: {
           color: theme === DARK_THEME ? '#fff' : '#000000',
         },
+        tabBarHideOnKeyboard: true,
       }}
     >
       <Tabs.Screen
