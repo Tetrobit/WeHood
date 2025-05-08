@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, SafeAreaView, TouchableOpacity, LayoutAnimation, UIManager } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather, Fontisto, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -21,7 +21,6 @@ interface HourlyForecast {
 
 const WeatherScreen: React.FC = () => {
   const themeName = useThemeName();
-  const setTheme = useSetTheme();
 
   const metrics: WeatherMetric[] = [
     { value: '13 км/ч', label: 'Ветер' },
@@ -36,9 +35,8 @@ const WeatherScreen: React.FC = () => {
     { time: '23:59', temperature: 19, icon: '🌤️' },
   ];
 
-  const onChangeTheme = () => {
-    setTheme(themeName === DARK_THEME ? LIGHT_THEME : DARK_THEME);
-    setStatusBarBackgroundColor(themeName !== DARK_THEME ? '#000000' : '#ffffff');
+  const onBack = () => {
+    router.back();
   }
 
   const styles = React.useMemo(() => makeStyles(themeName), [themeName]);
@@ -52,7 +50,7 @@ const WeatherScreen: React.FC = () => {
         <View style={styles.view}>
           {/* Header */}
           <View style={styles.header}>
-            <TouchableOpacity onPress={onChangeTheme}>
+            <TouchableOpacity onPress={onBack}>
               <Ionicons name="grid-outline" size={24} color="white" />
             </TouchableOpacity>
             <View style={styles.locationContainer}>
