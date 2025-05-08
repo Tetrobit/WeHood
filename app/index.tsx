@@ -1,19 +1,19 @@
-import { useRouter } from "expo-router";
+import { useQuery } from "@realm/react";
+import Theme from "@/core/models/theme";
+import { useRealm } from "@realm/react";
+import { Redirect } from "expo-router";
 import React from "react";
-import { Text, View } from "react-native";
 
-export default function IndexPage() {
-  const router = useRouter();
+export default function App() {
+  const [theme] = useQuery(Theme);
+  const realm = useRealm();
 
-  React.useLayoutEffect(() => {
-    setTimeout(() => {
-      router.replace('/auth');
-    }, 1000);
-  }, []);
+  if (!theme) {
+    realm.write(() => {
+      realm.create(Theme, Theme.generate('dark'));
+    });
+    return null;
+  }
 
-  return (
-    <View>
-      <Text>Hello World</Text>
-    </View>
-  )
+  return <Redirect href={'/auth'} />
 }
