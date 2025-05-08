@@ -128,7 +128,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    padding: 12,
+    paddingVertical: 8,
     backgroundColor: '#fff',
     elevation: 2,
   },
@@ -139,7 +140,7 @@ const styles = StyleSheet.create({
   weatherContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 8,
+    padding: 2,
     borderRadius: 12,
     backgroundColor: '#fff',
     elevation: 2,

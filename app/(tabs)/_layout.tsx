@@ -1,6 +1,7 @@
 import { Stack } from "expo-router";
 import { Tabs } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
+import { BellRing, Blocks, MapPin, House, User } from 'lucide-react-native';
 
 export default function TabsLayout() {
   return (
@@ -27,16 +28,16 @@ export default function TabsLayout() {
           headerShown: false,
           title: 'Главная',
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="home" size={size} color={color} />
+            <House size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="family"
+        name="services"
         options={{
-          title: 'Родные',
+          title: 'Сервисы',
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="people" size={size} color={color} />
+            <Blocks size={size} color={color} />
           ),
         }}
       />
@@ -45,7 +46,7 @@ export default function TabsLayout() {
         options={{
           title: 'Рядом',
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="location-on" size={size} color={color} />
+            <MapPin size={size} color={color} />
           ),
         }}
       />
@@ -54,7 +55,7 @@ export default function TabsLayout() {
         options={{
           title: 'Уведомления',
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="notifications" size={size} color={color} />
+            <BellRing size={size} color={color} />
           ),
         }}
       />
@@ -63,7 +64,7 @@ export default function TabsLayout() {
         options={{
           title: 'Профиль',
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="person" size={size} color={color} />
+            <User size={size} color={color} />
           ),
         }}
       />
