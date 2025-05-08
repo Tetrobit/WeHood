@@ -208,6 +208,7 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
   temperature: {
     color: 'white',
     fontSize: 90,
+    fontFamily: 'Inter_700Bold',
     fontWeight: 'bold',
   },
   condition: {

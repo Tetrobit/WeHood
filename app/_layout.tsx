@@ -3,6 +3,17 @@ import { useThemeName } from "@/core/hooks/useTheme";
 import { DARK_THEME } from "@/core/hooks/useTheme";
 import StorageProvider from "@/core/models";
 import React from "react";
+import * as SplashScreen from 'expo-splash-screen';
+
+// Keep the splash screen visible while we fetch resources
+SplashScreen.preventAutoHideAsync();
+
+// Set the animation options. This is optional.
+SplashScreen.setOptions({
+  duration: 1000,
+  fade: true,
+});
+
 
 export default function RootLayoutWrapper() {
   return (

@@ -16,6 +16,7 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@expo-google-fonts/inter": "^0.3.0",
     "@expo/vector-icons": "^14.1.0",
     "@react-native-community/blur": "^4.4.1",
     "@react-navigation/bottom-tabs": "^7.3.10",
@@ -28,6 +29,7 @@
     "expo-asset": "^11.1.5",
     "expo-blur": "~14.1.4",
     "expo-constants": "~17.1.5",
+    "expo-dev-client": "~5.1.8",
     "expo-file-system": "~18.1.9",
     "expo-font": "~13.3.1",
     "expo-gl": "~15.1.5",
@@ -55,8 +57,7 @@
     "react-native-web": "^0.20.0",
     "react-native-webview": "^13.13.5",
     "realm": "^12.14.2",
-    "three": "^0.176.0",
-    "expo-dev-client": "~5.1.8"
+    "three": "^0.176.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
