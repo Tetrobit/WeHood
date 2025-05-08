@@ -49,12 +49,20 @@
         "expo-splash-screen",
         {
           "backgroundColor": "#232323",
-          "image": "./assets/images/splash.png",
+          "image": "assets/images/splash.png",
           "dark": {
-            "image": "./assets/images/splash.png",
+            "image": "assets/images/splash.png",
             "backgroundColor": "#000000"
           },
-          "imageWidth": 200
+          "imageWidth": 756
+        }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "node_modules/@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf"
+          ]
         }
       ]
     ],
