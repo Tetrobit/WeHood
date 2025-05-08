@@ -1,10 +1,15 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
+import { DARK_THEME, LIGHT_THEME, useSetTheme, useThemeName } from '@/core/hooks/useTheme';
 
 export default function ProfileScreen() {
   const theme = useThemeName();
   const styles = makeStyles(theme);
+  const setTheme = useSetTheme();
+
+  const onChangeTheme = () => {
+    setTheme(theme === DARK_THEME ? LIGHT_THEME : DARK_THEME);
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -48,6 +53,24 @@ export default function ProfileScreen() {
           <Text style={styles.menuText}>Уведомления</Text>
           <Ionicons name="chevron-forward" size={24} color={theme === DARK_THEME ? '#fff' : '#999'} />
         </TouchableOpacity>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Настройки</Text>
+        <View style={[styles.menuItem, styles.lastMenuItem]}>
+          <Ionicons 
+            name={theme === DARK_THEME ? "moon" : "sunny"} 
+            size={24} 
+            color={theme === DARK_THEME ? '#fff' : '#333'} 
+          />
+          <Text style={styles.menuText}>Тёмная тема</Text>
+          <Switch
+            value={theme === DARK_THEME}
+            onValueChange={onChangeTheme}
+            trackColor={{ false: '#767577', true: '#81b0ff' }}
+            thumbColor={theme === DARK_THEME ? '#007AFF' : '#f4f3f4'}
+          />
+        </View>
       </View>
 
       <TouchableOpacity style={styles.logoutButton}>
@@ -124,7 +147,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     flex: 1,
     fontSize: 16,
     marginLeft: 15,
-    color: theme === DARK_THEME ? '#fff' :  '#333',
+    color: theme === DARK_THEME ? '#fff' : '#333',
   },
   logoutButton: {
     margin: 20,
