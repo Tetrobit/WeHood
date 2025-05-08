@@ -35,6 +35,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="services"
         options={{
+          headerShown: false,
           title: 'Сервисы',
           tabBarIcon: ({ color, size }) => (
             <Blocks size={size} color={color} />
