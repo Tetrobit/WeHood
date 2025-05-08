@@ -45,6 +45,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="nearby"
         options={{
+          headerShown: false,
           title: 'Рядом',
           tabBarIcon: ({ color, size }) => (
             <MapPin size={size} color={color} />
@@ -54,6 +55,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="notifications"
         options={{
+          headerShown: false,
           title: 'Уведомления',
           tabBarIcon: ({ color, size }) => (
             <BellRing size={size} color={color} />
@@ -63,6 +65,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="profile"
         options={{
+          headerShown: false,
           title: 'Профиль',
           tabBarIcon: ({ color, size }) => (
             <User size={size} color={color} />
