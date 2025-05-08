@@ -101,7 +101,7 @@ export default function NotificationsScreen() {
                 <Text style={styles.notificationMessage}>{notification.message}</Text>
               </View>
             </TouchableOpacity>
-            {index < notifications.length - 1 && <Divider style={{ backgroundColor: theme === DARK_THEME ? '#666' : '#eee' }} />}
+            {index < notifications.length - 1 && <Divider style={{ backgroundColor: theme === DARK_THEME ? '#555' : '#eee' }} />}
           </View>
         ))}
         <View style={styles.bottomSpacer} />
@@ -117,7 +117,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   header: {
     padding: 16,
-    backgroundColor: theme === DARK_THEME ? '#333' : '#fff',
+    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
     elevation: 2,
   },
   title: {
@@ -139,10 +139,10 @@ const makeStyles = (theme: string) => StyleSheet.create({
   notificationCard: {
     flexDirection: 'row',
     padding: 16,
-    backgroundColor: theme === DARK_THEME ? '#333' : '#fff',
+    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
   },
   unreadNotification: {
-    backgroundColor: theme === DARK_THEME ? '#333' : '#f8f9fa',
+    backgroundColor: theme === DARK_THEME ? '#222' : '#f8f9fa',
   },
   iconContainer: {
     width: 48,

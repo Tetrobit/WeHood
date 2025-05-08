@@ -151,7 +151,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   header: {
     padding: 16,
-    backgroundColor: theme === DARK_THEME ? '#333' : '#fff',
+    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
     elevation: 2,
   },
   title: {
@@ -162,18 +162,18 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   searchBar: {
     elevation: 0,
-    backgroundColor: theme === DARK_THEME ? '#444' : '#f5f5f5',
+    backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5',
     borderRadius: 8,
     color: theme === DARK_THEME ? '#fff' : '#000',
   },
   categoriesContainer: {
     paddingHorizontal: 16,
-    backgroundColor: theme === DARK_THEME ? '#333' : '#fff',
+    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: theme === DARK_THEME ? '#444' : '#eee',
+    borderBottomColor: theme === DARK_THEME ? '#333' : '#eee',
   },
   categoriesScroll: {
-    backgroundColor: theme === DARK_THEME ? '#333' : '#fff',
+    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
     marginBottom: 16,
   },
   categoryButton: {
@@ -181,7 +181,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     marginRight: 8,
-    backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5',
+    backgroundColor: theme === DARK_THEME ? '#222' : '#f5f5f5',
   },
   categoryButtonActive: {
     backgroundColor: '#007AFF',
@@ -205,7 +205,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     marginBottom: 12,
     borderRadius: 12,
     elevation: 2,
-    backgroundColor: theme === DARK_THEME ? '#333' : '#fff',
+    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
   },
   serviceContent: {
     flexDirection: 'row',

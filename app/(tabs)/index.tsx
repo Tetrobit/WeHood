@@ -156,7 +156,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     marginLeft: 6,
     paddingLeft: 6,
     borderLeftWidth: 1,
-    borderLeftColor: theme === DARK_THEME ? '#333' : '#eee',
+    borderLeftColor: theme === DARK_THEME ? '#222' : '#eee',
   },
   location: {
     fontSize: 16,
@@ -182,7 +182,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     margin: 16,
     borderRadius: 16,
     elevation: 4,
-    backgroundColor: theme === DARK_THEME ? '#333' : '#fff',
+    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
   },
   rideContent: {
     flexDirection: 'row',
@@ -207,7 +207,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   rideButton: {
     borderRadius: 8,
     marginTop: 8,
-    backgroundColor: theme === DARK_THEME ? '#555' : '#000',
+    backgroundColor: theme === DARK_THEME ? '#444' : '#000',
   },
   carImage: {
     width: 120,
@@ -230,7 +230,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   serviceItem: {
     width: (width - 48) / 2,
-    backgroundColor: theme === DARK_THEME ? '#333' : '#fff',
+    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -262,7 +262,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     marginBottom: 16,
     borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: theme === DARK_THEME ? '#333' : '#fff',
+    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
   },
   newsImage: {
     height: 160,

@@ -30,12 +30,12 @@ export default function ProfileScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Личная информация</Text>
         <TouchableOpacity style={styles.menuItem}>
-          <Ionicons name="person-outline" size={24} color={theme === DARK_THEME ? '#fff' : '#333'} />
+          <Ionicons name="person-outline" size={24} color={theme === DARK_THEME ? '#fff' : '#222'} />
           <Text style={styles.menuText}>Редактировать профиль</Text>
           <Ionicons name="chevron-forward" size={24} color={theme === DARK_THEME ? '#fff' : '#999'} />
         </TouchableOpacity>
         <TouchableOpacity style={[styles.menuItem, styles.lastMenuItem]}>
-          <Ionicons name="settings-outline" size={24} color={theme === DARK_THEME ? '#fff' : '#333'} />
+          <Ionicons name="settings-outline" size={24} color={theme === DARK_THEME ? '#fff' : '#222'} />
           <Text style={styles.menuText}>Настройки</Text>
           <Ionicons name="chevron-forward" size={24} color={theme === DARK_THEME ? '#fff' : '#999'} />
         </TouchableOpacity>
@@ -44,12 +44,12 @@ export default function ProfileScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Безопасность</Text>
         <TouchableOpacity style={styles.menuItem}>
-          <Ionicons name="lock-closed-outline" size={24} color={theme === DARK_THEME ? '#fff' : '#333'} />
+          <Ionicons name="lock-closed-outline" size={24} color={theme === DARK_THEME ? '#fff' : '#222'} />
           <Text style={styles.menuText}>Изменить пароль</Text>
           <Ionicons name="chevron-forward" size={24} color={theme === DARK_THEME ? '#fff' : '#999'} />
         </TouchableOpacity>
         <TouchableOpacity style={[styles.menuItem, styles.lastMenuItem]}>
-          <Ionicons name="notifications-outline" size={24} color={theme === DARK_THEME ? '#fff' : '#333'} />
+          <Ionicons name="notifications-outline" size={24} color={theme === DARK_THEME ? '#fff' : '#222'} />
           <Text style={styles.menuText}>Уведомления</Text>
           <Ionicons name="chevron-forward" size={24} color={theme === DARK_THEME ? '#fff' : '#999'} />
         </TouchableOpacity>
@@ -61,7 +61,7 @@ export default function ProfileScreen() {
           <Ionicons 
             name={theme === DARK_THEME ? "moon" : "sunny"} 
             size={24} 
-            color={theme === DARK_THEME ? '#fff' : '#333'} 
+            color={theme === DARK_THEME ? '#fff' : '#222'} 
           />
           <Text style={styles.menuText}>Тёмная тема</Text>
           <Switch
@@ -73,7 +73,7 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.logoutButton}>
+      <TouchableOpacity activeOpacity={0.7} style={styles.logoutButton}>
         <Text style={styles.logoutText}>Выйти</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -88,9 +88,9 @@ const makeStyles = (theme: string) => StyleSheet.create({
   header: {
     alignItems: 'center',
     padding: 20,
-    backgroundColor: theme === DARK_THEME ? '#333' : '#fff',
+    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: theme === DARK_THEME ? '#444' : '#eee',
+    borderBottomColor: theme === DARK_THEME ? '#333' : '#eee',
   },
   avatarContainer: {
     position: 'relative',
@@ -116,14 +116,14 @@ const makeStyles = (theme: string) => StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 5,
-    color: theme === DARK_THEME ? '#fff' : '#333',
+    color: theme === DARK_THEME ? '#fff' : '#222',
   },
   email: {
     fontSize: 16,
     color: theme === DARK_THEME ? '#aaa' : '#666',
   },
   section: {
-    backgroundColor: theme === DARK_THEME ? '#333' : '#fff',
+    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
     marginTop: 20,
     padding: 15,
   },
@@ -131,14 +131,14 @@ const makeStyles = (theme: string) => StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 15,
-    color: theme === DARK_THEME ? '#fff' : '#333',
+    color: theme === DARK_THEME ? '#fff' : '#222',
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: theme === DARK_THEME ? '#444' : '#eee',
+    borderBottomColor: theme === DARK_THEME ? '#333' : '#eee',
   },
   lastMenuItem: {
     borderBottomWidth: 0,
@@ -147,7 +147,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     flex: 1,
     fontSize: 16,
     marginLeft: 15,
-    color: theme === DARK_THEME ? '#fff' : '#333',
+    color: theme === DARK_THEME ? '#fff' : '#222',
   },
   logoutButton: {
     margin: 20,
