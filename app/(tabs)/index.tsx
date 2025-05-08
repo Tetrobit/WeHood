@@ -46,7 +46,7 @@ export default function HomeScreen() {
             <MaterialCommunityIcons name="weather-sunny" size={30} color="#ebb010" />
             <Text style={styles.temperature}>+23°</Text>
           </TouchableOpacity>
-          <View>
+          <View style={styles.locationTextContainer}>
             <Text style={styles.location}>Вахитовский район</Text>
             <Text style={styles.city}>Казань</Text>
           </View>
@@ -140,17 +140,18 @@ const styles = StyleSheet.create({
   weatherContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 5,
-    borderRadius: 5,
-    backgroundColor: '#fff',
-    elevation: 2,
-    marginRight: 12,
   },
   temperature: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#ebb010',
     marginLeft: 3,
+  },
+  locationTextContainer: {
+    marginLeft: 6,
+    paddingLeft: 6,
+    borderLeftWidth: 1,
+    borderLeftColor: '#eee',
   },
   location: {
     fontSize: 16,
