@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "WeHood",
-    "slug": "WeHood",
+    "slug": "wehood",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
@@ -68,6 +68,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7307e0e8-b950-4e5f-ab5c-113c608c2f63"
+      }
+    },
+    "owner": "so_dam"
   }
 }
