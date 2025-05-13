@@ -4,23 +4,16 @@
     "slug": "wehood",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo.png",
+    "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/splash.png",
-        "backgroundColor": "#ffffff"
-      },
-      "package": "com.so_dam.WeHood"
-    },
     "web": {
       "bundler": "metro",
-      "output": "static",
+      "output": "single",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
@@ -37,24 +30,14 @@
       [
         "expo-build-properties",
         {
-          "ios": {
-            "newArchEnabled": true
-          },
           "android": {
-            "newArchEnabled": true
-          }
-        }
-      ],
-      [
-        "expo-splash-screen",
-        {
-          "backgroundColor": "#232323",
-          "image": "assets/images/splash.png",
-          "dark": {
-            "image": "assets/images/splash.png",
-            "backgroundColor": "#000000"
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0"
           },
-          "imageWidth": 756
+          "ios": {
+            "deploymentTarget": "15.1"
+          }
         }
       ],
       [
@@ -75,6 +58,9 @@
         "projectId": "1739d78e-d0e0-4943-bfd0-245fdb4f73d7"
       }
     },
-    "owner": "tetrobit"
+    "owner": "tetrobit",
+    "android": {
+      "package": "com.so_dam.wehood"
+    }
   }
 }

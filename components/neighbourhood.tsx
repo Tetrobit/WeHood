@@ -1,18 +1,13 @@
 import React from "react";
 import * as THREE from "three";
-// import { color, fog, float, positionWorld, triNoise3D, positionView, normalWorld, uniform } from 'three/build/three.tsl';
 import { loadObjAsync, Renderer } from "expo-three";
 import { ExpoWebGLRenderingContext, GLView } from "expo-gl";
-import { SafeAreaView } from "react-native-safe-area-context";
 import {
   Gesture,
   GestureDetector,
   GestureHandlerRootView,
 } from 'react-native-gesture-handler';
 import { useSharedValue } from "react-native-reanimated";
-import { ActivityIndicator, Dimensions, StyleSheet, Text, View } from "react-native";
-import Cloud from "@/components/cloud";
-import { LinearGradient } from "expo-linear-gradient";
 
 declare type NeighbourhoodProps = {
     width: number;
@@ -113,13 +108,13 @@ const Neighbourhood = (props: NeighbourhoodProps) => {
       renderer.setSize(gl.drawingBufferWidth, gl.drawingBufferHeight);
 
       const ground = await loadObjAsync({
-        asset: require('../assets/models/neighborhood.obj'),
-        mtlAsset: require('../assets/models/neighborhood.mtl'),
+        asset: require('../assets/models/neighborhood_ground_object.obj'),
+        mtlAsset: require('../assets/models/neighborhood_ground_material.mtl'),
       }).catch(err => console.error(err));
       
       const carObj = await loadObjAsync({
-        asset: require('../assets/models/neighborhood_car.obj'),
-        mtlAsset: require('../assets/models/neighborhood_car.mtl'),
+        asset: require('../assets/models/neighborhood_car_object.obj'),
+        mtlAsset: require('../assets/models/neighborhood_car_material.mtl'),
       }).catch(err => console.error(err));
 
       const light = new THREE.DirectionalLight(0xffffff, 15);

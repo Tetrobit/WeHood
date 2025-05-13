@@ -1,4 +1,4 @@
-package com.so_dam.WeHood
+package com.so_dam.wehood
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build
