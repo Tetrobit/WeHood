@@ -41,6 +41,13 @@ function RootLayout() {
           statusBarBackgroundColor: themedStatusBarBackgroundColor
         }}
       />
+      <Stack.Screen name="+not-found"
+        options={{
+          headerShown: false,
+          statusBarStyle: themedStatusBarStyle,
+          statusBarBackgroundColor: themedStatusBarBackgroundColor
+        }}
+      />
     </Stack>
   );
 }
