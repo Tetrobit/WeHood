@@ -3,7 +3,7 @@ import { Card, Button } from 'react-native-paper';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router } from 'expo-router';
 import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
-import Carousel from 'react-native-snap-carousel';
+import Carousel from 'react-native-reanimated-carousel';
 
 const { width } = Dimensions.get('window');
 
@@ -75,18 +75,6 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Слайдер */}
-      <View style={styles.carouselContainer}>
-        <Carousel
-          data={carouselData}
-          renderItem={renderCarouselItem}
-          sliderWidth={width}
-          itemWidth={width - 32}
-          autoplayInterval={5000}
-          loop
-        />
-      </View>
-
       {/* Погода и локация */}
       <View style={styles.header}>
         <View style={styles.locationContainer}>
@@ -106,30 +94,23 @@ export default function HomeScreen() {
           />
         </TouchableOpacity>
       </View>
-
-      {/* Совместные поездки */}
-      <Card style={styles.rideCard}>
-        <Card.Content>
-          <View style={styles.rideContent}>
-            <View style={styles.rideTextContainer}>
-              <Text style={styles.rideTitle}>Совместные поездки</Text>
-              <Text style={styles.rideSubtitle}>Находите попутчиков{'\n'}рядом с Вами</Text>
-              <Button 
-                mode="contained" 
-                style={styles.rideButton}
-                onPress={() => {router.push('/rides' as any)}}
-                rippleColor={theme === DARK_THEME ? '#fff1' : '#fff3'}
-              >
-                Найти поездку
-              </Button>
-            </View>
-            <Image 
-              source={{ uri: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2' }}
-              style={styles.carImage}
-            />
-          </View>
-        </Card.Content>
-      </Card>
+      
+      {/* Слайдер */}
+      <View style={styles.carouselContainer}>
+        <Carousel
+          loop={true}
+          width={Dimensions.get('screen').width}
+          height={200}
+          snapEnabled={true}
+          pagingEnabled={true}
+          mode="parallax"
+          autoPlayInterval={2000}
+          data={carouselData}
+          style={{ width: "100%" }}
+          onSnapToItem={(index) => console.log("current index:", index)}
+          renderItem={renderCarouselItem}
+        />
+      </View>
 
       {/* Сервисы */}
       <View style={styles.findAllContainer}>
