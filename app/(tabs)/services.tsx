@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Touchable } from 'react-native';
 import { Card, Searchbar } from 'react-native-paper';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useState } from 'react';
 import { DARK_THEME } from '@/core/hooks/useTheme';
 import { useThemeName } from '@/core/hooks/useTheme';
+import { Href, router } from 'expo-router';
 
 type Service = {
   id: string;
@@ -12,16 +13,18 @@ type Service = {
   icon: string;
   color: string;
   category: string;
+  target?: Href;
 };
 
 const services: Service[] = [
   {
     id: '1',
-    title: 'Помощь пожилым',
-    description: 'Волонтерская помощь пожилым людям',
-    icon: 'hand-heart',
-    color: '#FF6B6B',
-    category: 'Помощь'
+    title: 'Недвижимость',
+    description: 'Аренда квартиры и сдача в аренду',
+    icon: 'warehouse',
+    color: '#44944A',
+    category: 'Помощь',
+    target: '/services/flats'
   },
   {
     id: '2',
@@ -61,7 +64,7 @@ const services: Service[] = [
     description: 'Помощь с ремонтом бытовой техники',
     icon: 'tools',
     color: '#4ECDC4',
-    category: 'Помощь'
+    category: 'Помощь',
   }
 ];
 
@@ -125,18 +128,20 @@ export default function ServicesScreen() {
 
       <ScrollView style={styles.servicesContainer}>
         {filteredServices.map((service) => (
-          <Card key={service.id} style={styles.serviceCard}>
-            <Card.Content style={styles.serviceContent}>
-              <View style={[styles.iconContainer, { backgroundColor: service.color }]}>
-                <MaterialCommunityIcons name={service.icon as any} size={24} color="#fff" />
-              </View>
-              <View style={styles.serviceInfo}>
-                <Text style={styles.serviceTitle}>{service.title}</Text>
-                <Text style={styles.serviceDescription}>{service.description}</Text>
-              </View>
-              <MaterialCommunityIcons name="chevron-right" size={24} color="#666" />
-            </Card.Content>
-          </Card>
+          <TouchableOpacity key={service.id} onPress={() => router.push(service.target || '/+not-found')}>
+            <Card key={service.id} style={styles.serviceCard}>
+              <Card.Content style={styles.serviceContent}>
+                <View style={[styles.iconContainer, { backgroundColor: service.color }]}>
+                  <MaterialCommunityIcons name={service.icon as any} size={24} color="#fff" />
+                </View>
+                <View style={styles.serviceInfo}>
+                  <Text style={styles.serviceTitle}>{service.title}</Text>
+                  <Text style={styles.serviceDescription}>{service.description}</Text>
+                </View>
+                <MaterialCommunityIcons name="chevron-right" size={24} color="#666" />
+              </Card.Content>
+            </Card>
+          </TouchableOpacity>
         ))}
         <View style={styles.bottomSpacer} />
       </ScrollView>
