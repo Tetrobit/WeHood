@@ -18,7 +18,10 @@ export default function FlatCard({ flat }: FlatCardProps) {
   return (
     <TouchableOpacity 
       style={styles.container}
-      onPress={() => router.push(`/+not-found`)}
+      onPress={() => router.push({
+        pathname: '/services/flats/[id]',
+        params: { id: flat.id }
+      })}
       activeOpacity={0.7}
     >
       <Image source={{ uri: flat.images[0] }} style={styles.image} />

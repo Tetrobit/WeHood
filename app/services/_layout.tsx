@@ -20,6 +20,8 @@ export default function ServicesLayout() {
   return (
     <Stack>
       <Stack.Screen name="flats" options={{...defaultConfig}} />
+      <Stack.Screen name="flats/[id]" options={defaultConfig} />
+      <Stack.Screen name="flats/new" options={{...defaultConfig, title: 'Новое объявление'}} />
     </Stack>
   );
 }
