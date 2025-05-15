@@ -108,8 +108,7 @@ export default function FlatsScreen() {
       <FAB
         icon="plus"
         style={styles.fab}
-        onPress={() => router.push('/+not-found')}
-        // onPress={() => router.push('/services/flats/new')}
+        onPress={() => router.push('/services/flats/new')}
         color="#fff"
       />
     </View>
