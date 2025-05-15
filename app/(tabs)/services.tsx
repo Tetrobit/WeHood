@@ -128,7 +128,7 @@ export default function ServicesScreen() {
 
       <ScrollView style={styles.servicesContainer}>
         {filteredServices.map((service) => (
-          <TouchableOpacity key={service.id} onPress={() => router.push(service.target || '/+not-found')}>
+          <TouchableOpacity activeOpacity={0.7} key={service.id} onPress={() => router.push(service.target || '/+not-found')}>
             <Card key={service.id} style={styles.serviceCard}>
               <Card.Content style={styles.serviceContent}>
                 <View style={[styles.iconContainer, { backgroundColor: service.color }]}>

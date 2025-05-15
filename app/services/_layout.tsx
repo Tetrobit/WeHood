@@ -19,7 +19,7 @@ export default function ServicesLayout() {
 
   return (
     <Stack>
-      <Stack.Screen name="flats" options={{...defaultConfig, headerShown: true}} />
+      <Stack.Screen name="flats" options={{...defaultConfig}} />
     </Stack>
   );
 }
