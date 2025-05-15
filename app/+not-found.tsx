@@ -1,22 +1,41 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
 import { router } from 'expo-router';
+import { useState } from 'react';
 
-export default function HomeScreen() {
+const memIds = [
+  {
+    image: require('@/assets/images/mem-face.png'),
+    text: 'Бу! Испугался?',
+    buttonText: 'Да',
+    width: 200,
+    height: 200
+  },
+  {
+    image: require('@/assets/images/statham.png'),
+    text: 'Я вам запрещаю сюда входить!',
+    buttonText: 'Выйти отсюда',
+    width: 200,
+    height: 500
+  }
+];
+
+export default function NotFoundScreen() {
   const theme = useThemeName();
   const styles = makeStyles(theme);
+  const [memId] = useState(Math.floor(Math.random() * memIds.length));
 
   return (
     <View style={styles.container}>
       <View>
         <Image
-          style={styles.image}
-          source={require('@/assets/images/mem-face.png')}
+          style={[styles.image, { width: memIds[memId].width, height: memIds[memId].height }]}
+          source={memIds[memId].image}
         />
       </View>
-      <Text style={styles.header}>Бу! Испугался?</Text>
+      <Text style={styles.header}>{memIds[memId].text}</Text>
       <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7} style={styles.button}>
-        <Text style={styles.buttonContent}>Да</Text>
+        <Text style={styles.buttonContent}>{memIds[memId].buttonText}</Text>
       </TouchableOpacity>
     </View>
   );
