@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { View, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import Carousel from 'react-native-reanimated-carousel';
+import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel';
 import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
 
 interface ImageGalleryProps {
@@ -11,9 +11,19 @@ interface ImageGalleryProps {
 const { width: screenWidth } = Dimensions.get('window');
 
 export default function ImageGallery({ images }: ImageGalleryProps) {
+  const carouselRef = useRef<ICarouselInstance>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const theme = useThemeName();
   const styles = makeStyles(theme);
+
+  const onNext = () => {
+    carouselRef.current?.next();
+    setActiveIndex(prev => (prev < images.length - 1 ? prev + 1 : 0));
+  }
+  const onPrev = () => {
+    carouselRef.current?.prev();
+    setActiveIndex(prev => (prev > 0 ? prev - 1 : images.length - 1));
+  }
 
   return (
     <View style={styles.container}>
@@ -27,6 +37,7 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
         renderItem={({ item }) => (
           <Image source={{ uri: item }} style={styles.image} />
         )}
+        ref={carouselRef}
       />
       
       <View style={styles.pagination}>
@@ -44,13 +55,13 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
       <View style={styles.controls}>
         <TouchableOpacity 
           style={styles.controlButton}
-          onPress={() => setActiveIndex(prev => (prev > 0 ? prev - 1 : images.length - 1))}
+          onPress={onPrev}
         >
           <MaterialCommunityIcons name="chevron-left" size={24} color="#fff" />
         </TouchableOpacity>
         <TouchableOpacity 
           style={styles.controlButton}
-          onPress={() => setActiveIndex(prev => (prev < images.length - 1 ? prev + 1 : 0))}
+          onPress={onNext}
         >
           <MaterialCommunityIcons name="chevron-right" size={24} color="#fff" />
         </TouchableOpacity>
