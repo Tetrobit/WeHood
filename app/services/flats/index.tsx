@@ -76,13 +76,25 @@ export default function FlatsScreen() {
           />
         </TouchableOpacity>
         <Text style={styles.title}>Аренда квартир</Text>
-        <TouchableOpacity>
-          <MaterialCommunityIcons 
-            name="tune" 
-            size={24} 
-            color={theme === DARK_THEME ? '#fff' : '#000'} 
-          />
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity 
+            style={styles.headerButton}
+            onPress={() => router.push('/services/flats/favorites')}
+          >
+            <MaterialCommunityIcons 
+              name="heart-outline" 
+              size={24} 
+              color={theme === DARK_THEME ? '#fff' : '#000'} 
+            />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.headerButton}>
+            <MaterialCommunityIcons 
+              name="tune" 
+              size={24} 
+              color={theme === DARK_THEME ? '#fff' : '#000'} 
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <Searchbar
@@ -149,5 +161,12 @@ const makeStyles = (theme: string) => StyleSheet.create({
     right: 16,
     bottom: 16,
     backgroundColor: '#4ECDC4',
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerButton: {
+    marginLeft: 16,
   },
 });
