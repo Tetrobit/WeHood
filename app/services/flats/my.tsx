@@ -1,11 +1,12 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
 import { Card, ProgressBar } from 'react-native-paper';
 import { LineChart } from 'react-native-chart-kit';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { DARK_THEME } from '@/core/hooks/useTheme';
 import { useThemeName } from '@/core/hooks/useTheme';
 import { Dimensions } from 'react-native';
+import { router } from 'expo-router';
 
 type FlatListing = {
   id: string;
@@ -44,8 +45,29 @@ const mockListings: FlatListing[] = [
 
 export default function MyListingsScreen() {
   const [expandedListing, setExpandedListing] = useState<string | null>(null);
+  const rotationAnimations = useRef<{ [key: string]: Animated.Value }>({}).current;
   const theme = useThemeName();
   const styles = makeStyles(theme);
+
+  // Инициализация анимации для каждого листинга
+  mockListings.forEach(listing => {
+    if (!rotationAnimations[listing.id]) {
+      rotationAnimations[listing.id] = new Animated.Value(0);
+    }
+  });
+
+  const handleExpand = (listingId: string) => {
+    const toValue = expandedListing === listingId ? 0 : 1;
+    
+    Animated.spring(rotationAnimations[listingId], {
+      toValue,
+      useNativeDriver: true,
+      friction: 8,
+      tension: 40
+    }).start();
+
+    setExpandedListing(expandedListing === listingId ? null : listingId);
+  };
 
   const getRemainingDays = (expiresAt: string) => {
     const now = new Date();
@@ -62,8 +84,22 @@ export default function MyListingsScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Мои объявления</Text>
-        <Text style={styles.subtitle}>Активные публикации: {mockListings.length}</Text>
+        <View style={styles.headerContent}>
+          <TouchableOpacity 
+            onPress={() => router.back()} 
+            style={styles.backButton}
+          >
+            <MaterialCommunityIcons 
+              name="arrow-left" 
+              size={24} 
+              color={theme === DARK_THEME ? '#fff' : '#000'} 
+            />
+          </TouchableOpacity>
+          <View>
+            <Text style={styles.title}>Мои объявления</Text>
+            <Text style={styles.subtitle}>Активные публикации: {mockListings.length}</Text>
+          </View>
+        </View>
       </View>
 
       <ScrollView style={styles.listingsContainer}>
@@ -71,7 +107,7 @@ export default function MyListingsScreen() {
           <Card 
             key={listing.id} 
             style={styles.listingCard}
-            onPress={() => setExpandedListing(expandedListing === listing.id ? null : listing.id)}
+            onPress={() => handleExpand(listing.id)}
           >
             <Card.Content>
               <View style={styles.listingHeader}>
@@ -87,6 +123,21 @@ export default function MyListingsScreen() {
                   <View style={styles.statsRow}>
                     <MaterialCommunityIcons name="eye" size={16} color="#666" />
                     <Text style={styles.statsText}>{listing.views}</Text>
+                    <Animated.View style={{
+                      marginLeft: 8,
+                      transform: [{
+                        rotate: rotationAnimations[listing.id].interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ['0deg', '180deg']
+                        })
+                      }]
+                    }}>
+                      <MaterialCommunityIcons 
+                        name="chevron-down" 
+                        size={20} 
+                        color={theme === DARK_THEME ? '#fff' : '#666'} 
+                      />
+                    </Animated.View>
                   </View>
                 </View>
               </View>
@@ -165,6 +216,14 @@ const makeStyles = (theme: string) => StyleSheet.create({
   header: {
     padding: 16,
     backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButton: {
+    marginRight: 16,
+    padding: 4,
   },
   title: {
     fontSize: 24,

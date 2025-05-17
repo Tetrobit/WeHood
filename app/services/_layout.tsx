@@ -24,6 +24,7 @@ export default function ServicesLayout() {
       <Stack.Screen name="flats/new" options={{...defaultConfig, title: 'Новое объявление'}} />
       <Stack.Screen name="flats/viewed" options={{...defaultConfig, title: 'Просмотренные'}} />
       <Stack.Screen name="flats/favorites" options={{...defaultConfig, title: 'Избранное'}} />
+      <Stack.Screen name="flats/my" options={{...defaultConfig, title: 'Мои объявления'}} />
       <Stack.Screen name="events" options={{...defaultConfig, title: 'События'}} />
     </Stack>
   );
