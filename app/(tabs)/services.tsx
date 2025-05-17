@@ -7,7 +7,7 @@ import { useThemeName } from '@/core/hooks/useTheme';
 import { router } from 'expo-router';
 
 type RouteType = {
-  pathname: '/services/flats' | '/services/flats/new' | '/services/flats/viewed' | '/services/flats/favorites' | '/services/events';
+  pathname: '/services/flats' | '/services/flats/new' | '/services/flats/viewed' | '/services/flats/favorites' | '/services/events' | '/services/flats/my';
 };
 
 type Service = {
@@ -60,6 +60,12 @@ const services: Service[] = [
         title: 'Избранное',
         icon: 'heart',
         target: { pathname: '/services/flats/favorites' },
+      },
+      {
+        id: '1-5',
+        title: 'Мои объявления',
+        icon: 'clipboard-list',
+        target: { pathname: '/services/flats/my' },
       }
     ]
   },
