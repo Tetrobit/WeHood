@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
-import { Card, ProgressBar } from 'react-native-paper';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, TextInput, Modal } from 'react-native';
+import { Card, ProgressBar, Button } from 'react-native-paper';
 import { LineChart } from 'react-native-chart-kit';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useState, useRef } from 'react';
@@ -13,6 +13,7 @@ type FlatListing = {
   title: string;
   price: number;
   address: string;
+  description?: string;
   publishedAt: string;
   expiresAt: string;
   views: number;
@@ -20,6 +21,18 @@ type FlatListing = {
   contacts: number;
   viewsHistory: number[];
   recommendations: string[];
+  rooms?: number;
+  floor?: number;
+  totalFloors?: number;
+  area?: number;
+  hasParking?: boolean;
+  hasFurniture?: boolean;
+  hasAppliances?: boolean;
+  petsAllowed?: boolean;
+  utilities?: string;
+  deposit?: number;
+  contactPhone?: string;
+  contactName?: string;
 };
 
 const mockListings: FlatListing[] = [
@@ -95,6 +108,10 @@ const mockListings: FlatListing[] = [
 
 export default function MyListingsScreen() {
   const [expandedListing, setExpandedListing] = useState<string | null>(null);
+  const [editingListing, setEditingListing] = useState<FlatListing | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
+  const [isLoadingAiSuggestions, setIsLoadingAiSuggestions] = useState(false);
   const rotationAnimations = useRef<{ [key: string]: Animated.Value }>({}).current;
   const theme = useThemeName();
   const styles = makeStyles(theme);
@@ -129,6 +146,40 @@ export default function MyListingsScreen() {
 
   const getEngagementRate = (listing: FlatListing) => {
     return ((listing.contacts + listing.favorites) / listing.views * 100).toFixed(1);
+  };
+
+  const handleEdit = (listing: FlatListing) => {
+    setEditingListing({ ...listing });
+    setShowEditModal(true);
+    generateAiSuggestions();
+  };
+
+  const handleSave = () => {
+    if (!editingListing) return;
+    
+    // В реальном приложении здесь был бы API-запрос
+    const updatedListings = mockListings.map(listing => 
+      listing.id === editingListing.id ? editingListing : listing
+    );
+    
+    setShowEditModal(false);
+    setEditingListing(null);
+  };
+
+  const generateAiSuggestions = () => {
+    setIsLoadingAiSuggestions(true);
+    // В реальном приложении здесь был бы запрос к AI API
+    setTimeout(() => {
+      const suggestions = [
+        'Добавьте информацию о близлежащих школах и детских садах',
+        'Упомяните наличие парковочных мест',
+        'Расскажите о качестве интернет-подключения',
+        'Добавьте фотографии в разное время суток',
+        'Укажите информацию о коммунальных платежах'
+      ];
+      setAiSuggestions(suggestions);
+      setIsLoadingAiSuggestions(false);
+    }, 1000);
   };
 
   return (
@@ -249,12 +300,266 @@ export default function MyListingsScreen() {
                       </View>
                     ))}
                   </View>
+
+                  <View style={styles.actionButtons}>
+                    <Button 
+                      mode="contained" 
+                      onPress={() => handleEdit(listing)}
+                      style={styles.editButton}
+                    >
+                      Редактировать
+                    </Button>
+                  </View>
                 </View>
               )}
             </Card.Content>
           </Card>
         ))}
       </ScrollView>
+
+      <Modal
+        visible={showEditModal}
+        animationType="slide"
+        onRequestClose={() => setShowEditModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Редактирование объявления</Text>
+            <TouchableOpacity onPress={() => setShowEditModal(false)}>
+              <MaterialCommunityIcons name="close" size={24} color={theme === DARK_THEME ? '#fff' : '#000'} />
+            </TouchableOpacity>
+          </View>
+
+          {editingListing && (
+            <ScrollView style={styles.modalContent}>
+              <View style={styles.formSection}>
+                <Text style={styles.sectionTitle}>Основная информация</Text>
+                <Text style={styles.inputLabel}>Название</Text>
+                <TextInput
+                  style={styles.input}
+                  value={editingListing.title}
+                  onChangeText={(text) => setEditingListing({...editingListing, title: text})}
+                  placeholder="Например: Уютная 2-комнатная квартира в центре"
+                />
+
+                <Text style={styles.inputLabel}>Цена (₽/мес)</Text>
+                <TextInput
+                  style={styles.input}
+                  value={editingListing.price.toString()}
+                  onChangeText={(text) => setEditingListing({...editingListing, price: parseInt(text) || 0})}
+                  keyboardType="numeric"
+                  placeholder="30000"
+                />
+
+                <Text style={styles.inputLabel}>Залог (₽)</Text>
+                <TextInput
+                  style={styles.input}
+                  value={editingListing.deposit?.toString()}
+                  onChangeText={(text) => setEditingListing({...editingListing, deposit: parseInt(text) || 0})}
+                  keyboardType="numeric"
+                  placeholder="30000"
+                />
+
+                <Text style={styles.inputLabel}>Адрес</Text>
+                <TextInput
+                  style={styles.input}
+                  value={editingListing.address}
+                  onChangeText={(text) => setEditingListing({...editingListing, address: text})}
+                  placeholder="Улица, дом"
+                />
+              </View>
+
+              <View style={styles.formSection}>
+                <Text style={styles.sectionTitle}>Характеристики квартиры</Text>
+                <Text style={styles.inputLabel}>Количество комнат</Text>
+                <TextInput
+                  style={styles.input}
+                  value={editingListing.rooms?.toString()}
+                  onChangeText={(text) => setEditingListing({...editingListing, rooms: parseInt(text) || 0})}
+                  keyboardType="numeric"
+                  placeholder="2"
+                />
+
+                <View style={styles.rowInputs}>
+                  <View style={styles.halfInput}>
+                    <Text style={styles.inputLabel}>Этаж</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={editingListing.floor?.toString()}
+                      onChangeText={(text) => setEditingListing({...editingListing, floor: parseInt(text) || 0})}
+                      keyboardType="numeric"
+                      placeholder="5"
+                    />
+                  </View>
+                  <View style={styles.halfInput}>
+                    <Text style={styles.inputLabel}>Этажей в доме</Text>
+                    <TextInput
+                      style={styles.input}
+                      value={editingListing.totalFloors?.toString()}
+                      onChangeText={(text) => setEditingListing({...editingListing, totalFloors: parseInt(text) || 0})}
+                      keyboardType="numeric"
+                      placeholder="9"
+                    />
+                  </View>
+                </View>
+
+                <Text style={styles.inputLabel}>Площадь (м²)</Text>
+                <TextInput
+                  style={styles.input}
+                  value={editingListing.area?.toString()}
+                  onChangeText={(text) => setEditingListing({...editingListing, area: parseFloat(text) || 0})}
+                  keyboardType="numeric"
+                  placeholder="50"
+                />
+              </View>
+
+              <View style={styles.formSection}>
+                <Text style={styles.sectionTitle}>Удобства</Text>
+                <View style={styles.checkboxGroup}>
+                  <TouchableOpacity 
+                    style={styles.checkbox} 
+                    onPress={() => setEditingListing({
+                      ...editingListing, 
+                      hasParking: !editingListing.hasParking
+                    })}
+                  >
+                    <MaterialCommunityIcons 
+                      name={editingListing.hasParking ? "checkbox-marked" : "checkbox-blank-outline"} 
+                      size={24} 
+                      color={theme === DARK_THEME ? '#fff' : '#000'} 
+                    />
+                    <Text style={styles.checkboxLabel}>Парковка</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity 
+                    style={styles.checkbox} 
+                    onPress={() => setEditingListing({
+                      ...editingListing, 
+                      hasFurniture: !editingListing.hasFurniture
+                    })}
+                  >
+                    <MaterialCommunityIcons 
+                      name={editingListing.hasFurniture ? "checkbox-marked" : "checkbox-blank-outline"} 
+                      size={24} 
+                      color={theme === DARK_THEME ? '#fff' : '#000'} 
+                    />
+                    <Text style={styles.checkboxLabel}>Мебель</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity 
+                    style={styles.checkbox} 
+                    onPress={() => setEditingListing({
+                      ...editingListing, 
+                      hasAppliances: !editingListing.hasAppliances
+                    })}
+                  >
+                    <MaterialCommunityIcons 
+                      name={editingListing.hasAppliances ? "checkbox-marked" : "checkbox-blank-outline"} 
+                      size={24} 
+                      color={theme === DARK_THEME ? '#fff' : '#000'} 
+                    />
+                    <Text style={styles.checkboxLabel}>Бытовая техника</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity 
+                    style={styles.checkbox} 
+                    onPress={() => setEditingListing({
+                      ...editingListing, 
+                      petsAllowed: !editingListing.petsAllowed
+                    })}
+                  >
+                    <MaterialCommunityIcons 
+                      name={editingListing.petsAllowed ? "checkbox-marked" : "checkbox-blank-outline"} 
+                      size={24} 
+                      color={theme === DARK_THEME ? '#fff' : '#000'} 
+                    />
+                    <Text style={styles.checkboxLabel}>Можно с животными</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <View style={styles.formSection}>
+                <Text style={styles.sectionTitle}>Описание</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  value={editingListing.description}
+                  onChangeText={(text) => setEditingListing({...editingListing, description: text})}
+                  multiline
+                  numberOfLines={4}
+                  placeholder="Подробное описание квартиры, условия аренды и т.д."
+                />
+
+                <Text style={styles.inputLabel}>Коммунальные платежи</Text>
+                <TextInput
+                  style={styles.input}
+                  value={editingListing.utilities}
+                  onChangeText={(text) => setEditingListing({...editingListing, utilities: text})}
+                  placeholder="Например: Включены в стоимость / Оплачиваются отдельно"
+                />
+              </View>
+
+              <View style={styles.formSection}>
+                <Text style={styles.sectionTitle}>Контактная информация</Text>
+                <Text style={styles.inputLabel}>Имя</Text>
+                <TextInput
+                  style={styles.input}
+                  value={editingListing.contactName}
+                  onChangeText={(text) => setEditingListing({...editingListing, contactName: text})}
+                  placeholder="Как к вам обращаться"
+                />
+
+                <Text style={styles.inputLabel}>Телефон</Text>
+                <TextInput
+                  style={styles.input}
+                  value={editingListing.contactPhone}
+                  onChangeText={(text) => setEditingListing({...editingListing, contactPhone: text})}
+                  keyboardType="phone-pad"
+                  placeholder="+7 (___) ___-__-__"
+                />
+              </View>
+
+              <View style={styles.formSection}>
+                <Text style={styles.sectionTitle}>Рекомендации ИИ</Text>
+                {isLoadingAiSuggestions ? (
+                  <View style={styles.loadingContainer}>
+                    <Text style={styles.loadingText}>Генерация рекомендаций...</Text>
+                  </View>
+                ) : (
+                  <View style={styles.aiSuggestionsContainer}>
+                    {aiSuggestions.map((suggestion, index) => (
+                      <View key={index} style={styles.suggestionItem}>
+                        <MaterialCommunityIcons 
+                          name="lightbulb-outline" 
+                          size={20} 
+                          color={theme === DARK_THEME ? '#FFD700' : '#FFA500'} 
+                        />
+                        <Text style={styles.suggestionText}>{suggestion}</Text>
+                      </View>
+                    ))}
+                    <Button 
+                      mode="outlined" 
+                      onPress={generateAiSuggestions}
+                      style={styles.refreshButton}
+                    >
+                      Обновить рекомендации
+                    </Button>
+                  </View>
+                )}
+              </View>
+
+              <Button 
+                mode="contained" 
+                onPress={handleSave}
+                style={styles.saveButton}
+              >
+                Сохранить
+              </Button>
+
+              <View style={styles.bottomPadding} />
+            </ScrollView>
+          )}
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -394,5 +699,132 @@ const makeStyles = (theme: string) => StyleSheet.create({
     fontSize: 14,
     color: theme === DARK_THEME ? '#fff' : '#000',
     flex: 1,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 16,
+    marginBottom: 16,
+  },
+  editButton: {
+    flex: 1,
+    marginRight: 8,
+    backgroundColor: '#007AFF',
+  },
+  aiSuggestionContainer: {
+    backgroundColor: theme === DARK_THEME ? '#2c2c2c' : '#f0f0f0',
+    padding: 16,
+    borderRadius: 8,
+    marginTop: 16,
+  },
+  aiSuggestionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: theme === DARK_THEME ? '#fff' : '#000',
+    marginBottom: 8,
+  },
+  aiSuggestionText: {
+    fontSize: 14,
+    color: theme === DARK_THEME ? '#ddd' : '#333',
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: theme === DARK_THEME ? '#000' : '#fff',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: theme === DARK_THEME ? '#333' : '#eee',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: theme === DARK_THEME ? '#fff' : '#000',
+  },
+  modalContent: {
+    padding: 16,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: theme === DARK_THEME ? '#fff' : '#000',
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: theme === DARK_THEME ? '#222' : '#f5f5f5',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    color: theme === DARK_THEME ? '#fff' : '#000',
+  },
+  textArea: {
+    height: 120,
+    textAlignVertical: 'top',
+  },
+  saveButton: {
+    marginTop: 16,
+  },
+  formSection: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: theme === DARK_THEME ? '#fff' : '#000',
+    marginBottom: 16,
+  },
+  aiSuggestionsContainer: {
+    backgroundColor: theme === DARK_THEME ? '#2c2c2c' : '#f0f0f0',
+    padding: 16,
+    borderRadius: 8,
+  },
+  suggestionItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  suggestionText: {
+    flex: 1,
+    marginLeft: 12,
+    fontSize: 14,
+    color: theme === DARK_THEME ? '#ddd' : '#333',
+  },
+  loadingContainer: {
+    padding: 16,
+    alignItems: 'center',
+  },
+  loadingText: {
+    color: theme === DARK_THEME ? '#aaa' : '#666',
+    fontSize: 14,
+  },
+  refreshButton: {
+    marginTop: 16,
+  },
+  rowInputs: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 16,
+  },
+  halfInput: {
+    flex: 1,
+  },
+  checkboxGroup: {
+    marginTop: 8,
+  },
+  checkbox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  checkboxLabel: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: theme === DARK_THEME ? '#fff' : '#000',
+  },
+  bottomPadding: {
+    height: 100, // Отступ для нижней навигации Android
   },
 }); 
