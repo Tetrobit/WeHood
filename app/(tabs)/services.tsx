@@ -4,7 +4,11 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useState } from 'react';
 import { DARK_THEME } from '@/core/hooks/useTheme';
 import { useThemeName } from '@/core/hooks/useTheme';
-import { Href, router } from 'expo-router';
+import { router } from 'expo-router';
+
+type RouteType = {
+  pathname: '/services/flats' | '/services/flats/new' | '/services/flats/viewed' | '/services/flats/favorites' | '/services/events';
+};
 
 type Service = {
   id: string;
@@ -13,26 +17,60 @@ type Service = {
   icon: string;
   color: string;
   category: string;
-  target?: Href;
+  target?: RouteType;
+  isAccordion?: boolean;
+  actions?: Array<{
+    id: string;
+    title: string;
+    icon: string;
+    target: RouteType;
+  }>;
 };
 
 const services: Service[] = [
   {
     id: '1',
     title: 'Недвижимость',
-    description: 'Аренда квартиры и сдача в аренду',
+    description: 'Поиск квартиры или дома',
     icon: 'warehouse',
     color: '#44944A',
     category: 'Помощь',
-    target: '/services/flats'
+    isAccordion: true,
+    actions: [
+      {
+        id: '1-1',
+        title: 'Сдать в аренду',
+        icon: 'key-variant',
+        target: { pathname: '/services/flats/new' },
+      },
+      {
+        id: '1-2',
+        title: 'Снять квартиру',
+        icon: 'home-search',
+        target: { pathname: '/services/flats' },
+      },
+      {
+        id: '1-3',
+        title: 'Просмотренные',
+        icon: 'eye',
+        target: { pathname: '/services/flats/viewed' },
+      },
+      {
+        id: '1-4',
+        title: 'Избранное',
+        icon: 'heart',
+        target: { pathname: '/services/flats/favorites' },
+      }
+    ]
   },
   {
     id: '2',
-    title: 'Уборка территории',
+    title: 'Субботники',
     description: 'Субботники и экологические акции',
     icon: 'broom',
     color: '#4ECDC4',
-    category: 'События'
+    category: 'События',
+    target: { pathname: '/services/events' }
   },
   {
     id: '3',
@@ -73,6 +111,7 @@ const categories = ['Все', 'Помощь', 'События', 'Объявле�
 export default function ServicesScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Все');
+  const [expandedService, setExpandedService] = useState<string | null>(null);
 
   const filteredServices = services.filter(service => {
     const matchesSearch = service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -83,6 +122,14 @@ export default function ServicesScreen() {
 
   const theme = useThemeName();
   const styles = makeStyles(theme);
+
+  const handleServicePress = (service: Service) => {
+    if (service.isAccordion) {
+      setExpandedService(expandedService === service.id ? null : service.id);
+    } else if (service.target) {
+      router.push(service.target);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -128,20 +175,45 @@ export default function ServicesScreen() {
 
       <ScrollView style={styles.servicesContainer}>
         {filteredServices.map((service) => (
-          <TouchableOpacity activeOpacity={0.7} key={service.id} onPress={() => router.push(service.target || '/+not-found')}>
-            <Card key={service.id} style={styles.serviceCard}>
-              <Card.Content style={styles.serviceContent}>
-                <View style={[styles.iconContainer, { backgroundColor: service.color }]}>
-                  <MaterialCommunityIcons name={service.icon as any} size={24} color="#fff" />
-                </View>
-                <View style={styles.serviceInfo}>
-                  <Text style={styles.serviceTitle}>{service.title}</Text>
-                  <Text style={styles.serviceDescription}>{service.description}</Text>
-                </View>
-                <MaterialCommunityIcons name="chevron-right" size={24} color="#666" />
-              </Card.Content>
-            </Card>
-          </TouchableOpacity>
+          <View key={service.id}>
+            <TouchableOpacity 
+              activeOpacity={0.7} 
+              onPress={() => handleServicePress(service)}
+            >
+              <Card style={styles.serviceCard}>
+                <Card.Content style={styles.serviceContent}>
+                  <View style={styles.serviceHeader}>
+                    <View style={[styles.iconContainer, { backgroundColor: service.color }]}>
+                      <MaterialCommunityIcons name={service.icon as any} size={24} color="#fff" />
+                    </View>
+                    <View style={styles.serviceInfo}>
+                      <Text style={styles.serviceTitle}>{service.title}</Text>
+                      <Text style={styles.serviceDescription}>{service.description}</Text>
+                    </View>
+                    <MaterialCommunityIcons 
+                      name={service.isAccordion ? (expandedService === service.id ? "chevron-up" : "chevron-down") : "chevron-right"} 
+                      size={24} 
+                      color="#666" 
+                    />
+                  </View>
+                  {service.isAccordion && expandedService === service.id && service.actions && (
+                    <View style={styles.actionsContainer}>
+                      {service.actions.map((action, index) => (
+                        <TouchableOpacity
+                          key={action.id}
+                          style={{...styles.actionButton, ...(index == service.actions!.length - 1 ? {borderBottomWidth: 0} : {})}}
+                          onPress={() => router.push(action.target)}
+                        >
+                          <MaterialCommunityIcons name={action.icon as any} size={24} color='#888' />
+                          <Text style={styles.actionText}>{action.title}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+                </Card.Content>
+              </Card>
+            </TouchableOpacity>
+          </View>
         ))}
         <View style={styles.bottomSpacer} />
       </ScrollView>
@@ -212,9 +284,11 @@ const makeStyles = (theme: string) => StyleSheet.create({
     elevation: 2,
     backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
   },
-  serviceContent: {
+  serviceHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
+  },
+  serviceContent: {
+    flexDirection: 'column',
   },
   iconContainer: {
     width: 48,
@@ -236,5 +310,24 @@ const makeStyles = (theme: string) => StyleSheet.create({
   serviceDescription: {
     fontSize: 14,
     color: theme === DARK_THEME ? '#aaa' : '#666',
+  },
+  actionsContainer: {
+    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+    paddingHorizontal: 16,
+    marginTop: 10,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: theme === DARK_THEME ? '#333' : '#eee',
+  },
+  actionText: {
+    marginLeft: 12,
+    fontSize: 16,
+    color: theme === DARK_THEME ? '#fff' : '#000',
   },
 });
