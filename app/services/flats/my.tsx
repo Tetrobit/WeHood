@@ -28,7 +28,7 @@ const mockListings: FlatListing[] = [
     price: 25000,
     address: 'ул. Ленина, 42',
     publishedAt: '2024-03-01',
-    expiresAt: '2024-04-01',
+    expiresAt: '2025-06-01',
     views: 156,
     favorites: 12,
     contacts: 8,
@@ -81,7 +81,7 @@ export default function MyListingsScreen() {
                   <Text style={styles.listingAddress}>{listing.address}</Text>
                 </View>
                 <View style={styles.listingStats}>
-                  <Text style={styles.expiryText}>
+                  <Text style={{...styles.expiryText, color: 'orange'}}>
                     {getRemainingDays(listing.expiresAt)} дней до снятия
                   </Text>
                   <View style={styles.statsRow}>
