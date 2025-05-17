@@ -40,7 +40,57 @@ const mockListings: FlatListing[] = [
       'Опишите инфраструктуру района'
     ]
   },
-  // Добавьте больше мок-данных при необходимости
+  {
+    id: '2',
+    title: 'Студия с панорамными окнами',
+    price: 18000,
+    address: 'ул. Пушкина, 15',
+    publishedAt: '2024-03-10',
+    expiresAt: '2025-07-10',
+    views: 234,
+    favorites: 28,
+    contacts: 15,
+    viewsHistory: [35, 42, 38, 45, 32, 25, 17],
+    recommendations: [
+      'Добавьте видео-обзор квартиры',
+      'Укажите условия заселения с питомцами',
+      'Добавьте фото вида из окна'
+    ]
+  },
+  {
+    id: '3',
+    title: '3-комнатная с ремонтом',
+    price: 45000,
+    address: 'пр. Мира, 78',
+    publishedAt: '2024-02-25',
+    expiresAt: '2025-06-25',
+    views: 89,
+    favorites: 7,
+    contacts: 3,
+    viewsHistory: [15, 18, 12, 14, 10, 12, 8],
+    recommendations: [
+      'Снизьте цену - она выше средней по району',
+      'Добавьте планировку квартиры',
+      'Опишите преимущества района'
+    ]
+  },
+  {
+    id: '4',
+    title: 'Уютная 1-комнатная',
+    price: 20000,
+    address: 'ул. Гагарина, 23',
+    publishedAt: '2024-03-15',
+    expiresAt: '2025-08-15',
+    views: 167,
+    favorites: 19,
+    contacts: 11,
+    viewsHistory: [28, 35, 30, 25, 22, 15, 12],
+    recommendations: [
+      'Добавьте фото мебели и техники',
+      'Укажите список доступной бытовой техники',
+      'Опишите условия длительной аренды'
+    ]
+  }
 ];
 
 export default function MyListingsScreen() {
@@ -107,40 +157,41 @@ export default function MyListingsScreen() {
           <Card 
             key={listing.id} 
             style={styles.listingCard}
-            onPress={() => handleExpand(listing.id)}
           >
             <Card.Content>
-              <View style={styles.listingHeader}>
-                <View style={styles.listingInfo}>
-                  <Text style={styles.listingTitle}>{listing.title}</Text>
-                  <Text style={styles.listingPrice}>{listing.price.toLocaleString()} ₽/мес</Text>
-                  <Text style={styles.listingAddress}>{listing.address}</Text>
-                </View>
-                <View style={styles.listingStats}>
-                  <Text style={{...styles.expiryText, color: 'orange'}}>
-                    {getRemainingDays(listing.expiresAt)} дней до снятия
-                  </Text>
-                  <View style={styles.statsRow}>
-                    <MaterialCommunityIcons name="eye" size={16} color="#666" />
-                    <Text style={styles.statsText}>{listing.views}</Text>
-                    <Animated.View style={{
-                      marginLeft: 8,
-                      transform: [{
-                        rotate: rotationAnimations[listing.id].interpolate({
-                          inputRange: [0, 1],
-                          outputRange: ['0deg', '180deg']
-                        })
-                      }]
-                    }}>
-                      <MaterialCommunityIcons 
-                        name="chevron-down" 
-                        size={20} 
-                        color={theme === DARK_THEME ? '#fff' : '#666'} 
-                      />
-                    </Animated.View>
+              <TouchableOpacity onPress={() => handleExpand(listing.id)}>
+                <View style={styles.listingHeader}>
+                  <View style={styles.listingInfo}>
+                    <Text style={styles.listingTitle}>{listing.title}</Text>
+                    <Text style={styles.listingPrice}>{listing.price.toLocaleString()} ₽/мес</Text>
+                    <Text style={styles.listingAddress}>{listing.address}</Text>
+                  </View>
+                  <View style={styles.listingStats}>
+                    <Text style={{...styles.expiryText, color: 'orange'}}>
+                      {getRemainingDays(listing.expiresAt)} дней до снятия
+                    </Text>
+                    <View style={styles.statsRow}>
+                      <MaterialCommunityIcons name="eye" size={16} color="#666" />
+                      <Text style={styles.statsText}>{listing.views}</Text>
+                      <Animated.View style={{
+                        marginLeft: 8,
+                        transform: [{
+                          rotate: rotationAnimations[listing.id].interpolate({
+                            inputRange: [0, 1],
+                            outputRange: ['0deg', '180deg']
+                          })
+                        }]
+                      }}>
+                        <MaterialCommunityIcons 
+                          name="chevron-down" 
+                          size={20} 
+                          color={theme === DARK_THEME ? '#fff' : '#666'} 
+                        />
+                      </Animated.View>
+                    </View>
                   </View>
                 </View>
-              </View>
+              </TouchableOpacity>
 
               {expandedListing === listing.id && (
                 <View style={styles.analytics}>
