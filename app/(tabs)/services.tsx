@@ -4,12 +4,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useState } from 'react';
 import { DARK_THEME } from '@/core/hooks/useTheme';
 import { useThemeName } from '@/core/hooks/useTheme';
-import { router } from 'expo-router';
-
-type RouteType = {
-  pathname: '/services/flats' | '/services/flats/new' | '/services/flats/viewed' | '/services/flats/favorites' | '/services/flats/my' | 
-            '/services/events' | '/services/activities' | '/services/activities/apply' | '/services/activities/my' | '/services/activities/contact';
-};
+import { Href, router } from 'expo-router';
 
 type Service = {
   id: string;
@@ -18,13 +13,13 @@ type Service = {
   icon: string;
   color: string;
   category: string;
-  target?: RouteType;
+  target?: Href;
   isAccordion?: boolean;
   actions?: Array<{
     id: string;
     title: string;
     icon: string;
-    target: RouteType;
+    target: Href;
   }>;
 };
 
@@ -98,6 +93,15 @@ const services: Service[] = [
         target: { pathname: '/services/activities/my' },
       }
     ]
+  },
+  {
+    id: '3',
+    title: 'Товары и услуги',
+    description: 'Покупка, продажа и обмен товарами',
+    icon: 'shopping',
+    color: '#FF9800',
+    category: 'Объявления',
+    isAccordion: false,
   }
 ];
 
