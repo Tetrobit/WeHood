@@ -7,7 +7,8 @@ import { useThemeName } from '@/core/hooks/useTheme';
 import { router } from 'expo-router';
 
 type RouteType = {
-  pathname: '/services/flats' | '/services/flats/new' | '/services/flats/viewed' | '/services/flats/favorites' | '/services/events' | '/services/flats/my';
+  pathname: '/services/flats' | '/services/flats/new' | '/services/flats/viewed' | '/services/flats/favorites' | '/services/flats/my' | 
+            '/services/events' | '/services/activities' | '/services/activities/apply' | '/services/activities/my' | '/services/activities/contact';
 };
 
 type Service = {
@@ -109,6 +110,35 @@ const services: Service[] = [
     icon: 'tools',
     color: '#4ECDC4',
     category: 'Помощь',
+  },
+  {
+    id: '7',
+    title: 'Детские секции',
+    description: 'Поиск и запись в секции и кружки',
+    icon: 'school',
+    color: '#9C27B0',
+    category: 'Помощь',
+    isAccordion: true,
+    actions: [
+      {
+        id: '7-1',
+        title: 'Найти секцию',
+        icon: 'magnify',
+        target: { pathname: '/services/activities' },
+      },
+      {
+        id: '7-2',
+        title: 'Подать заявку',
+        icon: 'file-document-edit',
+        target: { pathname: '/services/activities/apply' },
+      },
+      {
+        id: '7-3',
+        title: 'Мои заявки',
+        icon: 'clipboard-list',
+        target: { pathname: '/services/activities/my' },
+      }
+    ]
   }
 ];
 
