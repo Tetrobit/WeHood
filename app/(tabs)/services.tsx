@@ -39,27 +39,27 @@ const services: Service[] = [
     actions: [
       {
         id: '1-1',
-        title: 'Сдать в аренду',
-        icon: 'key-variant',
-        target: { pathname: '/services/flats/new' },
-      },
-      {
-        id: '1-2',
         title: 'Снять квартиру',
         icon: 'home-search',
         target: { pathname: '/services/flats' },
       },
       {
-        id: '1-3',
+        id: '1-2',
         title: 'Просмотренные',
         icon: 'eye',
         target: { pathname: '/services/flats/viewed' },
       },
       {
-        id: '1-4',
+        id: '1-3',
         title: 'Избранное',
         icon: 'heart',
         target: { pathname: '/services/flats/favorites' },
+      },
+      {
+        id: '1-4',
+        title: 'Сдать в аренду',
+        icon: 'key-variant',
+        target: { pathname: '/services/flats/new' },
       },
       {
         id: '1-5',
@@ -182,12 +182,12 @@ export default function ServicesScreen() {
       <ScrollView style={styles.servicesContainer}>
         {filteredServices.map((service) => (
           <View key={service.id}>
-            <TouchableOpacity 
-              activeOpacity={0.7} 
-              onPress={() => handleServicePress(service)}
-            >
-              <Card style={styles.serviceCard}>
-                <Card.Content style={styles.serviceContent}>
+            <Card style={styles.serviceCard}>
+              <Card.Content style={styles.serviceContent}>
+                <TouchableOpacity 
+                  activeOpacity={0.7} 
+                  onPress={() => handleServicePress(service)}
+                >
                   <View style={styles.serviceHeader}>
                     <View style={[styles.iconContainer, { backgroundColor: service.color }]}>
                       <MaterialCommunityIcons name={service.icon as any} size={24} color="#fff" />
@@ -202,23 +202,24 @@ export default function ServicesScreen() {
                       color="#666" 
                     />
                   </View>
-                  {service.isAccordion && expandedService === service.id && service.actions && (
-                    <View style={styles.actionsContainer}>
-                      {service.actions.map((action, index) => (
-                        <TouchableOpacity
-                          key={action.id}
-                          style={{...styles.actionButton, ...(index == service.actions!.length - 1 ? {borderBottomWidth: 0} : {})}}
-                          onPress={() => router.push(action.target)}
-                        >
-                          <MaterialCommunityIcons name={action.icon as any} size={24} color='#888' />
-                          <Text style={styles.actionText}>{action.title}</Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  )}
-                </Card.Content>
-              </Card>
-            </TouchableOpacity>
+                </TouchableOpacity>
+                {service.isAccordion && expandedService === service.id && service.actions && (
+                  <View style={styles.actionsContainer}>
+                    {service.actions.map((action, index) => (
+                      <TouchableOpacity
+                        key={action.id}
+                        activeOpacity={0.7}
+                        style={{...styles.actionButton, ...(index == service.actions!.length - 1 ? {borderBottomWidth: 0} : {})}}
+                        onPress={() => router.push(action.target)}
+                      >
+                        <MaterialCommunityIcons name={action.icon as any} size={24} color='#888' />
+                        <Text style={styles.actionText}>{action.title}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </Card.Content>
+            </Card>
           </View>
         ))}
         <View style={styles.bottomSpacer} />
