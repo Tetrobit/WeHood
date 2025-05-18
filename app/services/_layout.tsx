@@ -26,6 +26,12 @@ export default function ServicesLayout() {
       <Stack.Screen name="flats/favorites" options={{...defaultConfig, title: 'Избранное'}} />
       <Stack.Screen name="flats/my" options={{...defaultConfig, title: 'Мои объявления'}} />
       <Stack.Screen name="events" options={{...defaultConfig, title: 'События'}} />
+      <Stack.Screen name="activities/index" options={{...defaultConfig, title: 'Детские секции'}} />
+      <Stack.Screen name="activities/apply" options={{...defaultConfig, title: 'Подать заявку'}} />
+      <Stack.Screen name="activities/my" options={{...defaultConfig, title: 'Мои заявки'}} />
+      <Stack.Screen name="activities/contact" options={{...defaultConfig, title: 'Связаться'}} />
+      <Stack.Screen name="marketplace/index" options={{...defaultConfig, title: 'Товары и услуги'}} />
+      <Stack.Screen name="marketplace/[id]" options={defaultConfig} />
     </Stack>
   );
 }

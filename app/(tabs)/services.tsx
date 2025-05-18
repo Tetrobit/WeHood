@@ -75,19 +75,13 @@ const services: Service[] = [
     isAccordion: true,
     actions: [
       {
-        id: '7-1',
+        id: '2-1',
         title: 'Найти секцию',
         icon: 'magnify',
         target: { pathname: '/services/activities' },
       },
       {
-        id: '7-2',
-        title: 'Подать заявку',
-        icon: 'file-document-edit',
-        target: { pathname: '/services/activities/apply' },
-      },
-      {
-        id: '7-3',
+        id: '2-2',
         title: 'Мои заявки',
         icon: 'clipboard-list',
         target: { pathname: '/services/activities/my' },
@@ -102,6 +96,7 @@ const services: Service[] = [
     color: '#FF9800',
     category: 'Объявления',
     isAccordion: false,
+    target: { pathname: '/services/marketplace' },
   }
 ];
 
