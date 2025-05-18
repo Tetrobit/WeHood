@@ -27,6 +27,7 @@ const App = () => {
   const handleSubmit = () => {
     // Здесь будет логика авторизации
     console.log('Submit:', { email, password });
+    router.push('/(tabs)');
   };
 
   const handleVKAuth = () => {
