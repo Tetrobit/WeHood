@@ -72,47 +72,6 @@ const services: Service[] = [
   },
   {
     id: '2',
-    title: 'Субботники',
-    description: 'Субботники и экологические акции',
-    icon: 'broom',
-    color: '#4ECDC4',
-    category: 'События',
-    target: { pathname: '/services/events' }
-  },
-  {
-    id: '3',
-    title: 'Обмен вещами',
-    description: 'Отдайте ненужные вещи нуждающимся',
-    icon: 'swap-horizontal',
-    color: '#FFD93D',
-    category: 'Объявления'
-  },
-  {
-    id: '4',
-    title: 'Соседский чат',
-    description: 'Общение с соседями',
-    icon: 'chat',
-    color: '#95E1D3',
-    category: 'Соседи'
-  },
-  {
-    id: '5',
-    title: 'Доставка продуктов',
-    description: 'Помощь с доставкой продуктов',
-    icon: 'cart',
-    color: '#FF6B6B',
-    category: 'Помощь'
-  },
-  {
-    id: '6',
-    title: 'Ремонт техники',
-    description: 'Помощь с ремонтом бытовой техники',
-    icon: 'tools',
-    color: '#4ECDC4',
-    category: 'Помощь',
-  },
-  {
-    id: '7',
     title: 'Детские секции',
     description: 'Поиск и запись в секции и кружки',
     icon: 'school',
