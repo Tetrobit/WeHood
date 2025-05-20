@@ -3,6 +3,7 @@ import { Card, Button } from 'react-native-paper';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router } from 'expo-router';
 import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
+import Carousel from 'react-native-reanimated-carousel';
 
 const { width } = Dimensions.get('window');
 
@@ -37,9 +38,40 @@ const services: Array<{
   { id: '4', title: 'Соседи', icon: 'account-group', color: '#95E1D3' },
 ];
 
+const carouselData = [
+  {
+    id: '1',
+    title: 'Добро пожаловать в WeHood',
+    description: 'Ваш районный помощник',
+    image: 'https://images.unsplash.com/photo-1519834785169-98be25ec3f84',
+  },
+  {
+    id: '2',
+    title: 'Будьте активны',
+    description: 'Участвуйте в жизни района',
+    image: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a',
+  },
+  {
+    id: '3',
+    title: 'Помогайте соседям',
+    description: 'Создавайте крепкое сообщество',
+    image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2',
+  },
+];
+
 export default function HomeScreen() {
   const theme = useThemeName();
   const styles = makeStyles(theme);
+
+  const renderCarouselItem = ({ item }: { item: typeof carouselData[0] }) => (
+    <View style={styles.carouselItem}>
+      <Image source={{ uri: item.image }} style={styles.carouselImage} />
+      <View style={styles.carouselTextContainer}>
+        <Text style={styles.carouselTitle}>{item.title}</Text>
+        <Text style={styles.carouselDescription}>{item.description}</Text>
+      </View>
+    </View>
+  );
 
   return (
     <ScrollView style={styles.container}>
@@ -62,30 +94,23 @@ export default function HomeScreen() {
           />
         </TouchableOpacity>
       </View>
-
-      {/* Совместные поездки */}
-      <Card style={styles.rideCard}>
-        <Card.Content>
-          <View style={styles.rideContent}>
-            <View style={styles.rideTextContainer}>
-              <Text style={styles.rideTitle}>Совместные поездки</Text>
-              <Text style={styles.rideSubtitle}>Находите попутчиков{'\n'}рядом с Вами</Text>
-              <Button 
-                mode="contained" 
-                style={styles.rideButton}
-                onPress={() => {router.push('/rides' as any)}}
-                rippleColor={theme === DARK_THEME ? '#fff1' : '#fff3'}
-              >
-                Найти поездку
-              </Button>
-            </View>
-            <Image 
-              source={{ uri: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2' }}
-              style={styles.carImage}
-            />
-          </View>
-        </Card.Content>
-      </Card>
+      
+      {/* Слайдер */}
+      <View style={styles.carouselContainer}>
+        <Carousel
+          loop={true}
+          width={Dimensions.get('screen').width}
+          height={200}
+          snapEnabled={true}
+          pagingEnabled={true}
+          mode="parallax"
+          autoPlayInterval={2000}
+          data={carouselData}
+          style={{ width: "100%" }}
+          onSnapToItem={(index) => console.log("current index:", index)}
+          renderItem={renderCarouselItem}
+        />
+      </View>
 
       {/* Сервисы */}
       <View style={styles.findAllContainer}>
@@ -283,5 +308,37 @@ const makeStyles = (theme: string) => StyleSheet.create({
   newsTime: {
     fontSize: 12,
     color: theme === DARK_THEME ? '#aaa' : '#666',
+  },
+  carouselContainer: {
+    marginTop: 8,
+  },
+  carouselItem: {
+    height: 200,
+    borderRadius: 16,
+    overflow: 'hidden',
+    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+  },
+  carouselImage: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+  },
+  carouselTextContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  carouselTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 4,
+  },
+  carouselDescription: {
+    fontSize: 14,
+    color: '#fff',
   },
 });

@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Touchable } from 'react-native';
 import { Card, Searchbar } from 'react-native-paper';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useState } from 'react';
 import { DARK_THEME } from '@/core/hooks/useTheme';
 import { useThemeName } from '@/core/hooks/useTheme';
+import { Href, router } from 'expo-router';
 
 type Service = {
   id: string;
@@ -12,56 +13,90 @@ type Service = {
   icon: string;
   color: string;
   category: string;
+  target?: Href;
+  isAccordion?: boolean;
+  actions?: Array<{
+    id: string;
+    title: string;
+    icon: string;
+    target: Href;
+  }>;
 };
 
 const services: Service[] = [
   {
     id: '1',
-    title: 'Помощь пожилым',
-    description: 'Волонтерская помощь пожилым людям',
-    icon: 'hand-heart',
-    color: '#FF6B6B',
-    category: 'Помощь'
+    title: 'Недвижимость',
+    description: 'Поиск квартиры или дома',
+    icon: 'warehouse',
+    color: '#44944A',
+    category: 'Помощь',
+    isAccordion: true,
+    actions: [
+      {
+        id: '1-1',
+        title: 'Снять квартиру',
+        icon: 'home-search',
+        target: { pathname: '/services/flats' },
+      },
+      {
+        id: '1-2',
+        title: 'Просмотренные',
+        icon: 'eye',
+        target: { pathname: '/services/flats/viewed' },
+      },
+      {
+        id: '1-3',
+        title: 'Избранное',
+        icon: 'heart',
+        target: { pathname: '/services/flats/favorites' },
+      },
+      {
+        id: '1-4',
+        title: 'Сдать в аренду',
+        icon: 'key-variant',
+        target: { pathname: '/services/flats/new' },
+      },
+      {
+        id: '1-5',
+        title: 'Мои объявления',
+        icon: 'clipboard-list',
+        target: { pathname: '/services/flats/my' },
+      }
+    ]
   },
   {
     id: '2',
-    title: 'Уборка территории',
-    description: 'Субботники и экологические акции',
-    icon: 'broom',
-    color: '#4ECDC4',
-    category: 'События'
+    title: 'Детские секции',
+    description: 'Поиск и запись в секции и кружки',
+    icon: 'school',
+    color: '#9C27B0',
+    category: 'Помощь',
+    isAccordion: true,
+    actions: [
+      {
+        id: '2-1',
+        title: 'Найти секцию',
+        icon: 'magnify',
+        target: { pathname: '/services/activities' },
+      },
+      {
+        id: '2-2',
+        title: 'Мои заявки',
+        icon: 'clipboard-list',
+        target: { pathname: '/services/activities/my' },
+      }
+    ]
   },
   {
     id: '3',
-    title: 'Обмен вещами',
-    description: 'Отдайте ненужные вещи нуждающимся',
-    icon: 'swap-horizontal',
-    color: '#FFD93D',
-    category: 'Объявления'
-  },
-  {
-    id: '4',
-    title: 'Соседский чат',
-    description: 'Общение с соседями',
-    icon: 'chat',
-    color: '#95E1D3',
-    category: 'Соседи'
-  },
-  {
-    id: '5',
-    title: 'Доставка продуктов',
-    description: 'Помощь с доставкой продуктов',
-    icon: 'cart',
-    color: '#FF6B6B',
-    category: 'Помощь'
-  },
-  {
-    id: '6',
-    title: 'Ремонт техники',
-    description: 'Помощь с ремонтом бытовой техники',
-    icon: 'tools',
-    color: '#4ECDC4',
-    category: 'Помощь'
+    title: 'Товары и услуги',
+    description: 'Покупка, продажа и обмен товарами',
+    icon: 'shopping',
+    color: '#FF9800',
+    category: 'Объявления',
+    isAccordion: false,
+    target: { pathname: '/services/marketplace' },
   }
 ];
 
@@ -70,6 +105,7 @@ const categories = ['Все', 'Помощь', 'События', 'Объявле�
 export default function ServicesScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Все');
+  const [expandedService, setExpandedService] = useState<string | null>(null);
 
   const filteredServices = services.filter(service => {
     const matchesSearch = service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -80,6 +116,14 @@ export default function ServicesScreen() {
 
   const theme = useThemeName();
   const styles = makeStyles(theme);
+
+  const handleServicePress = (service: Service) => {
+    if (service.isAccordion) {
+      setExpandedService(expandedService === service.id ? null : service.id);
+    } else if (service.target) {
+      router.push(service.target);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -125,18 +169,46 @@ export default function ServicesScreen() {
 
       <ScrollView style={styles.servicesContainer}>
         {filteredServices.map((service) => (
-          <Card key={service.id} style={styles.serviceCard}>
-            <Card.Content style={styles.serviceContent}>
-              <View style={[styles.iconContainer, { backgroundColor: service.color }]}>
-                <MaterialCommunityIcons name={service.icon as any} size={24} color="#fff" />
-              </View>
-              <View style={styles.serviceInfo}>
-                <Text style={styles.serviceTitle}>{service.title}</Text>
-                <Text style={styles.serviceDescription}>{service.description}</Text>
-              </View>
-              <MaterialCommunityIcons name="chevron-right" size={24} color="#666" />
-            </Card.Content>
-          </Card>
+          <View key={service.id}>
+            <Card style={styles.serviceCard}>
+              <Card.Content style={styles.serviceContent}>
+                <TouchableOpacity 
+                  activeOpacity={0.7} 
+                  onPress={() => handleServicePress(service)}
+                >
+                  <View style={styles.serviceHeader}>
+                    <View style={[styles.iconContainer, { backgroundColor: service.color }]}>
+                      <MaterialCommunityIcons name={service.icon as any} size={24} color="#fff" />
+                    </View>
+                    <View style={styles.serviceInfo}>
+                      <Text style={styles.serviceTitle}>{service.title}</Text>
+                      <Text style={styles.serviceDescription}>{service.description}</Text>
+                    </View>
+                    <MaterialCommunityIcons 
+                      name={service.isAccordion ? (expandedService === service.id ? "chevron-up" : "chevron-down") : "chevron-right"} 
+                      size={24} 
+                      color="#666" 
+                    />
+                  </View>
+                </TouchableOpacity>
+                {service.isAccordion && expandedService === service.id && service.actions && (
+                  <View style={styles.actionsContainer}>
+                    {service.actions.map((action, index) => (
+                      <TouchableOpacity
+                        key={action.id}
+                        activeOpacity={0.7}
+                        style={{...styles.actionButton, ...(index == service.actions!.length - 1 ? {borderBottomWidth: 0} : {})}}
+                        onPress={() => router.push(action.target)}
+                      >
+                        <MaterialCommunityIcons name={action.icon as any} size={24} color='#888' />
+                        <Text style={styles.actionText}>{action.title}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </Card.Content>
+            </Card>
+          </View>
         ))}
         <View style={styles.bottomSpacer} />
       </ScrollView>
@@ -207,9 +279,11 @@ const makeStyles = (theme: string) => StyleSheet.create({
     elevation: 2,
     backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
   },
-  serviceContent: {
+  serviceHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
+  },
+  serviceContent: {
+    flexDirection: 'column',
   },
   iconContainer: {
     width: 48,
@@ -231,5 +305,24 @@ const makeStyles = (theme: string) => StyleSheet.create({
   serviceDescription: {
     fontSize: 14,
     color: theme === DARK_THEME ? '#aaa' : '#666',
+  },
+  actionsContainer: {
+    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+    paddingHorizontal: 16,
+    marginTop: 10,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: theme === DARK_THEME ? '#333' : '#eee',
+  },
+  actionText: {
+    marginLeft: 12,
+    fontSize: 16,
+    color: theme === DARK_THEME ? '#fff' : '#000',
   },
 });
