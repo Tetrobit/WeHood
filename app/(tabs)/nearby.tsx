@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { DARK_THEME, LIGHT_THEME, useThemeName } from '@/core/hooks/useTheme';
 
 const { width } = Dimensions.get('window');
 
@@ -23,6 +24,8 @@ const IMAGES = [
 
 export default function NearbyScreen() {
   const [activeTab, setActiveTab] = useState('images');
+  const theme = useThemeName();
+  const styles = makeStyles(theme);
 
   return (
     <View style={styles.container}>
@@ -33,7 +36,11 @@ export default function NearbyScreen() {
           <Text style={styles.city}>Казань</Text>
         </View>
         <TouchableOpacity style={styles.filterBtn}>
-          <MaterialIcons name="tune" size={24} color="#222" />
+          <MaterialIcons 
+            name="tune" 
+            size={24} 
+            color={theme === DARK_THEME ? '#fff' : '#222'} 
+          />
         </TouchableOpacity>
       </View>
 
@@ -45,7 +52,9 @@ export default function NearbyScreen() {
             style={[styles.tab, activeTab === tab.key && styles.tabActive]}
             onPress={() => setActiveTab(tab.key)}
           >
-            <Text style={[styles.tabText, activeTab === tab.key && styles.tabTextActive]}>{tab.label}</Text>
+            <Text style={[styles.tabText, activeTab === tab.key && styles.tabTextActive]}>
+              {tab.label}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -69,10 +78,10 @@ export default function NearbyScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (theme: string) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: theme === DARK_THEME ? '#000' : '#fff',
   },
   header: {
     flexDirection: 'row',
@@ -81,22 +90,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 18,
     paddingBottom: 8,
-    backgroundColor: '#fff',
+    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    borderBottomColor: theme === DARK_THEME ? '#333' : '#eee',
+    borderBottomWidth: 1,
   },
   district: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#222',
+    color: theme === DARK_THEME ? '#fff' : '#222',
   },
   city: {
     fontSize: 14,
-    color: '#aaa',
+    color: theme === DARK_THEME ? '#aaa' : '#666',
     marginTop: 2,
   },
   filterBtn: {
     padding: 6,
     borderRadius: 8,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5',
   },
   tabsContainer: {
     flexDirection: 'row',
@@ -104,21 +115,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 8,
     paddingBottom: 8,
-    backgroundColor: '#fff',
+    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    borderBottomColor: theme === DARK_THEME ? '#333' : '#eee',
+    borderBottomWidth: 1,
   },
   tab: {
     paddingVertical: 6,
     paddingHorizontal: 16,
     borderRadius: 16,
     marginRight: 8,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5',
   },
   tabActive: {
-    backgroundColor: '#222',
+    backgroundColor: theme === DARK_THEME ? '#555' : '#222',
   },
   tabText: {
     fontSize: 15,
-    color: '#222',
+    color: theme === DARK_THEME ? '#fff' : '#222',
     fontWeight: '500',
   },
   tabTextActive: {
@@ -140,7 +153,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     marginBottom: 16,
-    backgroundColor: '#eee',
+    backgroundColor: theme === DARK_THEME ? '#333' : '#eee',
     position: 'relative',
   },
   image: {
@@ -162,4 +175,4 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '500',
   },
-}); 
+});
