@@ -4,6 +4,7 @@ import { useRealm } from "@realm/react";
 import { Redirect, router } from "expo-router";
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Animated, Easing } from "react-native";
+import Profile from "@/core/models/profile";
 
 export default function App() {
   const [theme] = useQuery(Theme);
@@ -11,10 +12,16 @@ export default function App() {
   const [timeLeft, setTimeLeft] = useState(5);
   const [showNotice, setShowNotice] = useState(true);
   const progressAnimation = React.useRef(new Animated.Value(1)).current;
+  const [profile] = useQuery(Profile);
 
   useEffect(() => {
     if (!showNotice) {
-      router.replace('/auth');
+      if (profile) {  
+        router.replace('/(tabs)');
+      }
+      else {
+        router.replace('/auth');
+      }
       return;
     }
 

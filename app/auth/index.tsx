@@ -190,7 +190,7 @@ const App = () => {
                   secureTextEntry
                 />
               }
-              <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+              <TouchableOpacity disabled={true} style={styles.submitButton} onPress={handleSubmit}>
                 <Text style={styles.submitButtonText}>
                   {isLogin ? 'Войти' : 'Зарегистрироваться'}
                 </Text>
@@ -440,7 +440,7 @@ top: 7,
     fontSize: 16,
   },
   submitButton: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#ffffffaa',
     padding: 15,
     borderRadius: 5,
     marginBottom: 15,
