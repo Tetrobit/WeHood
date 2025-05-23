@@ -40,6 +40,7 @@ const App = () => {
       return;
     }
 
+    setStatus('vk-open');
     isVKOpen.value = true;
 
     try {
@@ -47,8 +48,9 @@ const App = () => {
       await ExpoLinking.openURL(url);
     } catch (error) {
       console.error("Не удалось открыть страницу авторизации", error);
-      Alert.alert("Не удалось открыть страницу авторизации");
+      Alert.alert("Что-то пошло не так", "Не удалось открыть страницу авторизации");
     } finally {
+      setStatus('idle');
       isVKOpen.value = false;
     }
   };
@@ -161,7 +163,7 @@ const App = () => {
         
         {/* Auth Form */}
         <View style={styles.authContainer}>
-          {status === 'idle' && (
+          {(status === 'idle' || status === 'vk-open') && (
             <View style={styles.authForm}>
             <>
               <Text style={styles.authTitle}>{isLogin ? 'Вход' : 'Регистрация'}</Text>
@@ -190,14 +192,19 @@ const App = () => {
                   secureTextEntry
                 />
               }
-              <TouchableOpacity disabled={true} style={styles.submitButton} onPress={handleSubmit}>
+              <TouchableOpacity disabled={status !== 'idle'} style={styles.submitButton} onPress={handleSubmit}>
                 <Text style={styles.submitButtonText}>
                   {isLogin ? 'Войти' : 'Зарегистрироваться'}
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.vkButton} onPress={handleVKAuth}>
-                <VKLogo width={40} />
-                <Text style={styles.vkButtonText}>Продолжить с VK</Text>
+              <TouchableOpacity disabled={status !== 'idle'} style={styles.vkButton} onPress={handleVKAuth}>
+                <VKLogo width={35} />
+                {status === 'vk-open' && (
+                  <ActivityIndicator size="large" color="#ffffff" />
+                )}
+                {status === 'idle' && (
+                  <Text style={styles.vkButtonText}>Продолжить с VK</Text>
+                )}
                 <View style={{width: 40}}></View>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
