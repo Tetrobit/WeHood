@@ -3,7 +3,7 @@ import { wait } from "@/core/utils/time";
 import { useQuery } from "@realm/react";
 import LottieView from "lottie-react-native";
 import { useEffect, useLayoutEffect } from "react";
-import { Text, StyleSheet } from "react-native";
+import { Text, StyleSheet, View } from "react-native";
 import Animated, { useAnimatedStyle, withTiming, Easing } from "react-native-reanimated";
 import { useSharedValue } from "react-native-reanimated";
 
@@ -41,17 +41,12 @@ export default function Success() {
       fontSize: 24,
       fontWeight: 'bold',
       textAlign: 'center',
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
       transform: [{ translateY: -50 }],
     },
   });
 
   return (
     <>
-      {/* <Animated.View style={[{backgroundColor: 'red', width: 100, height: 100}, style]}>
-      </Animated.View> */}
       <Animated.View style={[shiftStyle]}>
         <LottieView style={{width: 300, height: 300}} source={require('@/assets/lottie/success.json')} autoPlay={true} loop={false} />
         <Animated.Text style={[opacityStyle, styles.container]}>Добро пожаловать,</Animated.Text>

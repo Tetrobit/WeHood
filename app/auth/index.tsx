@@ -1,7 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useLayoutEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSharedValue } from "react-native-reanimated";
-import { ActivityIndicator, Dimensions, StyleSheet, Text, View, TextInput, TouchableOpacity, Platform, Linking, Alert, ColorValue } from "react-native";
+import { ActivityIndicator, Dimensions, StyleSheet, Text, View, TextInput, TouchableOpacity, Platform, Linking, Alert, ColorValue, BackHandler } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Neighbourhood from "@/components/neighbourhood";
 import VKLogo from "@/components/vk-logo";
@@ -13,6 +13,8 @@ import { wait } from "@/core/utils/time";
 import Spinner from 'react-native-spinkit';
 import Success from "./success";
 import { setStatusBarBackgroundColor, StatusBar } from "expo-status-bar";
+import PagerView from 'react-native-pager-view';
+import { ArrowLeftIcon } from "lucide-react-native";
 
 const gradientColors: [ColorValue, ColorValue][] = [
   ['#f26f8b', '#fdc859'],
@@ -29,10 +31,32 @@ const App = () => {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [repeatPassword, setRepeatPassword] = React.useState('');
+  const pagerRef = React.useRef<PagerView>(null);
+  const pagerPage = useSharedValue(0);
+
+  const handlePagerPage = (page: number) => {
+    pagerPage.value = page;
+    pagerRef.current?.setPage(page);
+  };
 
   const handleSubmit = () => {
     // Здесь будет логика авторизации
-    router.push('/(tabs)');
+    // router.push('/(tabs)');
+    handlePagerPage(1);
+    // setStatus('vk-login');
+
+    // const handleVKAuth = async () => {
+    //   try {
+    //     await wait(2500);
+    //     setStatus('success');
+    //     await wait(4000);
+    //   } catch(error) {  
+    //     console.error(error);
+    //     // setStatus('idle');
+    //   }
+    // };
+
+    // handleVKAuth();
   };
 
   const handleVKAuth = async () => {
@@ -93,6 +117,20 @@ const App = () => {
   useEffect(() => {
     setStatusBarBackgroundColor(gradientColors[gradientIndex][0]);
   }, [gradientIndex]);
+
+  useLayoutEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (pagerPage.value !== 0) {
+        handlePagerPage(pagerPage.value - 1);
+        return true;
+      }
+      return false;
+    });
+
+    return () => {
+      backHandler.remove();
+    };
+  }, []);
 
   return (
     <LinearGradient colors={gradientColors[gradientIndex]}>
@@ -162,11 +200,98 @@ const App = () => {
         </View>
         
         {/* Auth Form */}
-        <View style={styles.authContainer}>
-          {(status === 'idle' || status === 'vk-open') && (
+        <PagerView style={{...styles.authContainer}} ref={pagerRef} initialPage={0} scrollEnabled={false}>
+          <View key="1" style={styles.authWrapper}>
+            {(status === 'idle' || status === 'vk-open') && (
+              <View style={styles.authForm}>
+              <>
+                <Text style={styles.authTitle}>{isLogin ? 'Вход' : 'Регистрация'}</Text>
+                <TextInput
+                  onChangeText={setEmail}
+                  style={styles.input}
+                  placeholder="Почта"
+                  placeholderTextColor="#ffffff88"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+                <TouchableOpacity disabled={status !== 'idle'} style={styles.submitButton} onPress={handleSubmit}>
+                  <Text style={styles.submitButtonText}>
+                    Войти с почтой
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity disabled={status !== 'idle'} style={styles.vkButton} onPress={handleVKAuth}>
+                  <VKLogo width={35} />
+                  {status === 'vk-open' && (
+                    <ActivityIndicator size="large" color="#ffffff" />
+                  )}
+                  {status === 'idle' && (
+                    <Text style={styles.vkButtonText}>Продолжить с VK</Text>
+                  )}
+                  <View style={{width: 40}}></View>
+                </TouchableOpacity>
+              </>
+              </View>
+            )}
+            {status === 'vk-login' && (
+              <View style={styles.loadingContainer}>
+                <Spinner type={'Bounce'} size={75} color="#ffffff" />
+              </View>
+            )}
+            {status === 'success' && (
+              <View style={styles.successContainer}>
+                <Success />
+              </View>
+            )}
+          </View>
+          <View key="2" style={styles.authWrapper}>
             <View style={styles.authForm}>
-            <>
-              <Text style={styles.authTitle}>{isLogin ? 'Вход' : 'Регистрация'}</Text>
+              <View style={styles.authFormHeader}>
+                <View style={styles.authFormHeaderLeft}>
+                  <TouchableOpacity onPress={() => pagerRef.current?.setPage(0)}>
+                    <ArrowLeftIcon size={25} color="white" />
+                  </TouchableOpacity>
+                </View>
+                <Text style={styles.authTitle}>Регистрация</Text>
+              </View>
+              <TextInput
+                onChangeText={setEmail}
+                style={styles.input}
+                placeholder="Почта"
+                placeholderTextColor="#ffffff88"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                editable={false}
+                value={email}
+              />
+              <TextInput
+                onChangeText={setPassword}
+                style={styles.input}
+                placeholder="Пароль"
+                placeholderTextColor="#ffffff88"
+                secureTextEntry
+              />
+              <TextInput
+                onChangeText={setRepeatPassword}
+                style={styles.input}
+                placeholder="Повторите пароль"
+                placeholderTextColor="#ffffff88"
+                secureTextEntry
+              />
+              <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+                <Text style={styles.submitButtonText}>Зарегистрироваться</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          <View key="3" style={styles.authWrapper}>
+            <View style={styles.authForm}>
+              <View style={styles.authFormHeader}>
+                <View style={styles.authFormHeaderLeft}>
+                  <TouchableOpacity onPress={() => pagerRef.current?.setPage(0)}>
+                    <ArrowLeftIcon size={25} color="white" />
+                  </TouchableOpacity>
+                </View>
+                <Text style={styles.authTitle}>Регистрация</Text>
+              </View>
               <TextInput
                 onChangeText={setEmail}
                 style={styles.input}
@@ -176,56 +301,25 @@ const App = () => {
                 autoCapitalize="none"
               />
               <TextInput
-                onChangeText={text => setPassword(text)}
+                onChangeText={setPassword}
                 style={styles.input}
                 placeholder="Пароль"
                 placeholderTextColor="#ffffff88"
                 secureTextEntry
-                defaultValue={password}
               />
-              {!isLogin && 
-                <TextInput
-                  onChangeText={setRepeatPassword}
-                  style={styles.input}
-                  placeholder="Повторите пароль"
-                  placeholderTextColor="#ffffff88"
-                  secureTextEntry
-                />
-              }
-              <TouchableOpacity disabled={status !== 'idle'} style={styles.submitButton} onPress={handleSubmit}>
-                <Text style={styles.submitButtonText}>
-                  {isLogin ? 'Войти' : 'Зарегистрироваться'}
-                </Text>
+              <TextInput
+                onChangeText={setRepeatPassword}
+                style={styles.input}
+                placeholder="Повторите пароль"
+                placeholderTextColor="#ffffff88"
+                secureTextEntry
+              />
+              <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+                <Text style={styles.submitButtonText}>Зарегистрироваться</Text>
               </TouchableOpacity>
-              <TouchableOpacity disabled={status !== 'idle'} style={styles.vkButton} onPress={handleVKAuth}>
-                <VKLogo width={35} />
-                {status === 'vk-open' && (
-                  <ActivityIndicator size="large" color="#ffffff" />
-                )}
-                {status === 'idle' && (
-                  <Text style={styles.vkButtonText}>Продолжить с VK</Text>
-                )}
-                <View style={{width: 40}}></View>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-                <Text style={styles.switchText}>
-                  {isLogin ? 'Нет аккаунта? Зарегистрируйтесь' : 'Уже есть аккаунт? Войдите'}
-                </Text>
-              </TouchableOpacity>
-            </>
             </View>
-          )}
-          {status === 'vk-login' && (
-            <View style={styles.loadingContainer}>
-              <Spinner type={'Bounce'} size={75} color="#ffffff" />
-            </View>
-          )}
-          {status === 'success' && (
-            <View style={styles.successContainer}>
-              <Success />
-            </View>
-          )}
-        </View>
+          </View>
+        </PagerView>
 
         <Neighbourhood
           width={Dimensions.get('screen').width}
@@ -412,15 +506,20 @@ top: 7,
     color: 'white',
     fontSize: 20,
   },
+  authWrapper: {
+    width: '100%',
+    maxWidth: 400,
+    padding: 20,
+  },
   authContainer: {
     width: '100%',
     position: 'absolute',
     marginTop: 100,
     marginBottom: 50,
+    height: 500,
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
     zIndex: 1
   },
   authForm: {
@@ -430,6 +529,25 @@ top: 7,
     padding: 20,
     borderRadius: 10,
     backdropFilter: 'blur(10px)',
+  },
+  authFormHeader: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  authFormHeaderLeft: {
+    position: 'absolute',
+    left: 0,
+    top: 6,
+  },
+  authFormHeaderLeftText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  authFormHeaderRight: {
+    // width: 20,
   },
   authTitle: {
     color: 'white',
@@ -447,7 +565,7 @@ top: 7,
     fontSize: 16,
   },
   submitButton: {
-    backgroundColor: '#ffffffaa',
+    backgroundColor: '#ffffffff',
     padding: 15,
     borderRadius: 5,
     marginBottom: 15,
@@ -488,7 +606,6 @@ top: 7,
     paddingVertical: 80,
     marginTop: 110,
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
     backdropFilter: 'blur(10px)',
@@ -498,7 +615,7 @@ top: 7,
     maxWidth: 400,
     paddingVertical: 80,
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     borderRadius: 10,
     backdropFilter: 'blur(10px)',
