@@ -1,1 +1,1 @@
-export const API_URL = 'https://user230874919-zgdcurj4.tunnel.vk-apps.com';
+export const API_URL = 'https://api.wehood.zenlog.ru';

@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSharedValue } from "react-native-reanimated";
-import { ActivityIndicator, Dimensions, StyleSheet, Text, View, TextInput, TouchableOpacity, Platform, Linking, Alert } from "react-native";
+import { ActivityIndicator, Dimensions, StyleSheet, Text, View, TextInput, TouchableOpacity, Platform, Linking, Alert, ColorValue } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Neighbourhood from "@/components/neighbourhood";
 import VKLogo from "@/components/vk-logo";
@@ -12,8 +12,16 @@ import useApi from "@/core/hooks/useApi";
 import { wait } from "@/core/utils/time";
 import Spinner from 'react-native-spinkit';
 import Success from "./success";
+import { setStatusBarBackgroundColor, StatusBar } from "expo-status-bar";
+
+const gradientColors: [ColorValue, ColorValue][] = [
+  ['#f26f8b', '#fdc859'],
+  ['#323f94', '#5ab8db'],
+  ['#393790', '#df729d'],
+];
 
 const App = () => {
+  const [gradientIndex, updateGradientIndex] = React.useReducer((state: number) => (state + 1) % gradientColors.length, 2);
   const { generateVKAuthUrl, loginWithVK } = useApi();
   const isVKOpen = useSharedValue(false);
   const [status, setStatus] = React.useState('idle');
@@ -80,11 +88,12 @@ const App = () => {
     };
   }, []);
 
+  useEffect(() => {
+    setStatusBarBackgroundColor(gradientColors[gradientIndex][0]);
+  }, [gradientIndex]);
+
   return (
-    <LinearGradient colors={['#393790', '#df729d']}>
-    {/* <LinearGradient colors={['#f26f8b', '#fdc859']}> */}
-    {/* <LinearGradient colors={['#323f94', '#5ab8db']}> */}
-    {/* <LinearGradient colors={['#df729d', '#393790']}> */}
+    <LinearGradient colors={gradientColors[gradientIndex]}>
       <SafeAreaView style={styles.view}>
         {/* <Cloud/> */}
         <View style={styles.header}>
@@ -217,6 +226,13 @@ const App = () => {
           onLoad={() => {}}
           styles={styles.neighbourhood}
         />
+        <TouchableOpacity style={styles.gradient} onPress={() => updateGradientIndex()}>
+          <View style={{}}>
+            <LinearGradient colors={[gradientColors[gradientIndex][1], gradientColors[gradientIndex][1]]}>
+              <View style={styles.gradientButton} />
+            </LinearGradient>
+          </View>
+        </TouchableOpacity>
       </SafeAreaView>
     </LinearGradient>
   );
@@ -479,6 +495,26 @@ top: 7,
     alignItems: 'center',
     borderRadius: 10,
     backdropFilter: 'blur(10px)',
+  },
+  gradient: {
+    position: 'absolute',
+    width: 30,
+    height: 30,
+    borderRadius: '50%',
+    borderWidth: 3,
+    borderColor: 'white',
+    overflow: 'hidden',
+    right: 15,
+    bottom: 50,
+  },
+  gradientButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    borderWidth: 2,
+    borderColor: 'white',
+    right: 50,
+    bottom: 50,
   },
 })
 
