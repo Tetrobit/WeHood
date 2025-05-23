@@ -1,24 +1,18 @@
 import React from "react";
-import * as THREE from "three";
-// import { color, fog, float, positionWorld, triNoise3D, positionView, normalWorld, uniform } from 'three/build/three.tsl';
-import { loadObjAsync, Renderer } from "expo-three";
-import { ExpoWebGLRenderingContext, GLView } from "expo-gl";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  Gesture,
-  GestureDetector,
-  GestureHandlerRootView,
-} from 'react-native-gesture-handler';
 import { useSharedValue } from "react-native-reanimated";
-import { ActivityIndicator, Dimensions, StyleSheet, Text, View, TextInput, TouchableOpacity, Platform } from "react-native";
-import Cloud from "@/components/cloud";
+import { ActivityIndicator, Dimensions, StyleSheet, Text, View, TextInput, TouchableOpacity, Platform, Linking, Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Neighbourhood from "@/components/neighbourhood";
 import VKLogo from "@/components/vk-logo";
 import { router } from "expo-router";
+import * as ExpoLinking from 'expo-linking';
+import { parseQueryParams } from "@/core/utils/url";
+import * as Device from 'expo-device';
 
 const App = () => {
-  const [loading, setLoading] = React.useState(true);
+  const isVKOpen = useSharedValue(false);
+  const codeVerifier = useSharedValue<string | null>(null);
   const [isLogin, setIsLogin] = React.useState(true);
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
@@ -26,15 +20,82 @@ const App = () => {
 
   const handleSubmit = () => {
     // Здесь будет логика авторизации
-    console.log('Submit:', { email, password });
     router.push('/(tabs)');
   };
 
-  const handleVKAuth = () => {
-    // Здесь будет логика авторизации через ВК
-    console.log('VK Auth');
-    router.push('/(tabs)');
+  const handleVKAuth = async () => {
+    if (isVKOpen.value) {
+      return;
+    }
+
+    isVKOpen.value = true;
+
+    try {
+      const response = await fetch('https://api.wehood.zenlog.ru/api/auth/vk-parameters').catch(err => {
+        throw new Error("Не удалось подключиться к серверу");
+      });
+      const data = await response?.json();
+      const { vkAppId, redirectUri, code_challenge, code_verifier, scope } = data;
+      const url = `https://id.vk.com/authorize?client_id=${vkAppId}&redirect_uri=${redirectUri}&code_challenge=${code_challenge}&code_challenge_method=S256&response_type=code&scope=${scope}`;
+      await ExpoLinking.openURL(url);
+      codeVerifier.value = code_verifier;
+    } catch (error) {
+      console.error("Не удалось открыть страницу авторизации", error);
+      Alert.alert("Не удалось открыть страницу авторизации");
+    } finally {
+      isVKOpen.value = false;
+    }
   };
+
+  React.useEffect(() => {
+    ExpoLinking.addEventListener('url', (event) => {
+      const {
+        code,
+        state,
+        device_id,
+        ext_id: _ext_id,
+        type: _type,
+      } = parseQueryParams(event.url);
+
+      if (code === undefined || device_id === undefined) {
+        return;
+      }
+
+      const handleVKAuth = async () => {
+        const response = await fetch('https://api.wehood.zenlog.ru/api/auth/login-vk', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            code,
+            code_verifier: codeVerifier.value,
+            device_id,
+            state,
+            device_name: Device.modelName,
+            device_os: Device.osName,
+            device_os_version: Device.osVersion,
+            device_params: {
+              manufacturer: Device.manufacturer,
+              model: Device.modelName,
+              brand: Device.brand,
+              device_manufacturer: Device.manufacturer,
+              device_model: Device.modelName,
+            }
+          }),
+        });
+
+        const data = await response.json();
+        const token = data.token;
+      };
+
+      handleVKAuth();
+    });
+
+    return () => {
+      Linking.removeAllListeners('url');
+    };
+  }, []);
 
   return (
     <LinearGradient colors={['#393790', '#df729d']}>
@@ -156,7 +217,7 @@ const App = () => {
         <Neighbourhood
           width={Dimensions.get('screen').width}
           height={Dimensions.get('screen').height}
-          onLoad={() => setLoading(false)}
+          onLoad={() => {}}
           styles={styles.neighbourhood}
         />
       </SafeAreaView>
