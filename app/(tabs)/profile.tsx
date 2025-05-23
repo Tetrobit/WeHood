@@ -17,7 +17,7 @@ export default function ProfileScreen() {
   }
 
   const onLogout = () => {
-    Alert.alert('Вы уверены, что хотите выйти?', 'Вы уверены, что хотите выйти?', [
+    Alert.alert('Мы будем скучать', 'Вы уверены, что хотите выйти?', [
       { text: 'Отмена', style: 'cancel' },
       { text: 'Выйти', style: 'destructive', onPress: async () => {
         try {
