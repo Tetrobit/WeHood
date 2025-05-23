@@ -22,7 +22,7 @@ export default function ProfileScreen() {
       { text: 'Выйти', style: 'destructive', onPress: async () => {
         try {
           await api.logout();
-          router.push('/auth');
+          router.replace('/auth');
         } catch (error) {
           Alert.alert('Что-то пошло не так', error instanceof Error ? error.message : 'Произошла ошибка при выходе из системы');
         }

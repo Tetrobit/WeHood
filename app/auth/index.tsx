@@ -1,7 +1,7 @@
 import React, { useEffect, useLayoutEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSharedValue } from "react-native-reanimated";
-import { ActivityIndicator, Dimensions, StyleSheet, Text, View, TextInput, TouchableOpacity, Platform, Linking, Alert, ColorValue, BackHandler } from "react-native";
+import { ActivityIndicator, Dimensions, StyleSheet, Text, View, TextInput, TouchableOpacity, Linking, Alert, ColorValue, BackHandler } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Neighbourhood from "@/components/neighbourhood";
 import VKLogo from "@/components/vk-logo";
@@ -12,9 +12,11 @@ import useApi from "@/core/hooks/useApi";
 import { wait } from "@/core/utils/time";
 import Spinner from 'react-native-spinkit';
 import Success from "./success";
-import { setStatusBarBackgroundColor, StatusBar } from "expo-status-bar";
+import { setStatusBarBackgroundColor } from "expo-status-bar";
 import PagerView from 'react-native-pager-view';
 import { ArrowLeftIcon } from "lucide-react-native";
+import { AppLogo, CompanyLogo } from "../components/Logo";
+import ToastManager, { Toast } from 'toastify-react-native'
 
 const gradientColors: [ColorValue, ColorValue][] = [
   ['#f26f8b', '#fdc859'],
@@ -24,39 +26,99 @@ const gradientColors: [ColorValue, ColorValue][] = [
 
 const App = () => {
   const [gradientIndex, updateGradientIndex] = React.useReducer((state: number) => (state + 1) % gradientColors.length, 2);
-  const { generateVKAuthUrl, loginWithVK } = useApi();
+  const { generateVKAuthUrl, loginWithVK, checkEmailExists } = useApi();
   const isVKOpen = useSharedValue(false);
   const [status, setStatus] = React.useState('idle');
-  const [isLogin, setIsLogin] = React.useState(true);
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [repeatPassword, setRepeatPassword] = React.useState('');
+  const [verificationCode, setVerificationCode] = React.useState('');
+  const [isExistingUser, setIsExistingUser] = React.useState(false);
+  const [userHasPassword, setUserHasPassword] = React.useState(false);
   const pagerRef = React.useRef<PagerView>(null);
   const pagerPage = useSharedValue(0);
 
   const handlePagerPage = (page: number) => {
+    if (pagerPage.value === page) return;
+
     pagerPage.value = page;
     pagerRef.current?.setPage(page);
   };
 
-  const handleSubmit = () => {
-    // Здесь будет логика авторизации
-    // router.push('/(tabs)');
-    handlePagerPage(1);
-    // setStatus('vk-login');
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
-    // const handleVKAuth = async () => {
-    //   try {
-    //     await wait(2500);
-    //     setStatus('success');
-    //     await wait(4000);
-    //   } catch(error) {  
-    //     console.error(error);
-    //     // setStatus('idle');
-    //   }
-    // };
+  const validatePassword = (password: string) => {
+    return password.length >= 6;
+  };
 
-    // handleVKAuth();
+  const handleEmailSubmit = async () => {
+    setStatus('email-check');
+    
+    if (!validateEmail(email)) {
+      Toast.error('Пожалуйста, введите корректный email', "top");
+      setStatus('idle');
+      return;
+    }
+
+    try {
+      const { exists, hasPassword } = await checkEmailExists(email);
+      setIsExistingUser(exists);
+      setUserHasPassword(hasPassword);
+      handlePagerPage(1);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setStatus('idle');
+    }
+  };
+
+  const handlePasswordSubmit = async () => {
+
+    if (!validatePassword(password)) {
+      Toast.error('Пароль должен содержать минимум 6 символов', "top");
+      return;
+    }
+
+    if (!isExistingUser && password !== repeatPassword) {
+      Toast.error('Пароли не совпадают', "top");
+      return;
+    }
+
+    setStatus('password-action');
+    await wait(1000);
+    Toast.success('Функция дорабатывается :)', "top");
+    setStatus('idle');
+  };
+
+  const handleVerificationSubmit = async () => {
+    if (!verificationCode) {
+      Toast.error('Введите код подтверждения', "top");
+      return;
+    }
+
+    try {
+      // Здесь должен быть API запрос для проверки кода
+      const response = await fetch('YOUR_API_ENDPOINT/verify-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, code: verificationCode }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        router.replace('/(tabs)');
+      } else {
+        Toast.error('Неверный код подтверждения', "top");
+      }
+    } catch (error) {
+      console.error('Ошибка при проверке кода:', error);
+      Alert.alert('Ошибка', 'Не удалось подтвердить код');
+    }
   };
 
   const handleVKAuth = async () => {
@@ -64,6 +126,7 @@ const App = () => {
       return;
     }
 
+    handlePagerPage(0);
     setStatus('vk-open');
     isVKOpen.value = true;
 
@@ -135,96 +198,43 @@ const App = () => {
   return (
     <LinearGradient colors={gradientColors[gradientIndex]}>
       <SafeAreaView style={styles.view}>
-        {/* <Cloud/> */}
         <View style={styles.header}>
-          <View style={styles.titleContainer}>
-            <View style={styles.leftFigure}>
-              <View style={{...styles.figuresWrapper, ...styles.leftFiguresWrapper}}>
-                <View style={styles.figuresWrapperRel}>
-                  <View style={{...styles.block, ...styles.blockL1}} />
-                  <View style={{...styles.block, ...styles.blockL2}} />
-                  <View style={{...styles.block, ...styles.blockL3}} />
-                  <View style={{...styles.block, ...styles.blockL4}} />
-                </View>
-              </View>
-            </View>
-            <Text style={styles.titleText}>Мой район</Text>
-            <View style={styles.rightFigure}>
-              <View style={{...styles.figuresWrapper, ...styles.rightFiguresWrapper}}>
-                <View style={styles.figuresWrapperRel}>
-                  <View style={{...styles.block, ...styles.blockR1}} />
-                  <View style={{...styles.block, ...styles.blockR2}} />
-                  <View style={{...styles.block, ...styles.blockR3}} />
-                  <View style={{...styles.block, ...styles.blockR4}} />
-                </View>
-              </View>
-            </View>
-          </View>
-          
-          <View style={styles.companyContainer}>
-            
-            <View style={styles.letterContainer}>
-              <View style={{...styles.figuresWrapper, ...styles.leftLetterWrapper}}>
-                <View style={styles.figuresWrapperRel}>
-                  <View style={{...styles.letterBlock, ...styles.blockT1}} />
-                  <View style={{...styles.letterBlock, ...styles.blockT2}} />
-                  <View style={{...styles.letterBlock, ...styles.blockT3}} />
-                  <View style={{...styles.letterBlock, ...styles.blockT4}} />
-                  <View style={{...styles.letterBlock, ...styles.blockT5}} />
-                </View>
-              </View>
-            </View>
-            <View style={styles.letterContainer}>
-              <View style={{...styles.figuresWrapper, ...styles.middleLetterWrapper}}>
-                <View style={styles.figuresWrapperRel}>
-                  <View style={{...styles.letterBlock, ...styles.blockE1}} />
-                  <View style={{...styles.letterBlock, ...styles.blockE2}} />
-                  <View style={{...styles.letterBlock, ...styles.blockE3}} />
-                  <View style={{...styles.letterBlock, ...styles.blockE4}} />
-                  {/* <View style={{...styles.letterBlock, ...styles.blockT5}} /> */}
-                </View>
-              </View>
-            </View>
-            <View style={styles.letterContainer}>
-              <View style={{...styles.figuresWrapper, ...styles.rightLetterWrapper}}>
-                <View style={styles.figuresWrapperRel}>
-                  <View style={{...styles.letterBlock, ...styles.blockT1}} />
-                  <View style={{...styles.letterBlock, ...styles.blockT2}} />
-                  <View style={{...styles.letterBlock, ...styles.blockT3}} />
-                  <View style={{...styles.letterBlock, ...styles.blockT4}} />
-                  <View style={{...styles.letterBlock, ...styles.blockT5}} />
-                </View>
-              </View>
-            </View>
-          </View>
+          <AppLogo />
+          <CompanyLogo />
         </View>
         
         {/* Auth Form */}
         <PagerView style={{...styles.authContainer}} ref={pagerRef} initialPage={0} scrollEnabled={false}>
           <View key="1" style={styles.authWrapper}>
-            {(status === 'idle' || status === 'vk-open') && (
+            {(status === 'idle' || status === 'vk-open' || status === 'email-check') && (
               <View style={styles.authForm}>
               <>
-                <Text style={styles.authTitle}>{isLogin ? 'Вход' : 'Регистрация'}</Text>
+                <Text style={styles.authTitle}>Вход</Text>
                 <TextInput
                   onChangeText={setEmail}
+                  value={email}
                   style={styles.input}
                   placeholder="Почта"
                   placeholderTextColor="#ffffff88"
                   keyboardType="email-address"
                   autoCapitalize="none"
                 />
-                <TouchableOpacity disabled={status !== 'idle'} style={styles.submitButton} onPress={handleSubmit}>
-                  <Text style={styles.submitButtonText}>
-                    Войти с почтой
-                  </Text>
+                <TouchableOpacity disabled={status !== 'idle'} style={styles.submitButton} onPress={handleEmailSubmit}>
+                  {status === 'email-check' && (
+                    <ActivityIndicator size="large" color="#000000" />
+                  )}
+                  {status !== 'email-check' && (
+                    <Text style={styles.submitButtonText}>
+                      Войти с почтой
+                    </Text>
+                  )}
                 </TouchableOpacity>
                 <TouchableOpacity disabled={status !== 'idle'} style={styles.vkButton} onPress={handleVKAuth}>
                   <VKLogo width={35} />
                   {status === 'vk-open' && (
                     <ActivityIndicator size="large" color="#ffffff" />
                   )}
-                  {status === 'idle' && (
+                  {status !== 'vk-open' && (
                     <Text style={styles.vkButtonText}>Продолжить с VK</Text>
                   )}
                   <View style={{width: 40}}></View>
@@ -247,39 +257,54 @@ const App = () => {
             <View style={styles.authForm}>
               <View style={styles.authFormHeader}>
                 <View style={styles.authFormHeaderLeft}>
-                  <TouchableOpacity onPress={() => pagerRef.current?.setPage(0)}>
+                  <TouchableOpacity onPress={() => handlePagerPage(0)}>
                     <ArrowLeftIcon size={25} color="white" />
                   </TouchableOpacity>
                 </View>
-                <Text style={styles.authTitle}>Регистрация</Text>
+                <Text style={styles.authTitle}>{isExistingUser ? 'Вход' : 'Регистрация'}</Text>
               </View>
-              <TextInput
-                onChangeText={setEmail}
-                style={styles.input}
-                placeholder="Почта"
-                placeholderTextColor="#ffffff88"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                editable={false}
-                value={email}
-              />
-              <TextInput
-                onChangeText={setPassword}
-                style={styles.input}
-                placeholder="Пароль"
-                placeholderTextColor="#ffffff88"
-                secureTextEntry
-              />
-              <TextInput
-                onChangeText={setRepeatPassword}
-                style={styles.input}
-                placeholder="Повторите пароль"
-                placeholderTextColor="#ffffff88"
-                secureTextEntry
-              />
-              <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                <Text style={styles.submitButtonText}>Зарегистрироваться</Text>
-              </TouchableOpacity>
+              <Text style={styles.emailText}>{email}</Text>
+              {(!isExistingUser || userHasPassword) && (
+                <TextInput
+                  onChangeText={setPassword}
+                  style={styles.input}
+                  placeholder="Пароль"
+                  placeholderTextColor="#ffffff88"
+                  secureTextEntry
+                />  
+              )}
+              {isExistingUser && !userHasPassword && (
+                <>
+                  <Text style={styles.warningText}>У пользователя с такой почтой отсутствует пароль, попробуйте войти с VK</Text>
+                  <View style={{height: 10}}></View>
+                  <TouchableOpacity style={styles.vkButton} onPress={handleVKAuth}>
+                    <VKLogo width={35} />
+                    <Text style={styles.vkButtonText}>Продолжить с VK</Text>
+                    <View style={{width: 40}}></View>
+                  </TouchableOpacity>
+                </>
+              )}
+
+              {!isExistingUser && (
+                <TextInput
+                  onChangeText={setRepeatPassword}
+                  style={styles.input}
+                  placeholder="Повторите пароль"
+                  placeholderTextColor="#ffffff88"
+                  secureTextEntry
+                />
+              )}
+
+              {(!isExistingUser || userHasPassword) && (
+                <TouchableOpacity style={styles.submitButton} onPress={handlePasswordSubmit}>
+                  {status === 'password-action' && (
+                    <ActivityIndicator size="large" color="#000000" />
+                  )}
+                  {status !== 'password-action' && (
+                    <Text style={styles.submitButtonText}>{isExistingUser ? 'Войти' : 'Далее'}</Text>
+                  )}
+                </TouchableOpacity>
+              )}
             </View>
           </View>
           <View key="3" style={styles.authWrapper}>
@@ -290,32 +315,16 @@ const App = () => {
                     <ArrowLeftIcon size={25} color="white" />
                   </TouchableOpacity>
                 </View>
-                <Text style={styles.authTitle}>Регистрация</Text>
+                <Text style={styles.authTitle}>Подтверждение</Text>
               </View>
               <TextInput
-                onChangeText={setEmail}
+                onChangeText={setVerificationCode}
                 style={styles.input}
-                placeholder="Почта"
+                placeholder="Введите код подтверждения"
                 placeholderTextColor="#ffffff88"
-                keyboardType="email-address"
-                autoCapitalize="none"
               />
-              <TextInput
-                onChangeText={setPassword}
-                style={styles.input}
-                placeholder="Пароль"
-                placeholderTextColor="#ffffff88"
-                secureTextEntry
-              />
-              <TextInput
-                onChangeText={setRepeatPassword}
-                style={styles.input}
-                placeholder="Повторите пароль"
-                placeholderTextColor="#ffffff88"
-                secureTextEntry
-              />
-              <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-                <Text style={styles.submitButtonText}>Зарегистрироваться</Text>
+              <TouchableOpacity style={styles.submitButton} onPress={handleVerificationSubmit}>
+                <Text style={styles.submitButtonText}>Подтвердить</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -334,18 +343,11 @@ const App = () => {
             </LinearGradient>
           </View>
         </TouchableOpacity>
+        <ToastManager />
       </SafeAreaView>
     </LinearGradient>
   );
 };
-
-const blockWidth = 15;
-const blockPad = 3;
-
-
-const letterBlockWidth = 12;
-const letterBlockPad = 2;
-
 
 const styles = StyleSheet.create({
   view: {
@@ -365,146 +367,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingLeft: 40,
     paddingRight: 20,
-  },
-  letterBlock: {
-    position: 'absolute',
-    width: letterBlockWidth,
-    height: letterBlockWidth,
-    backgroundColor: '#fffa',
-    borderRadius: 2,
-  },
-  letterContainer: {
-    position: 'relative',
-    width: (letterBlockPad + letterBlockWidth) * 3,
-top: 7,
-  },
-  leftLetterWrapper: {
-    left: letterBlockWidth,
-    top: -20,
-  },
-  middleLetterWrapper: {
-    left: letterBlockPad + letterBlockWidth,
-    top: -20,
-  },
-  rightLetterWrapper: {
-    left: 0,
-    top: -20,
-  },
-  companyContainer: {
-    display: 'flex',
-    justifyContent: 'flex-start',
-    color: 'white',
-    flexDirection: 'row',
-  },
-  blockE1: {
-    top: 0,
-    left: 0
-  },
-  blockE2: {
-    top: letterBlockPad + letterBlockWidth,
-    left: 0,
-  },
-  blockE3: {
-    top: letterBlockPad + letterBlockWidth,
-    left: letterBlockPad + letterBlockWidth,
-  },
-  blockE4: {
-    top: (letterBlockPad + letterBlockWidth) * 2,
-    left: 0,
-  },
-  blockT1: {
-    top: 0,
-    left: 0
-  },
-  blockT2: {
-    top: 0,
-    left: letterBlockPad + letterBlockWidth,
-  },
-  blockT3: {
-    top: 0,
-    left: (letterBlockPad + letterBlockWidth) * 2,
-  },
-  blockT4: {
-    top: letterBlockPad + letterBlockWidth,
-    left: letterBlockPad + letterBlockWidth,
-  },
-  blockT5: {
-    top: (letterBlockPad + letterBlockWidth) * 2,
-    left: letterBlockPad + letterBlockWidth,
-  },
-  titleContainer: {
-    display: 'flex',
-    justifyContent: 'flex-start',
-    color: 'white',
-    flexDirection: 'row',
-  },
-  titleWrapper: {
-
-  },
-
-  // Tetris Figures
-  figuresWrapper: {
-    position: 'absolute',
-  },
-  figuresWrapperRel: {
-    position: 'relative',
-  },
-  leftFigure: {
-    position: 'relative',
-  },
-  leftFiguresWrapper: {
-    top: -31,
-    left: 15
-  },
-  rightFiguresWrapper: {
-    top: 8,
-    left: 19,
-  },
-  rightFigure: {
-    position: 'relative',
-  },
-  blockL1: {
-    right: 0,
-    top: 0
-  },
-  blockL2: {
-    right: 0,
-    top: blockPad + blockWidth,
-  },
-  blockL3: {
-    right: blockPad + blockWidth,
-    top: blockPad + blockWidth,
-  },
-  blockL4: {
-    right: blockPad + blockWidth,
-    top: (blockPad + blockWidth) * 2,
-  },
-  blockR1: {
-    right: 0,
-    top: 0
-  },
-  blockR2: {
-    right: 0,
-    top: blockPad + blockWidth,
-  },
-  blockR3: {
-    right: blockPad + blockWidth,
-    top: blockPad + blockWidth,
-  },
-  blockR4: {
-    right: (blockPad + blockWidth) * 2,
-    top: blockPad + blockWidth,
-  },
-  block: {
-    position: 'absolute',
-    width: blockWidth,
-    height: blockWidth,
-    backgroundColor: '#fffa',
-    borderRadius: 3,
-  },
-  titleText: {
-    color: 'white',
-    fontSize: 20,
   },
   authWrapper: {
     width: '100%',
@@ -556,6 +418,19 @@ top: 7,
     marginBottom: 20,
     textAlign: 'center',
   },
+  emailText: {
+    color: '#fff9',
+    fontSize: 14,
+    marginBottom: 20,
+    marginTop: -20,
+    textAlign: 'center',
+  },
+  suggestionText: {
+    color: '#ffff',
+    fontSize: 14,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
   input: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 5,
@@ -564,11 +439,22 @@ top: 7,
     color: 'white',
     fontSize: 16,
   },
+  warningText: {
+    color: '#ffffff',
+    fontSize: 14,
+    marginBottom: 10,
+    marginTop: 5,
+    textAlign: 'center',
+  },
   submitButton: {
     backgroundColor: '#ffffffff',
-    padding: 15,
+    height: 48,
+    padding: 7,
     borderRadius: 5,
     marginBottom: 15,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   submitButtonText: {
     color: '#000',
@@ -579,8 +465,6 @@ top: 7,
   vkButton: {
     backgroundColor: '#000',
     padding: 7,
-    paddingTop: 7,
-    paddingBottom: 7,
     borderRadius: 5,
     marginBottom: 15,
     display: 'flex',

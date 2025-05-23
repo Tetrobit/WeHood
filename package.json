@@ -70,7 +70,8 @@
     "react-native-web": "^0.20.0",
     "react-native-webview": "^13.13.5",
     "realm": "^12.14.2",
-    "three": "^0.176.0"
+    "three": "^0.176.0",
+    "toastify-react-native": "^7.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

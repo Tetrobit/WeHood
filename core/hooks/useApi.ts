@@ -27,6 +27,11 @@ export interface LoginWithVKResponse {
   }
 }
 
+export interface CheckEmailExistsResponse {
+  exists: boolean;
+  hasPassword: boolean;
+}
+
 export const useApi = () => {
   const realm = useRealm();
   const [profile] = useQuery(Profile);
@@ -99,7 +104,14 @@ export const useApi = () => {
     })
   }
 
+  const checkEmailExists = async (email: string): Promise<CheckEmailExistsResponse> => {
+    const response = await fetch(`${API_URL}/api/auth/check-email-exists?email=${email}`);
+    return response.json();
+  }
+  
+
   return {
+    checkEmailExists,
     getVKParameters,
     generateVKAuthUrl,
     loginWithVK,
