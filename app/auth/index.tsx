@@ -8,11 +8,15 @@ import VKLogo from "@/components/vk-logo";
 import { router } from "expo-router";
 import * as ExpoLinking from 'expo-linking';
 import { parseQueryParams } from "@/core/utils/url";
-import * as Device from 'expo-device';
+import useApi from "@/core/hooks/useApi";
+import { wait } from "@/core/utils/time";
+import Spinner from 'react-native-spinkit';
+import Success from "./success";
 
 const App = () => {
+  const { generateVKAuthUrl, loginWithVK } = useApi();
   const isVKOpen = useSharedValue(false);
-  const codeVerifier = useSharedValue<string | null>(null);
+  const [status, setStatus] = React.useState('idle');
   const [isLogin, setIsLogin] = React.useState(true);
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
@@ -31,14 +35,8 @@ const App = () => {
     isVKOpen.value = true;
 
     try {
-      const response = await fetch('https://api.wehood.zenlog.ru/api/auth/vk-parameters').catch(err => {
-        throw new Error("Не удалось подключиться к серверу");
-      });
-      const data = await response?.json();
-      const { vkAppId, redirectUri, code_challenge, code_verifier, scope } = data;
-      const url = `https://id.vk.com/authorize?client_id=${vkAppId}&redirect_uri=${redirectUri}&code_challenge=${code_challenge}&code_challenge_method=S256&response_type=code&scope=${scope}`;
+      const url = await generateVKAuthUrl();
       await ExpoLinking.openURL(url);
-      codeVerifier.value = code_verifier;
     } catch (error) {
       console.error("Не удалось открыть страницу авторизации", error);
       Alert.alert("Не удалось открыть страницу авторизации");
@@ -53,40 +51,25 @@ const App = () => {
         code,
         state,
         device_id,
-        ext_id: _ext_id,
-        type: _type,
       } = parseQueryParams(event.url);
 
       if (code === undefined || device_id === undefined) {
         return;
       }
 
-      const handleVKAuth = async () => {
-        const response = await fetch('https://api.wehood.zenlog.ru/api/auth/login-vk', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            code,
-            code_verifier: codeVerifier.value,
-            device_id,
-            state,
-            device_name: Device.modelName,
-            device_os: Device.osName,
-            device_os_version: Device.osVersion,
-            device_params: {
-              manufacturer: Device.manufacturer,
-              model: Device.modelName,
-              brand: Device.brand,
-              device_manufacturer: Device.manufacturer,
-              device_model: Device.modelName,
-            }
-          }),
-        });
+      setStatus('vk-login');
 
-        const data = await response.json();
-        const token = data.token;
+      const handleVKAuth = async () => {
+        try {
+          await loginWithVK(code, device_id, state);
+          await wait(2500);
+          setStatus('success');
+          await wait(4000);
+          router.replace('/(tabs)');
+        } catch(error) {  
+          console.error(error);
+          setStatus('idle');
+        }
       };
 
       handleVKAuth();
@@ -165,53 +148,67 @@ const App = () => {
               </View>
             </View>
           </View>
-                  </View>
+        </View>
         
         {/* Auth Form */}
         <View style={styles.authContainer}>
-          <View style={styles.authForm}>
-            <Text style={styles.authTitle}>{isLogin ? 'Вход' : 'Регистрация'}</Text>
-            <TextInput
-              onChangeText={setEmail}
-              style={styles.input}
-              placeholder="Почта"
-              placeholderTextColor="#ffffff88"
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            <TextInput
-              onChangeText={text => setPassword(text)}
-              style={styles.input}
-              placeholder="Пароль"
-              placeholderTextColor="#ffffff88"
-              secureTextEntry
-              defaultValue={password}
-            />
-            {!isLogin && 
+          {status === 'idle' && (
+            <View style={styles.authForm}>
+            <>
+              <Text style={styles.authTitle}>{isLogin ? 'Вход' : 'Регистрация'}</Text>
               <TextInput
-                onChangeText={setRepeatPassword}
+                onChangeText={setEmail}
                 style={styles.input}
-                placeholder="Повторите пароль"
+                placeholder="Почта"
+                placeholderTextColor="#ffffff88"
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+              <TextInput
+                onChangeText={text => setPassword(text)}
+                style={styles.input}
+                placeholder="Пароль"
                 placeholderTextColor="#ffffff88"
                 secureTextEntry
+                defaultValue={password}
               />
-            }
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-              <Text style={styles.submitButtonText}>
-                {isLogin ? 'Войти' : 'Зарегистрироваться'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.vkButton} onPress={handleVKAuth}>
-              <VKLogo width={40} />
-              <Text style={styles.vkButtonText}>Продолжить с VK</Text>
-              <View style={{width: 40}}></View>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-              <Text style={styles.switchText}>
-                {isLogin ? 'Нет аккаунта? Зарегистрируйтесь' : 'Уже есть аккаунт? Войдите'}
-              </Text>
-            </TouchableOpacity>
-          </View>
+              {!isLogin && 
+                <TextInput
+                  onChangeText={setRepeatPassword}
+                  style={styles.input}
+                  placeholder="Повторите пароль"
+                  placeholderTextColor="#ffffff88"
+                  secureTextEntry
+                />
+              }
+              <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+                <Text style={styles.submitButtonText}>
+                  {isLogin ? 'Войти' : 'Зарегистрироваться'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.vkButton} onPress={handleVKAuth}>
+                <VKLogo width={40} />
+                <Text style={styles.vkButtonText}>Продолжить с VK</Text>
+                <View style={{width: 40}}></View>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
+                <Text style={styles.switchText}>
+                  {isLogin ? 'Нет аккаунта? Зарегистрируйтесь' : 'Уже есть аккаунт? Войдите'}
+                </Text>
+              </TouchableOpacity>
+            </>
+            </View>
+          )}
+          {status === 'vk-login' && (
+            <View style={styles.loadingContainer}>
+              <Spinner type={'Bounce'} size={75} color="#ffffff" />
+            </View>
+          )}
+          {status === 'success' && (
+            <View style={styles.successContainer}>
+              <Success />
+            </View>
+          )}
         </View>
 
         <Neighbourhood
@@ -445,13 +442,13 @@ top: 7,
     paddingBottom: 7,
     borderRadius: 5,
     marginBottom: 15,
-display: 'flex',
+    display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   vkButtonText: {
-marginLeft: 10,
+    marginLeft: 10,
     color: 'white',
     textAlign: 'center',
     fontSize: 16,
@@ -461,6 +458,27 @@ marginLeft: 10,
     color: 'white',
     textAlign: 'center',
     fontSize: 14,
+  },
+  loadingContainer: {
+    width: '100%',
+    maxWidth: 400,
+    paddingVertical: 80,
+    marginTop: 110,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
+    backdropFilter: 'blur(10px)',
+  },
+  successContainer: {
+    width: '100%',
+    maxWidth: 400,
+    paddingVertical: 80,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
+    backdropFilter: 'blur(10px)',
   },
 })
 
