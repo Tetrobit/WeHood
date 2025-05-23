@@ -82,10 +82,28 @@ export const useApi = () => {
     return data;
   }
 
+  const withAuth = async <T>(url: string, options: RequestInit = {}): Promise<T> => {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        'Authorization': `Bearer ${profile?.token}`,
+      },
+    });
+    return response.json();
+  }
+
+  const logout = async () => {
+    realm.write(() => {
+      realm.delete(realm.objects(Profile));
+    })
+  }
+
   return {
     getVKParameters,
     generateVKAuthUrl,
     loginWithVK,
+    logout,
   }
 }
 
