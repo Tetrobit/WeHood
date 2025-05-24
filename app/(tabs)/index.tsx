@@ -59,6 +59,13 @@ const carouselData = [
   },
 ];
 
+const serviceImages: Record<string, string> = {
+  'Помощь': 'https://cdn-icons-png.flaticon.com/512/616/616494.png', // рукопожатие, цветная
+  'События': 'https://cdn-icons-png.flaticon.com/512/2921/2921822.png', // календарь, цветной
+  'Объявления': 'https://cdn-icons-png.flaticon.com/512/1827/1827349.png', // мегафон, цветной
+  'Соседи': 'https://cdn-icons-png.flaticon.com/512/2922/2922510.png', // люди, цветные
+};
+
 export default function HomeScreen() {
   const theme = useThemeName();
   const styles = makeStyles(theme);
@@ -115,17 +122,26 @@ export default function HomeScreen() {
       {/* Сервисы */}
       <View style={styles.findAllContainer}>
         <Text style={styles.findAllTitle}>Сервисы</Text>
-        <View style={styles.servicesGrid}>
+        <View style={styles.servicesGridModern}>
           {services.map((service) => (
-            <TouchableOpacity 
-              key={service.id} 
-              style={styles.serviceItem}
+            <TouchableOpacity
+              key={service.id}
+              style={[styles.serviceModernCard, { backgroundColor: '#111' }]}
+              activeOpacity={0.85}
               onPress={() => {router.push(`/services/${service.id}` as any)}}
             >
-              <View style={[styles.serviceIcon, { backgroundColor: service.color }]}>
-                <MaterialCommunityIcons name={service.icon} size={24} color="#fff" />
+              <View style={styles.serviceModernContent}>
+                <View style={styles.serviceModernTextBlock}>
+                  <Text style={styles.serviceModernTitle}>{service.title}</Text>
+                </View>
+                <View style={styles.serviceModernImage}>
+                  <MaterialCommunityIcons
+                    name={service.icon}
+                    size={32}
+                    color={service.color}
+                  />
+                </View>
               </View>
-              <Text style={styles.serviceTitle}>{service.title}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -153,6 +169,48 @@ const makeStyles = (theme: string) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme === DARK_THEME ? '#000' : '#f5f5f5',
+  },
+  servicesGridModern: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  serviceModernCard: {
+    width: (width - 48) / 2,
+    borderRadius: 20,
+    padding: 18,
+    marginBottom: 18,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    overflow: 'hidden',
+  },
+  serviceModernContent: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    position: 'relative',
+  },
+  serviceModernTextBlock: {
+    flex: 1,
+    zIndex: 2,
+  },
+  serviceModernTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 2,
+  },
+  serviceModernImage: {
+    marginTop: 10,
+    alignSelf: 'center',
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
     flexDirection: 'row',
@@ -246,32 +304,6 @@ const makeStyles = (theme: string) => StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 16,
-    color: theme === DARK_THEME ? '#fff' : '#000',
-  },
-  servicesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  serviceItem: {
-    width: (width - 48) / 2,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    elevation: 2,
-  },
-  serviceIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  serviceTitle: {
-    fontSize: 14,
-    fontWeight: '500',
     color: theme === DARK_THEME ? '#fff' : '#000',
   },
   newsContainer: {
