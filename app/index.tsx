@@ -3,18 +3,26 @@ import Theme from "@/core/models/theme";
 import { useRealm } from "@realm/react";
 import { Redirect, router } from "expo-router";
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Animated } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Animated, Easing, useColorScheme } from "react-native";
+import Profile from "@/core/models/profile";
 
 export default function App() {
+  const systemTheme = useColorScheme();
   const [theme] = useQuery(Theme);
   const realm = useRealm();
-  const [timeLeft, setTimeLeft] = useState(10);
+  const [timeLeft, setTimeLeft] = useState(5);
   const [showNotice, setShowNotice] = useState(true);
   const progressAnimation = React.useRef(new Animated.Value(1)).current;
+  const [profile] = useQuery(Profile);
 
   useEffect(() => {
     if (!showNotice) {
-      router.replace('/auth');
+      if (profile) {  
+        router.replace('/(tabs)');
+      }
+      else {
+        router.replace('/auth');
+      }
       return;
     }
 
@@ -24,7 +32,7 @@ export default function App() {
 
     Animated.timing(progressAnimation, {
       toValue: 0,
-      duration: 10000,
+      duration: 5000,
       useNativeDriver: false,
     }).start();
 
@@ -39,7 +47,7 @@ export default function App() {
 
   if (!theme) {
     realm.write(() => {
-      realm.create(Theme, Theme.generate('dark'));
+      realm.create(Theme, Theme.generate(systemTheme === 'dark' ? 'dark' : 'light'));
     });
     return null;
   }
@@ -64,6 +72,7 @@ export default function App() {
                 width: progressAnimation.interpolate({
                   inputRange: [0, 1],
                   outputRange: ['0%', '100%'],
+                  easing: Easing.linear,
                 }),
               },
             ]} 
@@ -80,7 +89,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    backgroundColor: 'rgba(0, 0, 0, 1.0)',
   },
   notice: {
     backgroundColor: '#FFFFFF',

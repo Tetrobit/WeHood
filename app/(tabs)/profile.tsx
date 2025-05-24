@@ -1,8 +1,13 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { DARK_THEME, LIGHT_THEME, useSetTheme, useThemeName } from '@/core/hooks/useTheme';
-
+import { useQuery } from '@realm/react';
+import Profile from '@/core/models/profile';
+import { router } from 'expo-router';
+import useApi from '@/core/hooks/useApi';
 export default function ProfileScreen() {
+  const [profile] = useQuery(Profile);
+  const api = useApi();
   const theme = useThemeName();
   const styles = makeStyles(theme);
   const setTheme = useSetTheme();
@@ -11,20 +16,34 @@ export default function ProfileScreen() {
     setTheme(theme === DARK_THEME ? LIGHT_THEME : DARK_THEME);
   }
 
+  const onLogout = () => {
+    Alert.alert('Мы будем скучать', 'Вы уверены, что хотите выйти?', [
+      { text: 'Отмена', style: 'cancel' },
+      { text: 'Выйти', style: 'destructive', onPress: async () => {
+        try {
+          await api.logout();
+          router.replace('/auth');
+        } catch (error) {
+          Alert.alert('Что-то пошло не так', error instanceof Error ? error.message : 'Произошла ошибка при выходе из системы');
+        }
+      }},
+    ]);
+  }
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.avatarContainer}>
           <Image
-            source={{ uri: 'https://randomuser.me/api/portraits/men/3.jpg' }}
+            source={{ uri: profile?.avatar }}
             style={styles.avatar}
           />
           <TouchableOpacity style={styles.editAvatarButton}>
             <Ionicons name="camera" size={20} color="#fff" />
           </TouchableOpacity>
         </View>
-        <Text style={styles.name}>Иван Иванов</Text>
-        <Text style={styles.email}>ivan@example.com</Text>
+        <Text style={styles.name}>{profile?.firstName} {profile?.lastName}</Text>
+        <Text style={styles.email}>{profile?.email}</Text>
       </View>
 
       <View style={styles.section}>
@@ -73,7 +92,7 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      <TouchableOpacity activeOpacity={0.7} style={styles.logoutButton}>
+      <TouchableOpacity activeOpacity={0.7} style={styles.logoutButton} onPress={onLogout}>
         <Text style={styles.logoutText}>Выйти</Text>
       </TouchableOpacity>
     </ScrollView>
