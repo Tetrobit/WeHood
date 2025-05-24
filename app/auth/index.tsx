@@ -26,7 +26,7 @@ const gradientColors: [ColorValue, ColorValue][] = [
 
 const App = () => {
   const [gradientIndex, updateGradientIndex] = React.useReducer((state: number) => (state + 1) % gradientColors.length, 2);
-  const { generateVKAuthUrl, loginWithVK, checkEmailExists, sendVerificationCode, verifyVerificationCode } = useApi();
+  const { generateVKAuthUrl, loginWithVK, checkEmailExists, sendVerificationCode, verifyVerificationCode, register } = useApi();
   const isVKOpen = useSharedValue(false);
   const [status, setStatus] = React.useState('idle');
   const [email, setEmail] = React.useState('');
@@ -37,7 +37,7 @@ const App = () => {
   const [userHasPassword, setUserHasPassword] = React.useState(false);
   const pagerRef = React.useRef<PagerView>(null);
   const pagerPage = useSharedValue(0);
-
+  const [verificationCodeId, setVerificationCodeId] = React.useState('');
   const handlePagerPage = (page: number) => {
     if (pagerPage.value === page) return;
 
@@ -90,6 +90,8 @@ const App = () => {
     setStatus('password-action');
     try {
       const response = await sendVerificationCode(email);
+      setVerificationCodeId(response.id);
+
       Toast.success('Код подтверждения отправлен на почту', "top");
       setStatus('idle');
       handlePagerPage(2);
@@ -104,6 +106,36 @@ const App = () => {
     if (!verificationCode) {
       Toast.error('Введите код подтверждения', "top");
       return;
+    }
+
+    try {
+      setStatus('code-verify');
+      const response = await verifyVerificationCode(verificationCodeId, email, verificationCode);
+      if (response.ok) {
+        setStatus('code-success');
+      } else {
+        Toast.error("Неверный код подтверждения", "top");
+        setStatus('idle');
+        return;
+      }
+    } catch (error) {
+      console.error(error);
+      Toast.error('Не удалось подтвердить код', "top");
+      setStatus('idle');
+      return;
+    }
+    
+    setStatus('registration');
+    try {
+      await register(email, password, verificationCodeId);
+      setStatus('register-success');
+      await wait(4000);
+      router.replace('/(tabs)');
+    } catch (error) {
+      console.error(error);
+      Toast.error('Не удалось зарегистрироваться', "top");
+      handlePagerPage(1);
+      setStatus('idle');
     }
   };
 
@@ -294,25 +326,44 @@ const App = () => {
             </View>
           </View>
           <View key="3" style={styles.authWrapper}>
-            <View style={styles.authForm}>
-              <View style={styles.authFormHeader}>
-                <View style={styles.authFormHeaderLeft}>
-                  <TouchableOpacity onPress={() => pagerRef.current?.setPage(0)}>
-                    <ArrowLeftIcon size={25} color="white" />
-                  </TouchableOpacity>
+            { (status === 'code-verify' || status === 'idle') && (
+              <View style={styles.authForm}>
+                <View style={styles.authFormHeader}>
+                  <View style={styles.authFormHeaderLeft}>
+                    <TouchableOpacity onPress={() => handlePagerPage(1)}>
+                      <ArrowLeftIcon size={25} color="white" />
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={styles.authTitle}>Подтверждение</Text>
                 </View>
-                <Text style={styles.authTitle}>Подтверждение</Text>
+                <TextInput
+                  onChangeText={setVerificationCode}
+                  style={styles.input}
+                  placeholder="Введите код подтверждения"
+                  placeholderTextColor="#ffffff88"
+                  keyboardType="numeric"
+                  maxLength={6}
+                />
+                <TouchableOpacity style={styles.submitButton} onPress={handleVerificationSubmit}>
+                  {status === 'code-verify' && (
+                    <ActivityIndicator size="large" color="#000000" />
+                  )}
+                  {status !== 'code-verify' && (
+                    <Text style={styles.submitButtonText}>Подтвердить</Text>
+                  )}
+                </TouchableOpacity>
               </View>
-              <TextInput
-                onChangeText={setVerificationCode}
-                style={styles.input}
-                placeholder="Введите код подтверждения"
-                placeholderTextColor="#ffffff88"
-              />
-              <TouchableOpacity style={styles.submitButton} onPress={handleVerificationSubmit}>
-                <Text style={styles.submitButtonText}>Подтвердить</Text>
-              </TouchableOpacity>
-            </View>
+            )}
+            {status === 'registration' && (
+              <View style={styles.loadingContainer}>
+                <Spinner type={'Bounce'} size={75} color="#ffffff" />
+              </View>
+            )}
+            {status === 'register-success' && (
+              <View style={styles.successContainer}>
+                <Success />
+              </View>
+            )}
           </View>
         </PagerView>
 

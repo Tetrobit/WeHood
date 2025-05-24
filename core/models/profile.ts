@@ -1,21 +1,21 @@
 import { Realm } from '@realm/react';
-import { LoginWithVKResponse } from '@/core/hooks/useApi';
+import { LoginWithVKResponse, RegisterResponse } from '@/core/hooks/useApi';
 
-class Profile extends Realm.Object<Profile, "token" | "firstName" | "lastName" | "avatar" | "email"> {
+class Profile extends Realm.Object<Profile, "id" | "token" | "email" | "deviceId"> {
   _id = new Realm.BSON.ObjectId();
   id!: string;
-  token!: string;
-  firstName!: string;
-  lastName!: string;
-  avatar!: string;
-  email!: string;
-  vkId!: string;
   deviceId!: string;
+  email!: string;
+  token!: string;
+  firstName?: string;
+  lastName?: string;
+  avatar?: string;
+  vkId?: string;
 
   static primaryKey = "_id";
 
-  constructor(realm: Realm, token: string, firstName: string, lastName: string, avatar: string, email: string) {
-    super(realm, { token, firstName, lastName, avatar, email });
+  constructor(realm: Realm, id: string, token: string, email: string, deviceId: string, firstName?: string, lastName?: string, avatar?: string, vkId?: string) {
+    super(realm, { id, token, email, deviceId, firstName, lastName, avatar, vkId });
   }
 
   static fromLoginWithVK(data: LoginWithVKResponse) {
@@ -32,17 +32,28 @@ class Profile extends Realm.Object<Profile, "token" | "firstName" | "lastName" |
     }
   }
 
+
+  static fromRegister(data: RegisterResponse) {
+    return {
+      _id: new Realm.BSON.ObjectId(),
+      id: data.user.id,
+      token: data.token,
+      email: data.user.email,
+      deviceId: data.device.id,
+    }
+  }
+
   static schema = {
     name: 'Profile',
     properties: {
       _id: 'objectId',
       id: 'string',
       token: 'string',
-      firstName: 'string',
-      lastName: 'string',
-      avatar: 'string',
+      firstName: {type: 'string', optional: true},
+      lastName: {type: 'string', optional: true},
+      avatar: {type: 'string', optional: true},
       email: 'string',
-      vkId: 'string',
+      vkId: {type: 'string', optional: true},
       deviceId: 'string',
     },
   };

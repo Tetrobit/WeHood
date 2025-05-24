@@ -32,6 +32,30 @@ export interface CheckEmailExistsResponse {
   hasPassword: boolean;
 }
 
+export interface SendVerificationCodeResponse {
+  id: string;
+}
+
+export interface VerifyVerificationCodeResponse {
+  ok: boolean;
+  message: string;
+}
+
+export interface RegisterResponse {
+  token: string;
+  user: {
+    id: string;
+    email: string;
+    firstName: string | null;
+    lastName: string | null;
+    avatar: string | null;
+    vkId: string | null;
+  },
+  device: {
+    id: string;
+  }
+}
+
 export const useApi = () => {
   const realm = useRealm();
   const [profile] = useQuery(Profile);
@@ -109,24 +133,67 @@ export const useApi = () => {
     return response.json();
   }
 
-  const sendVerificationCode = async (email: string) => {
+  const sendVerificationCode = async (email: string): Promise<SendVerificationCodeResponse> => {
     const response = await fetch(`${API_URL}/api/auth/send-verification-code?email=${email}`);
     return response.json();
   }
 
-  const verifyVerificationCode = async (email: string, code: string) => {
-    const response = await fetch(`${API_URL}/api/auth/verify-verification-code?email=${email}&code=${code}`);
+  const verifyVerificationCode = async (verificationCodeId: string, email: string, code: string): Promise<VerifyVerificationCodeResponse> => {
+    const response = await fetch(`${API_URL}/api/auth/verify-verification-code`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        verificationCodeId,
+        email,
+        code,
+      }),
+    });
     return response.json();
+  }
+
+  const register = async (email: string, password: string, verificationCodeId: string): Promise<RegisterResponse> => { 
+    const response = await fetch(`${API_URL}/api/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        verificationCodeId,
+        device_name: Device.modelName,
+        device_os: Device.osName,
+        device_os_version: Device.osVersion,
+        device_params: {
+          manufacturer: Device.manufacturer,
+          model: Device.modelName,
+        }
+      }),
+    });
+
+    const data = await response.json();
+
+    realm.write(() => {
+      realm.delete(realm.objects(Profile));
+    });
+
+    realm.write(() => {
+      realm.create(Profile, Profile.fromRegister(data));
+    });
+
+    return data;
   }
 
   return {
     sendVerificationCode,
     verifyVerificationCode,
     checkEmailExists,
-    getVKParameters,
     generateVKAuthUrl,
     loginWithVK,
     logout,
+    register,
   }
 }
 

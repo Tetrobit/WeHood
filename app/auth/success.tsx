@@ -49,7 +49,7 @@ export default function Success() {
     <>
       <Animated.View style={[shiftStyle]}>
         <LottieView style={{width: 300, height: 300}} source={require('@/assets/lottie/success.json')} autoPlay={true} loop={false} />
-        <Animated.Text style={[opacityStyle, styles.container]}>Добро пожаловать,</Animated.Text>
+        <Animated.Text style={[opacityStyle, styles.container]}>Добро пожаловать{profile?.firstName ? ',' : '!'}</Animated.Text>
         <Animated.Text style={[opacityStyle, styles.container]}>{profile?.firstName} {profile?.lastName}</Animated.Text>
       </Animated.View>
     </>
