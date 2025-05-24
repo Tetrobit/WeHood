@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, SafeAreaView, TouchableOpacity, LayoutAnimation, UIManager, Dimensions, ScrollView } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text, StyleSheet, Image, SafeAreaView, TouchableOpacity, LayoutAnimation, UIManager, Dimensions, ScrollView, Animated, PanResponder } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather, Fontisto, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -43,6 +43,20 @@ const WeatherScreen: React.FC = () => {
 
   const styles = React.useMemo(() => makeStyles(themeName), [themeName]);
 
+  const pan = useRef(new Animated.ValueXY()).current;
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderMove: Animated.event([null, {dx: pan.x, dy: pan.y}]),
+      onPanResponderRelease: () => {
+        Animated.spring(pan, {
+          toValue: {x: 0, y: 0},
+          useNativeDriver: true,
+        }).start();
+      },
+    }),
+  ).current;
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollViewContainer}>
@@ -73,9 +87,16 @@ const WeatherScreen: React.FC = () => {
           </View>
 
           {/* Main Weather Icon */}
-          <View style={styles.weatherIconContainer}>
-            <Ionicons name="thunderstorm" size={120} color="white" />
-          </View>
+          <Animated.View
+          style={{
+            transform: [{translateX: pan.x}, {translateY: pan.y}],
+          }}
+          {...panResponder.panHandlers}>
+            <View style={styles.weatherIconContainer}>
+              <Ionicons name="thunderstorm" size={120} color="white" />
+            </View>
+          </Animated.View>
+
 
           {/* Temperature and Condition */}
           <View style={styles.temperatureContainer}>
@@ -248,8 +269,9 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
   forecastContainer: {
     width: '100%',
     left: 0,
-    bottom: 20,
-    marginTop: 20,
+    // bottom: 20,
+    // marginTop: 20,
+    ...(screenHeight > 720 ? {bottom: 20} : {marginTop: 20}),
     paddingHorizontal: 20,
   },
   forecastHeader: {
