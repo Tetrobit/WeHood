@@ -17,6 +17,9 @@ import Neighbourhood from "@/components/neighbourhood";
 import VKLogo from "@/components/vk-logo";
 import { router } from "expo-router";
 
+
+const screenHeight = Dimensions.get('window').height;
+
 const App = () => {
   const [loading, setLoading] = React.useState(true);
   const [isLogin, setIsLogin] = React.useState(true);
@@ -147,7 +150,7 @@ const App = () => {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
               <Text style={styles.switchText}>
-                {isLogin ? 'Нет аккаунта? Зарегистрируйтесь' : 'Уже есть аккаунт? Войдите'}
+                {isLogin ? `Нет аккаунта? Зарегистрируйтесь ${screenHeight}` : 'Уже есть аккаунт? Войдите'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -178,7 +181,7 @@ const styles = StyleSheet.create({
     paddingTop: 45
   },
   neighbourhood: {
-    top: 320,
+    top: screenHeight*5/13,
     position: 'absolute',
     zIndex: -1,
   },
