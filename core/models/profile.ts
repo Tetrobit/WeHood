@@ -1,5 +1,5 @@
 import { Realm } from '@realm/react';
-import { LoginWithVKResponse, RegisterResponse } from '@/core/hooks/useApi';
+import { LoginResponse, LoginWithVKResponse, RegisterResponse } from '@/core/hooks/useApi';
 
 class Profile extends Realm.Object<Profile, "id" | "token" | "email" | "deviceId"> {
   _id = new Realm.BSON.ObjectId();
@@ -40,6 +40,22 @@ class Profile extends Realm.Object<Profile, "id" | "token" | "email" | "deviceId
       token: data.token,
       email: data.user.email,
       deviceId: data.device.id,
+      firstName: data.user.firstName || '',
+      lastName: data.user.lastName || '',
+    }
+  }
+
+  static fromLogin(data: LoginResponse) {
+    return {
+      _id: new Realm.BSON.ObjectId(),
+      id: data.user!.id,
+      token: data.token!,
+      firstName: data.user!.firstName,
+      lastName: data.user!.lastName,
+      avatar: data.user!.avatar,
+      email: data.user!.email,
+      vkId: data.user!.vkId,
+      deviceId: data.device!.id,
     }
   }
 

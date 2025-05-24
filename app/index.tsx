@@ -3,10 +3,11 @@ import Theme from "@/core/models/theme";
 import { useRealm } from "@realm/react";
 import { Redirect, router } from "expo-router";
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Animated, Easing } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Animated, Easing, useColorScheme } from "react-native";
 import Profile from "@/core/models/profile";
 
 export default function App() {
+  const systemTheme = useColorScheme();
   const [theme] = useQuery(Theme);
   const realm = useRealm();
   const [timeLeft, setTimeLeft] = useState(5);
@@ -46,7 +47,7 @@ export default function App() {
 
   if (!theme) {
     realm.write(() => {
-      realm.create(Theme, Theme.generate('dark'));
+      realm.create(Theme, Theme.generate(systemTheme === 'dark' ? 'dark' : 'light'));
     });
     return null;
   }

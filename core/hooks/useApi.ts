@@ -46,12 +46,29 @@ export interface RegisterResponse {
   user: {
     id: string;
     email: string;
-    firstName: string | null;
-    lastName: string | null;
-    avatar: string | null;
-    vkId: string | null;
+    firstName: string;
+    lastName: string;
+    avatar?: string;
+    vkId?: string;
   },
   device: {
+    id: string;
+  }
+}
+
+export interface LoginResponse {
+  ok: boolean;
+  message?: string;
+  token?: string;
+  user?: {
+    id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    avatar?: string;
+    vkId?: string;
+  },
+  device?: {
     id: string;
   }
 }
@@ -153,7 +170,7 @@ export const useApi = () => {
     return response.json();
   }
 
-  const register = async (email: string, password: string, verificationCodeId: string): Promise<RegisterResponse> => { 
+  const register = async (email: string, password: string, verificationCodeId: string, firstName: string, lastName: string): Promise<RegisterResponse> => { 
     const response = await fetch(`${API_URL}/api/auth/register`, {
       method: 'POST',
       headers: {
@@ -163,6 +180,8 @@ export const useApi = () => {
         email,
         password,
         verificationCodeId,
+        firstName,
+        lastName,
         device_name: Device.modelName,
         device_os: Device.osName,
         device_os_version: Device.osVersion,
@@ -186,14 +205,51 @@ export const useApi = () => {
     return data;
   }
 
+  const login = async (email: string, password: string): Promise<LoginResponse> => {
+    const response = await fetch(`${API_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email,
+        password,
+        device_name: Device.modelName,
+        device_os: Device.osName,
+        device_os_version: Device.osVersion,
+        device_params: {
+          manufacturer: Device.manufacturer,
+          model: Device.modelName,
+        }
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!data.ok) {
+      return data;
+    }
+
+    realm.write(() => {
+      realm.delete(realm.objects(Profile));
+    });
+
+    realm.write(() => {
+      realm.create(Profile, Profile.fromLogin(data));
+    });
+
+    return data;
+  }
+
   return {
     sendVerificationCode,
     verifyVerificationCode,
     checkEmailExists,
     generateVKAuthUrl,
     loginWithVK,
-    logout,
     register,
+    login,
+    logout,
   }
 }
 

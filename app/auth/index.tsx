@@ -26,8 +26,10 @@ const gradientColors: [ColorValue, ColorValue][] = [
 
 const App = () => {
   const [gradientIndex, updateGradientIndex] = React.useReducer((state: number) => (state + 1) % gradientColors.length, 2);
-  const { generateVKAuthUrl, loginWithVK, checkEmailExists, sendVerificationCode, verifyVerificationCode, register } = useApi();
+  const { generateVKAuthUrl, loginWithVK, checkEmailExists, sendVerificationCode, verifyVerificationCode, register, login } = useApi();
   const isVKOpen = useSharedValue(false);
+  const [firstName, setFirstName] = React.useState('');
+  const [lastName, setLastName] = React.useState('');
   const [status, setStatus] = React.useState('idle');
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
@@ -75,6 +77,27 @@ const App = () => {
     }
   };
 
+  const handleNameSubmit = async () => {
+    if (!firstName || !lastName) {
+      Toast.error('Пожалуйста, введите имя и фамилию', "top");
+      return;
+    }
+
+    setStatus('name-action');
+    try {
+      const response = await sendVerificationCode(email);
+      setVerificationCodeId(response.id);
+
+      Toast.success('Код подтверждения отправлен на почту', "top");
+      handlePagerPage(3);
+    } catch (error) {
+      Toast.error('Не удалось отправить код подтверждения :(', "top");
+      console.error(error);
+    } finally {
+      setStatus('idle');
+    }
+  };
+
   const handlePasswordSubmit = async () => {
 
     if (!validatePassword(password)) {
@@ -89,15 +112,24 @@ const App = () => {
 
     setStatus('password-action');
     try {
-      const response = await sendVerificationCode(email);
-      setVerificationCodeId(response.id);
-
-      Toast.success('Код подтверждения отправлен на почту', "top");
-      setStatus('idle');
-      handlePagerPage(2);
+      if (isExistingUser) {
+        const response = await login(email, password);
+        if (response.ok) {
+          handlePagerPage(0);
+          setStatus('success');
+          await wait(4000);
+          router.replace('/(tabs)');
+        } else {
+          Toast.error(response.message || 'Не удалось войти', "top");
+        }
+      } else {
+        setStatus('idle');
+        handlePagerPage(2);
+      }
     } catch (error) {
-      Toast.error('Не удалось отправить код подтверждения :(', "top");
       console.error(error);
+      Toast.error('Что-то пошло не так :(', "top");
+    } finally {
       setStatus('idle');
     }
   };
@@ -127,7 +159,7 @@ const App = () => {
     
     setStatus('registration');
     try {
-      await register(email, password, verificationCodeId);
+      await register(email, password, verificationCodeId, firstName, lastName);
       setStatus('register-success');
       await wait(4000);
       router.replace('/(tabs)');
@@ -326,11 +358,48 @@ const App = () => {
             </View>
           </View>
           <View key="3" style={styles.authWrapper}>
+            <View style={styles.authForm}>
+              <View style={styles.authFormHeader}>
+                <View style={styles.authFormHeaderLeft}>
+                  <TouchableOpacity onPress={() => handlePagerPage(1)}>
+                    <ArrowLeftIcon size={25} color="white" />
+                  </TouchableOpacity>
+                </View>
+                <Text style={styles.authTitle}>Как Вас зовут?</Text>
+              </View>
+              <TextInput
+                onChangeText={setFirstName}
+                style={styles.input}
+                value={firstName}
+                placeholder="Имя"
+                placeholderTextColor="#ffffff88"
+              />
+              <TextInput
+                onChangeText={setLastName}
+                style={styles.input}
+                value={lastName}
+                placeholder="Фамилия"
+                placeholderTextColor="#ffffff88"
+              />
+
+              {(!isExistingUser || userHasPassword) && (
+                <TouchableOpacity style={styles.submitButton} onPress={handleNameSubmit}>
+                  {status === 'name-action' && (
+                    <ActivityIndicator size="large" color="#000000" />
+                  )}
+                  {status !== 'name-action' && (
+                    <Text style={styles.submitButtonText}>Далее</Text>
+                  )}
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+          <View key="4" style={styles.authWrapper}>
             { (status === 'code-verify' || status === 'idle') && (
               <View style={styles.authForm}>
                 <View style={styles.authFormHeader}>
                   <View style={styles.authFormHeaderLeft}>
-                    <TouchableOpacity onPress={() => handlePagerPage(1)}>
+                    <TouchableOpacity onPress={() => handlePagerPage(2)}>
                       <ArrowLeftIcon size={25} color="white" />
                     </TouchableOpacity>
                   </View>
