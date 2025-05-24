@@ -26,7 +26,7 @@ const gradientColors: [ColorValue, ColorValue][] = [
 
 const App = () => {
   const [gradientIndex, updateGradientIndex] = React.useReducer((state: number) => (state + 1) % gradientColors.length, 2);
-  const { generateVKAuthUrl, loginWithVK, checkEmailExists } = useApi();
+  const { generateVKAuthUrl, loginWithVK, checkEmailExists, sendVerificationCode, verifyVerificationCode } = useApi();
   const isVKOpen = useSharedValue(false);
   const [status, setStatus] = React.useState('idle');
   const [email, setEmail] = React.useState('');
@@ -88,36 +88,22 @@ const App = () => {
     }
 
     setStatus('password-action');
-    await wait(1000);
-    Toast.success('Функция дорабатывается :)', "top");
-    setStatus('idle');
+    try {
+      const response = await sendVerificationCode(email);
+      Toast.success('Код подтверждения отправлен на почту', "top");
+      setStatus('idle');
+      handlePagerPage(2);
+    } catch (error) {
+      Toast.error('Не удалось отправить код подтверждения :(', "top");
+      console.error(error);
+      setStatus('idle');
+    }
   };
 
   const handleVerificationSubmit = async () => {
     if (!verificationCode) {
       Toast.error('Введите код подтверждения', "top");
       return;
-    }
-
-    try {
-      // Здесь должен быть API запрос для проверки кода
-      const response = await fetch('YOUR_API_ENDPOINT/verify-code', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, code: verificationCode }),
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        router.replace('/(tabs)');
-      } else {
-        Toast.error('Неверный код подтверждения', "top");
-      }
-    } catch (error) {
-      console.error('Ошибка при проверке кода:', error);
-      Alert.alert('Ошибка', 'Не удалось подтвердить код');
     }
   };
 

@@ -108,9 +108,20 @@ export const useApi = () => {
     const response = await fetch(`${API_URL}/api/auth/check-email-exists?email=${email}`);
     return response.json();
   }
-  
+
+  const sendVerificationCode = async (email: string) => {
+    const response = await fetch(`${API_URL}/api/auth/send-verification-code?email=${email}`);
+    return response.json();
+  }
+
+  const verifyVerificationCode = async (email: string, code: string) => {
+    const response = await fetch(`${API_URL}/api/auth/verify-verification-code?email=${email}&code=${code}`);
+    return response.json();
+  }
 
   return {
+    sendVerificationCode,
+    verifyVerificationCode,
     checkEmailExists,
     getVKParameters,
     generateVKAuthUrl,
