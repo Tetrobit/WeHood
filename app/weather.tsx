@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, SafeAreaView, TouchableOpacity, LayoutAnimation, UIManager } from 'react-native';
+import { View, Text, StyleSheet, Image, SafeAreaView, TouchableOpacity, LayoutAnimation, UIManager, Dimensions, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather, Fontisto, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -7,6 +7,8 @@ import WeatherRain from '@/components/weather-rain';
 import { DARK_THEME, LIGHT_THEME, ThemeName } from '@/core/hooks/useTheme';
 import { useSetTheme, useThemeName } from '@/core/hooks/useTheme';
 import { setStatusBarBackgroundColor } from 'expo-status-bar';
+
+const screenHeight = Dimensions.get('window').height;
 
 interface WeatherMetric {
   value: string | number;
@@ -43,6 +45,7 @@ const WeatherScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
       <LinearGradient
         colors={['#7C4585', '#C95792']}
         style={styles.container}
@@ -131,6 +134,7 @@ const WeatherScreen: React.FC = () => {
           ))}
         </View>
       </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -142,6 +146,8 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
     padding: 10,
     paddingBottom: 20,
     zIndex: 1,
+  },
+  scrollViewContainer: { 
   },
   shadow: {
     position: 'absolute',
@@ -165,7 +171,7 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 10,
   },
   locationContainer: {
     flexDirection: 'row',
@@ -222,8 +228,9 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
   metricsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginTop: 30,
+    marginTop: 20,
     paddingHorizontal: 20,
+    marginBottom: 20, // Добавлено
   },
   metricItem: {
     alignItems: 'center',
@@ -239,11 +246,10 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
     marginTop: 2,
   },
   forecastContainer: {
-    position: 'absolute',
     width: '100%',
     left: 0,
     bottom: 20,
-    marginTop: 40,
+    marginTop: 20,
     paddingHorizontal: 20,
   },
   forecastHeader: {

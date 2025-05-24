@@ -150,7 +150,7 @@ const App = () => {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
               <Text style={styles.switchText}>
-                {isLogin ? `Нет аккаунта? Зарегистрируйтесь ${screenHeight}` : 'Уже есть аккаунт? Войдите'}
+                {isLogin ? 'Нет аккаунта? Зарегистрируйтесь' : 'Уже есть аккаунт? Войдите'}
               </Text>
             </TouchableOpacity>
           </View>
