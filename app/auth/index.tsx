@@ -72,6 +72,7 @@ const App = () => {
       handlePagerPage(1);
     } catch (error) {
       console.error(error);
+      Toast.error('Что-то пошло не так :(', "top");
     } finally {
       setStatus('idle');
     }
