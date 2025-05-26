@@ -1,16 +1,22 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Alert, Modal, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { DARK_THEME, LIGHT_THEME, useSetTheme, useThemeName } from '@/core/hooks/useTheme';
 import { useQuery } from '@realm/react';
 import Profile from '@/core/models/profile';
 import { router } from 'expo-router';
 import useApi from '@/core/hooks/useApi';
+import { useState } from 'react';
+import * as ImagePicker from 'expo-image-picker';
+
 export default function ProfileScreen() {
   const [profile] = useQuery(Profile);
   const api = useApi();
   const theme = useThemeName();
   const styles = makeStyles(theme);
   const setTheme = useSetTheme();
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [avatarUri, setAvatarUri] = useState(profile?.avatar);
 
   const onChangeTheme = () => {
     setTheme(theme === DARK_THEME ? LIGHT_THEME : DARK_THEME);
@@ -30,15 +36,28 @@ export default function ProfileScreen() {
     ]);
   }
 
+  const pickImage = async () => {
+    setModalVisible(false);
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets && result.assets[0]?.uri) {
+      setAvatarUri(result.assets[0].uri);
+    }
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.avatarContainer}>
           <Image
-            source={{ uri: profile?.avatar }}
+            source={{ uri: avatarUri }}
             style={styles.avatar}
           />
-          <TouchableOpacity style={styles.editAvatarButton}>
+          <TouchableOpacity style={styles.editAvatarButton} onPress={() => setModalVisible(true)}>
             <Ionicons name="camera" size={20} color="#fff" />
           </TouchableOpacity>
         </View>
@@ -91,6 +110,38 @@ export default function ProfileScreen() {
           />
         </View>
       </View>
+
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ backgroundColor: theme === DARK_THEME ? '#222' : '#fff', borderRadius: 16, padding: 24, width: 300 }}>
+            <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 20, textAlign: 'center' }}>Сменить фото профиля</Text>
+            <TouchableOpacity
+              style={{ backgroundColor: '#007AFF', borderRadius: 8, padding: 14, marginBottom: 12, alignItems: 'center' }}
+              onPress={pickImage}
+            >
+              <Text style={{ color: '#fff', fontSize: 16 }}>Выбрать из галереи</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{ backgroundColor: theme === DARK_THEME ? '#444' : '#eee', borderRadius: 8, padding: 14, marginBottom: 12, alignItems: 'center' }}
+              onPress={() => {}}
+              disabled
+            >
+              <Text style={{ color: theme === DARK_THEME ? '#aaa' : '#888', fontSize: 16 }}>Сгенерировать (скоро)</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{ alignItems: 'center', marginTop: 4 }}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={{ color: '#007AFF', fontSize: 16 }}>Отмена</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       <TouchableOpacity activeOpacity={0.7} style={styles.logoutButton} onPress={onLogout}>
         <Text style={styles.logoutText}>Выйти</Text>
