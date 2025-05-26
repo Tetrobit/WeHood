@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Alert, Modal, Platform } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Alert, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { DARK_THEME, LIGHT_THEME, useSetTheme, useThemeName } from '@/core/hooks/useTheme';
 import { useQuery } from '@realm/react';
@@ -8,6 +8,7 @@ import useApi from '@/core/hooks/useApi';
 import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import * as Notifications from 'expo-notifications';
+import Modal from 'react-native-modal';
 
 export default function ProfileScreen() {
   const [profile] = useQuery(Profile);
@@ -65,6 +66,8 @@ export default function ProfileScreen() {
           shouldShowAlert: true,
           shouldPlaySound: !silentNotifications,
           shouldSetBadge: true,
+          shouldShowBanner: true,
+          shouldShowList: true,
         }),
       });
     } else {
@@ -74,6 +77,8 @@ export default function ProfileScreen() {
           shouldShowAlert: false,
           shouldPlaySound: false,
           shouldSetBadge: false,
+          shouldShowBanner: false,
+          shouldShowList: false,
         }),
       });
     }
@@ -88,6 +93,8 @@ export default function ProfileScreen() {
           shouldShowAlert: true,
           shouldPlaySound: !value,
           shouldSetBadge: true,
+          shouldShowBanner: true,
+          shouldShowList: true,
         }),
       });
     }
@@ -156,69 +163,69 @@ export default function ProfileScreen() {
       </View>
 
       <Modal
-        visible={modalVisible}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setModalVisible(false)}
+        isVisible={modalVisible}
+        onBackdropPress={() => setModalVisible(false)}
+        animationIn="zoomIn"
+        animationOut="zoomOut"
+        backdropOpacity={0.35}
+        style={{ justifyContent: 'center', alignItems: 'center', margin: 0 }}
       >
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
-          <View style={{ backgroundColor: theme === DARK_THEME ? '#222' : '#fff', borderRadius: 16, padding: 24, width: 300 }}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 20, textAlign: 'center' }}>Сменить фото профиля</Text>
-            <TouchableOpacity
-              style={{ backgroundColor: '#007AFF', borderRadius: 8, padding: 14, marginBottom: 12, alignItems: 'center' }}
-              onPress={pickImage}
-            >
-              <Text style={{ color: '#fff', fontSize: 16 }}>Выбрать из галереи</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{ backgroundColor: theme === DARK_THEME ? '#444' : '#eee', borderRadius: 8, padding: 14, marginBottom: 12, alignItems: 'center' }}
-              onPress={() => {}}
-              disabled
-            >
-              <Text style={{ color: theme === DARK_THEME ? '#aaa' : '#888', fontSize: 16 }}>Сгенерировать (скоро)</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{ alignItems: 'center', marginTop: 4 }}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={{ color: '#007AFF', fontSize: 16 }}>Отмена</Text>
-            </TouchableOpacity>
-          </View>
+        <View style={{ backgroundColor: theme === DARK_THEME ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 320, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Сменить фото профиля</Text>
+          <TouchableOpacity
+            style={{ backgroundColor: '#007AFF', borderRadius: 12, padding: 16, marginBottom: 16, alignItems: 'center', shadowColor: '#007AFF', shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 }}
+            onPress={pickImage}
+          >
+            <Text style={{ color: '#fff', fontSize: 17, fontWeight: '600' }}>Выбрать из галереи</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{ backgroundColor: theme === DARK_THEME ? '#444' : '#eee', borderRadius: 12, padding: 16, marginBottom: 16, alignItems: 'center' }}
+            onPress={() => {}}
+            disabled
+          >
+            <Text style={{ color: theme === DARK_THEME ? '#aaa' : '#888', fontSize: 17, fontWeight: '600' }}>Сгенерировать (скоро)</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{ alignItems: 'center', marginTop: 4 }}
+            onPress={() => setModalVisible(false)}
+          >
+            <Text style={{ color: '#007AFF', fontSize: 16 }}>Отмена</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
 
       <Modal
-        visible={notifModalVisible}
-        animationType="slide"
-        transparent
-        onRequestClose={() => setNotifModalVisible(false)}
+        isVisible={notifModalVisible}
+        onBackdropPress={() => setNotifModalVisible(false)}
+        animationIn="zoomIn"
+        animationOut="zoomOut"
+        backdropOpacity={0.35}
+        style={{ justifyContent: 'center', alignItems: 'center', margin: 0 }}
       >
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
-          <View style={{ backgroundColor: theme === DARK_THEME ? '#222' : '#fff', borderRadius: 16, padding: 24, width: 320 }}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 20, textAlign: 'center' }}>Настройки уведомлений</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 18 }}>
-              <Text style={{ flex: 1, color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 16 }}>Отключение уведомлений</Text>
-              <Switch
-                value={!notificationsEnabled ? false : true}
-                onValueChange={v => toggleNotifications(v)}
-                trackColor={{ false: '#767577', true: '#81b0ff' }}
-                thumbColor={theme === DARK_THEME ? '#007AFF' : '#f4f3f4'}
-              />
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 18 }}>
-              <Text style={{ flex: 1, color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 16 }}>Беззвучные уведомления</Text>
-              <Switch
-                value={silentNotifications}
-                onValueChange={v => toggleSilent(v)}
-                disabled={!notificationsEnabled}
-                trackColor={{ false: '#767577', true: '#81b0ff' }}
-                thumbColor={theme === DARK_THEME ? '#007AFF' : '#f4f3f4'}
-              />
-            </View>
-            <TouchableOpacity style={{ alignItems: 'center', marginTop: 4 }} onPress={() => setNotifModalVisible(false)}>
-              <Text style={{ color: '#007AFF', fontSize: 16 }}>Закрыть</Text>
-            </TouchableOpacity>
+        <View style={{ backgroundColor: theme === DARK_THEME ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 340, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Настройки уведомлений</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 22 }}>
+            <Text style={{ flex: 1, color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 17 }}>Отключение уведомлений</Text>
+            <Switch
+              value={!notificationsEnabled ? false : true}
+              onValueChange={v => toggleNotifications(v)}
+              trackColor={{ false: '#767577', true: '#81b0ff' }}
+              thumbColor={theme === DARK_THEME ? '#007AFF' : '#f4f3f4'}
+            />
           </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 22 }}>
+            <Text style={{ flex: 1, color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 17 }}>Беззвучные уведомления</Text>
+            <Switch
+              value={silentNotifications}
+              onValueChange={v => toggleSilent(v)}
+              disabled={!notificationsEnabled}
+              trackColor={{ false: '#767577', true: '#81b0ff' }}
+              thumbColor={theme === DARK_THEME ? '#007AFF' : '#f4f3f4'}
+            />
+          </View>
+          <TouchableOpacity style={{ alignItems: 'center', marginTop: 4 }} onPress={() => setNotifModalVisible(false)}>
+            <Text style={{ color: '#007AFF', fontSize: 16 }}>Закрыть</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
 
