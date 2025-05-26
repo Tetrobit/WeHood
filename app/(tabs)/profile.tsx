@@ -7,6 +7,7 @@ import { router } from 'expo-router';
 import useApi from '@/core/hooks/useApi';
 import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
+import * as Notifications from 'expo-notifications';
 
 export default function ProfileScreen() {
   const [profile] = useQuery(Profile);
@@ -17,6 +18,11 @@ export default function ProfileScreen() {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [avatarUri, setAvatarUri] = useState(profile?.avatar);
+
+  // --- уведомления ---
+  const [notifModalVisible, setNotifModalVisible] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [silentNotifications, setSilentNotifications] = useState(false);
 
   const onChangeTheme = () => {
     setTheme(theme === DARK_THEME ? LIGHT_THEME : DARK_THEME);
@@ -46,6 +52,44 @@ export default function ProfileScreen() {
     });
     if (!result.canceled && result.assets && result.assets[0]?.uri) {
       setAvatarUri(result.assets[0].uri);
+    }
+  };
+
+  // Отключение/включение уведомлений
+  const toggleNotifications = async (value: boolean) => {
+    setNotificationsEnabled(value);
+    if (value) {
+      // Включить уведомления
+      await Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: true,
+          shouldPlaySound: !silentNotifications,
+          shouldSetBadge: true,
+        }),
+      });
+    } else {
+      // Отключить уведомления (не показывать)
+      await Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: false,
+          shouldPlaySound: false,
+          shouldSetBadge: false,
+        }),
+      });
+    }
+  };
+
+  // Беззвучные уведомления
+  const toggleSilent = async (value: boolean) => {
+    setSilentNotifications(value);
+    if (notificationsEnabled) {
+      await Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: true,
+          shouldPlaySound: !value,
+          shouldSetBadge: true,
+        }),
+      });
     }
   };
 
@@ -86,7 +130,7 @@ export default function ProfileScreen() {
           <Text style={styles.menuText}>Изменить пароль</Text>
           <Ionicons name="chevron-forward" size={24} color={theme === DARK_THEME ? '#fff' : '#999'} />
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.menuItem, styles.lastMenuItem]}>
+        <TouchableOpacity style={[styles.menuItem, styles.lastMenuItem]} onPress={() => setNotifModalVisible(true)}>
           <Ionicons name="notifications-outline" size={24} color={theme === DARK_THEME ? '#fff' : '#222'} />
           <Text style={styles.menuText}>Уведомления</Text>
           <Ionicons name="chevron-forward" size={24} color={theme === DARK_THEME ? '#fff' : '#999'} />
@@ -138,6 +182,41 @@ export default function ProfileScreen() {
               onPress={() => setModalVisible(false)}
             >
               <Text style={{ color: '#007AFF', fontSize: 16 }}>Отмена</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={notifModalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setNotifModalVisible(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ backgroundColor: theme === DARK_THEME ? '#222' : '#fff', borderRadius: 16, padding: 24, width: 320 }}>
+            <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 20, textAlign: 'center' }}>Настройки уведомлений</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 18 }}>
+              <Text style={{ flex: 1, color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 16 }}>Отключение уведомлений</Text>
+              <Switch
+                value={!notificationsEnabled ? false : true}
+                onValueChange={v => toggleNotifications(v)}
+                trackColor={{ false: '#767577', true: '#81b0ff' }}
+                thumbColor={theme === DARK_THEME ? '#007AFF' : '#f4f3f4'}
+              />
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 18 }}>
+              <Text style={{ flex: 1, color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 16 }}>Беззвучные уведомления</Text>
+              <Switch
+                value={silentNotifications}
+                onValueChange={v => toggleSilent(v)}
+                disabled={!notificationsEnabled}
+                trackColor={{ false: '#767577', true: '#81b0ff' }}
+                thumbColor={theme === DARK_THEME ? '#007AFF' : '#f4f3f4'}
+              />
+            </View>
+            <TouchableOpacity style={{ alignItems: 'center', marginTop: 4 }} onPress={() => setNotifModalVisible(false)}>
+              <Text style={{ color: '#007AFF', fontSize: 16 }}>Закрыть</Text>
             </TouchableOpacity>
           </View>
         </View>
