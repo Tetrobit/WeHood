@@ -126,7 +126,7 @@ export default function HomeScreen() {
           {services.map((service) => (
             <TouchableOpacity
               key={service.id}
-              style={[styles.serviceModernCard, { backgroundColor: '#111' }]}
+              style={styles.serviceModernCard}
               activeOpacity={0.85}
               onPress={() => {router.push(`/services/${service.id}` as any)}}
             >
@@ -186,6 +186,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     shadowOpacity: 0.18,
     shadowRadius: 8,
     overflow: 'hidden',
+    backgroundColor: theme === DARK_THEME ? '#111' : '#fff',
   },
   serviceModernContent: {
     flex: 1,
@@ -201,7 +202,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   serviceModernTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#fff',
+    color: theme === DARK_THEME ? '#fff' : '#111',
     marginBottom: 2,
   },
   serviceModernImage: {
