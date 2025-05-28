@@ -6,7 +6,11 @@ import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
 import { useQuery } from '@realm/react';
 import Profile from '@/core/models/profile';
 import Carousel from 'react-native-reanimated-carousel';
+import { useQuery } from '@realm/react';
+import Profile from '@/core/models/profile';
 import { useState } from 'react';
+import { useState } from 'react';
+
 
 const { width } = Dimensions.get('window');
 
@@ -75,6 +79,7 @@ export default function HomeScreen() {
   
   const theme = useThemeName();
   const styles = makeStyles(theme);
+  const [profile] = useQuery(Profile);
 
   const renderCarouselItem = ({ item }: { item: typeof carouselData[0] }) => (
     <View style={styles.carouselItem}>
@@ -102,7 +107,7 @@ export default function HomeScreen() {
         </View>
         <TouchableOpacity onPress={() => {router.push('/profile')}}>
           <Image 
-            source={{ uri: avatarUri }}
+            source={{ uri: profile?.avatar || 'https://randomuser.me/api/portraits/men/1.jpg' }}
             style={styles.profileImage}
           />
         </TouchableOpacity>
