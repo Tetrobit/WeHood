@@ -73,6 +73,18 @@ export interface LoginResponse {
   }
 }
 
+export interface ReverseGeocodeResponse {
+  original_response: any;
+  attributes: {
+    country?: string;
+    province?: string;
+    city?: string;
+    district?: string;
+    street?: string;
+    house?: string;
+    other?: string;
+  }
+}
 export const useApi = () => {
   const realm = useRealm();
   const [profile] = useQuery(Profile);
@@ -241,6 +253,21 @@ export const useApi = () => {
     return data;
   }
 
+  const forwardGeocode = async (address: string): Promise<string> => {
+    const response = await fetch(`${API_URL}/api/geocoding/forward?address=${address}`);
+    return response.json();
+  }
+
+  const reverseGeocode = async (latitude: number, longitude: number): Promise<ReverseGeocodeResponse> => {
+    const response = await fetch(`${API_URL}/api/geocoding/reverse?latitude=${latitude}&longitude=${longitude}`);
+    return response.json();
+  }
+
+  const ipGeocode = async (): Promise<string> => {
+    const response = await fetch(`${API_URL}/api/geocoding/ip`);
+    return response.json();
+  }
+
   return {
     sendVerificationCode,
     verifyVerificationCode,
@@ -250,6 +277,9 @@ export const useApi = () => {
     register,
     login,
     logout,
+    forwardGeocode,
+    reverseGeocode,
+    ipGeocode,
   }
 }
 

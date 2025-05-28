@@ -17,8 +17,8 @@ export default function App() {
 
   useEffect(() => {
     if (!showNotice) {
-      if (profile) {  
-        router.replace('/(tabs)');
+      if (profile) {
+        router.replace('/require-geolocation');
       }
       else {
         router.replace('/auth');

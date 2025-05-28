@@ -4,6 +4,10 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router } from 'expo-router';
 import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
 import Carousel from 'react-native-reanimated-carousel';
+import * as Network from 'expo-network';
+import * as Location from 'expo-location';
+import { useEffect } from 'react';
+import useApi from '@/core/hooks/useApi';
 
 const { width } = Dimensions.get('window');
 
@@ -69,6 +73,37 @@ const serviceImages: Record<string, string> = {
 export default function HomeScreen() {
   const theme = useThemeName();
   const styles = makeStyles(theme);
+  const { forwardGeocode, reverseGeocode, ipGeocode } = useApi();
+
+  useEffect(() => {
+    const getLocation = async () => {
+      try {
+        const response = await Location.requestForegroundPermissionsAsync();
+        let geo: any = null;
+
+        if (response.status === 'granted') {
+          const position = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.Balanced,
+          });
+          geo = await reverseGeocode(position.coords.latitude, position.coords.longitude);
+        }
+        else {
+          console.log("By  IP");
+          const ip = await Network.getIpAddressAsync();
+          console.log("A",  ip);
+          const position: any = await ipGeocode();
+          geo = await reverseGeocode(position.latitude, position.longitude);
+          console.log(position);
+        }
+
+        console.log(JSON.stringify(geo, null, 2));
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    getLocation();
+  }, []);
 
   const renderCarouselItem = ({ item }: { item: typeof carouselData[0] }) => (
     <View style={styles.carouselItem}>
