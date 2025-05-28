@@ -9,14 +9,21 @@ import { openSettings } from 'react-native-permissions';
 import LottieView from 'lottie-react-native';
 import { wait } from '@/core/utils/time';
 import { useSharedValue } from 'react-native-reanimated';
+import { useQuery, useRealm } from '@realm/react';
+import Theme from '@/core/models/theme';
+import { useColorScheme } from 'react-native';
 
 export const Greeting = () => {
+  const systemTheme = useColorScheme();
   const pagerRef = useRef<PagerView>(null);
   const themeName = useThemeName();
   const setThemeName = useSetTheme();
   const { requestGeolocation } = useGeolocation();
   const animationRef = useRef<LottieView>(null);
   const isSwitched = useSharedValue(true);
+  const [isThemeSwitched, setIsThemeSwitched] = useState(true);
+  const [realmTheme] = useQuery(Theme)
+  const realm = useRealm();
 
   const handleNext = (page: number) => {
     pagerRef.current?.setPage(page);
@@ -28,7 +35,7 @@ export const Greeting = () => {
 
   const handleThemeChange = async (theme: typeof THEMES[number]) => {
     if (!isSwitched.value) return;
-
+    setIsThemeSwitched(false);
     isSwitched.value = false;
     setThemeName(theme);
     setStatusBarBackgroundColor(theme === 'light' ? '#ffffff' : '#000000');
@@ -45,7 +52,28 @@ export const Greeting = () => {
     }
 
     isSwitched.value = true;
+    setIsThemeSwitched(true);
   };
+
+  React.useEffect(() => {
+    async function init() {
+      if (realmTheme) {
+        realm.write(() => {
+          realmTheme.name = systemTheme === 'dark' ? 'dark' : 'light';
+        });
+      }
+
+      if (systemTheme === 'dark') {
+        animationRef.current?.play(100, 100);
+      }
+      else {
+        animationRef.current?.play(1, 1);
+      }
+      await wait(20);
+      // animationRef.current?.pause();
+    }
+    init();
+  }, []);
 
   const theme = useTheme();
   const styles = StyleSheet.create({
@@ -69,6 +97,12 @@ export const Greeting = () => {
       textAlign: 'center',
       color: theme.textColor,
     },
+    subtitle: {
+      fontSize: 18,
+      marginBottom: 20,
+      textAlign: 'center',
+      color: theme.textColor + '99',
+    },
     description: {
       fontSize: 16,
       textAlign: 'center',
@@ -80,6 +114,18 @@ export const Greeting = () => {
       justifyContent: 'space-around',
       width: '100%',
       marginBottom: 30,
+    },
+    themeContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: '100%',
+    },
+    bottomContainer: {
+      position: 'absolute',
+      bottom: 40,
+      left: 20,
+      right: 20,
     },
     themeButton: {
       padding: 15,
@@ -149,8 +195,9 @@ export const Greeting = () => {
       >
         {/* Страница выбора темы */}
         <View key="1" style={styles.page}>
-          <Text style={styles.title}>Давайте настроим приложение</Text>
-          <View style={styles.themeButtons}>
+          <View style={styles.themeContainer}>
+            <Text style={styles.title}>Давайте настроим приложение</Text>
+            <Text style={styles.subtitle}>Выберите тему</Text>
             <TouchableOpacity activeOpacity={0.9} onPress={() => handleThemeChange(themeName === 'light' ? 'dark' : 'light')}>
               <LottieView 
                 ref={animationRef}
@@ -159,22 +206,17 @@ export const Greeting = () => {
                 style={{ width: 300, height: 200 }}
               />
             </TouchableOpacity>
-            {/* <TouchableOpacity 
-              style={[styles.themeButton, themeName === 'light' && styles.activeTheme]} 
-              onPress={() => handleThemeChange('light')}
-            >
-              <Text style={[styles.themeButtonText, themeName === 'light' && styles.activeTheme]}>Светлая</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.themeButton, themeName === 'dark' && styles.activeTheme]} 
-              onPress={() => handleThemeChange('dark')}
-            >
-              <Text style={[styles.themeButtonText, themeName === 'dark' && styles.activeTheme]}>Тёмная</Text>
-            </TouchableOpacity> */}
+            <Text style={styles.description}>
+              {themeName === 'light' 
+                ? 'Мы выбрали светлую тему, так как она была выбрана в настройках вашего устройства'
+                : 'Мы выбрали тёмную тему, так как она была выбрана в настройках вашего устройства'}
+            </Text>
           </View>
-          <TouchableOpacity style={styles.nextButton} onPress={() => handleNext(1)}>
-            <Text style={styles.nextButtonText}>Далее</Text>
-          </TouchableOpacity>
+          <View style={styles.bottomContainer}>
+            <TouchableOpacity style={styles.nextButton} onPress={() => handleNext(1)}>
+              <Text style={styles.nextButtonText}>Далее</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Страница геолокации */}
