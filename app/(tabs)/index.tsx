@@ -3,7 +3,10 @@ import { Card, Button } from 'react-native-paper';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router } from 'expo-router';
 import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
+import { useQuery } from '@realm/react';
+import Profile from '@/core/models/profile';
 import Carousel from 'react-native-reanimated-carousel';
+import { useState } from 'react';
 
 const { width } = Dimensions.get('window');
 
@@ -66,7 +69,10 @@ const serviceImages: Record<string, string> = {
   'Соседи': 'https://cdn-icons-png.flaticon.com/512/2922/2922510.png', // люди, цветные
 };
 
-export default function HomeScreen() {
+export default function HomeScreen() {  
+  const [profile] = useQuery(Profile);
+  const [avatarUri, setAvatarUri] = useState(profile?.avatar);
+  
   const theme = useThemeName();
   const styles = makeStyles(theme);
 
@@ -96,7 +102,7 @@ export default function HomeScreen() {
         </View>
         <TouchableOpacity onPress={() => {router.push('/profile')}}>
           <Image 
-            source={{ uri: 'https://randomuser.me/api/portraits/men/1.jpg' }}
+            source={{ uri: avatarUri }}
             style={styles.profileImage}
           />
         </TouchableOpacity>
