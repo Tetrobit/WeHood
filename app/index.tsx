@@ -5,9 +5,11 @@ import { Redirect, router } from "expo-router";
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Animated, Easing, useColorScheme } from "react-native";
 import Profile from "@/core/models/profile";
+import { useThemeName } from "@/core/hooks/useTheme";
 
 export default function App() {
   const systemTheme = useColorScheme();
+  const themeName = useThemeName();
   const [theme] = useQuery(Theme);
   const realm = useRealm();
   const [timeLeft, setTimeLeft] = useState(5);
@@ -18,7 +20,12 @@ export default function App() {
   useEffect(() => {
     if (!showNotice) {
       if (profile) {
-        router.replace('/require-geolocation');
+        if (!themeName) {
+          router.replace('/greeting');
+        }
+        else {
+          router.replace('/(tabs)');
+        }
       }
       else {
         router.replace('/auth');
@@ -43,14 +50,12 @@ export default function App() {
     if (timeLeft === 0) {
       setShowNotice(false);
     }
+    if (theme) {
+      realm.write(() => {
+        realm.delete(theme);
+      });
+    }
   }, [timeLeft]);
-
-  if (!theme) {
-    realm.write(() => {
-      realm.create(Theme, Theme.generate(systemTheme === 'dark' ? 'dark' : 'light'));
-    });
-    return null;
-  }
 
   return (
     <View style={styles.container}>
