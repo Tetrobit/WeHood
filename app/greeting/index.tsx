@@ -1,24 +1,25 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import { useTheme, useThemeName, useSetTheme, THEMES } from '@/core/hooks/useTheme';
 import { useGeolocation } from '@/core/hooks/useGeolocation';
 import { router } from 'expo-router';
-import { setStatusBarBackgroundColor, StatusBar } from 'expo-status-bar';
-import { openSettings } from 'react-native-permissions';
+import { setStatusBarBackgroundColor } from 'expo-status-bar';
 import LottieView from 'lottie-react-native';
 import { wait } from '@/core/utils/time';
 import { useSharedValue } from 'react-native-reanimated';
 import { useQuery, useRealm } from '@realm/react';
 import Theme from '@/core/models/theme';
 import { useColorScheme } from 'react-native';
+import ToastManager, { Toast } from 'toastify-react-native';
+import { Greeting } from '@/core/models/greeting';
 
-export const Greeting = () => {
+export const GreetingScreen = () => {
   const systemTheme = useColorScheme();
   const pagerRef = useRef<PagerView>(null);
   const themeName = useThemeName();
   const setThemeName = useSetTheme();
-  const { requestGeolocation } = useGeolocation();
+  const { location, errorMsg: errorLocation, requestGeolocation } = useGeolocation();
   const animationRef = useRef<LottieView>(null);
   const isSwitched = useSharedValue(true);
   const [isThemeSwitched, setIsThemeSwitched] = useState(true);
@@ -30,6 +31,9 @@ export const Greeting = () => {
   };
 
   const handleFinish = () => {
+    realm.write(() => {
+      realm.create(Greeting, Greeting.generate(true));
+    });
     router.replace('/(tabs)');
   };
 
@@ -70,7 +74,6 @@ export const Greeting = () => {
         animationRef.current?.play(1, 1);
       }
       await wait(20);
-      // animationRef.current?.pause();
     }
     init();
   }, []);
@@ -179,7 +182,7 @@ export const Greeting = () => {
       alignItems: 'center',
     },
     finishButtonText: {
-      color: theme.buttonTextColor,
+      color: 'white',
       fontSize: 16,
       fontWeight: '500',
     },
@@ -221,19 +224,41 @@ export const Greeting = () => {
 
         {/* Страница геолокации */}
         <View key="2" style={styles.page}>
+          <LottieView
+            source={require('@/assets/lottie/geolocation.json')}
+            style={{ width: 400, height: 300 }}
+            loop={true}
+            autoPlay={true}
+          />
           <Text style={styles.title}>Геолокация</Text>
           <Text style={styles.description}>
             Для корректной работы приложения нам нужен доступ к вашей геолокации
           </Text>
-          <TouchableOpacity 
-            style={styles.geoButton} 
-            onPress={requestGeolocation}
-          >
-            <Text style={styles.geoButtonText}>Разрешить доступ</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.nextButton} onPress={() => handleNext(2)}>
-            <Text style={styles.nextButtonText}>Далее</Text>
-          </TouchableOpacity>
+          {!location && (
+            <TouchableOpacity 
+              style={styles.geoButton} 
+              onPress={() => requestGeolocation().then((result) => {
+                if (!result) {
+                  Toast.error('Произошла ошибка при получении геолокации');
+                }
+                else {
+                  Toast.success('Геолокация успешно получена');
+                }
+              })}
+            >
+              <Text style={styles.geoButtonText}>Разрешить доступ</Text>
+            </TouchableOpacity>
+          )}
+          { !location && errorLocation && (
+            <TouchableOpacity style={styles.nextButton} onPress={() => Linking.openSettings()}>
+              <Text style={styles.nextButtonText}>Открыть настройки</Text>
+            </TouchableOpacity>
+          )}
+          { location && (
+            <TouchableOpacity style={styles.nextButton} onPress={() => handleNext(2)}>
+              <Text style={styles.nextButtonText}>Далее</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Финальная страница */}
@@ -247,8 +272,9 @@ export const Greeting = () => {
           </TouchableOpacity>
         </View>
       </PagerView>
+      <ToastManager />
     </View>
   );
 };
 
-export default Greeting;
+export default GreetingScreen;

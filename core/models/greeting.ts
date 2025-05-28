@@ -1,6 +1,6 @@
 import { Realm } from '@realm/react';
 
-class Greeting extends Realm.Object<Greeting, "isCompleted"> {
+export class Greeting extends Realm.Object<Greeting, "isCompleted"> {
   _id = new Realm.BSON.ObjectId();
   isCompleted!: boolean;
 

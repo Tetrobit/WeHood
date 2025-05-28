@@ -19,6 +19,7 @@ export default function App() {
   const [profile] = useQuery(Profile);
 
   useEffect(() => {
+    console.log(greeting);
     if (!showNotice) {
       if (profile) {
         if (!greeting) {
@@ -50,11 +51,6 @@ export default function App() {
   useEffect(() => {
     if (timeLeft === 0) {
       setShowNotice(false);
-    }
-    if (greeting) {
-      realm.write(() => {
-        realm.delete(greeting);
-      });
     }
   }, [timeLeft]);
 
