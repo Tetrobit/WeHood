@@ -9,6 +9,7 @@ import { useState } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import * as Notifications from 'expo-notifications';
 import Modal from 'react-native-modal';
+import { Toast } from 'toastify-react-native';
 
 export default function ProfileScreen() {
   const [profile] = useQuery(Profile);
@@ -160,6 +161,13 @@ export default function ProfileScreen() {
             thumbColor={theme === DARK_THEME ? '#007AFF' : '#f4f3f4'}
           />
         </View>
+        <View style={[styles.menuItem, styles.lastMenuItem]}>
+          <Ionicons name="settings-outline" size={24} color={theme === DARK_THEME ? '#fff' : '#222'} />
+          <Text style={styles.menuText}>Настройки</Text>
+          <TouchableOpacity onPress={() => Toast.info('Пока недоступно', 'top')} style={{marginLeft: 'auto'}}>
+            <Ionicons name="chevron-forward" size={24} color={theme === DARK_THEME ? '#fff' : '#999'} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <Modal
@@ -167,7 +175,11 @@ export default function ProfileScreen() {
         onBackdropPress={() => setModalVisible(false)}
         animationIn="zoomIn"
         animationOut="zoomOut"
+        animationInTiming={350}
+        animationOutTiming={350}
         backdropOpacity={0.35}
+        backdropTransitionInTiming={400}
+        backdropTransitionOutTiming={400}
         style={{ justifyContent: 'center', alignItems: 'center', margin: 0 }}
       >
         <View style={{ backgroundColor: theme === DARK_THEME ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 320, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
@@ -199,7 +211,11 @@ export default function ProfileScreen() {
         onBackdropPress={() => setNotifModalVisible(false)}
         animationIn="zoomIn"
         animationOut="zoomOut"
+        animationInTiming={350}
+        animationOutTiming={350}
         backdropOpacity={0.35}
+        backdropTransitionInTiming={400}
+        backdropTransitionOutTiming={400}
         style={{ justifyContent: 'center', alignItems: 'center', margin: 0 }}
       >
         <View style={{ backgroundColor: theme === DARK_THEME ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 340, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
