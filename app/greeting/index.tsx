@@ -1,16 +1,22 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import PagerView from 'react-native-pager-view';
-import { useTheme, useThemeName, useSetTheme } from '@/core/hooks/useTheme';
+import { useTheme, useThemeName, useSetTheme, THEMES } from '@/core/hooks/useTheme';
 import { useGeolocation } from '@/core/hooks/useGeolocation';
 import { router } from 'expo-router';
+import { setStatusBarBackgroundColor, StatusBar } from 'expo-status-bar';
+import { openSettings } from 'react-native-permissions';
+import LottieView from 'lottie-react-native';
+import { wait } from '@/core/utils/time';
+import { useSharedValue } from 'react-native-reanimated';
 
 export const Greeting = () => {
   const pagerRef = useRef<PagerView>(null);
   const themeName = useThemeName();
   const setThemeName = useSetTheme();
-
   const { requestGeolocation } = useGeolocation();
+  const animationRef = useRef<LottieView>(null);
+  const isSwitched = useSharedValue(true);
 
   const handleNext = (page: number) => {
     pagerRef.current?.setPage(page);
@@ -19,6 +25,119 @@ export const Greeting = () => {
   const handleFinish = () => {
     router.replace('/(tabs)');
   };
+
+  const handleThemeChange = async (theme: typeof THEMES[number]) => {
+    if (!isSwitched.value) return;
+
+    isSwitched.value = false;
+    setThemeName(theme);
+    setStatusBarBackgroundColor(theme === 'light' ? '#ffffff' : '#000000');
+    if (theme === 'dark') {
+      animationRef.current!.setState({ direction: 1 });
+      animationRef.current?.play(60, 100);
+      await wait(800);
+      animationRef.current?.pause();
+    }
+    else {
+      animationRef.current!.play(80, 40);
+      await wait(800);
+      animationRef.current?.pause();
+    }
+
+    isSwitched.value = true;
+  };
+
+  const theme = useTheme();
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.backgroundColor,
+    },
+    pager: {
+      flex: 1,
+    },
+    page: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      marginBottom: 30,
+      textAlign: 'center',
+      color: theme.textColor,
+    },
+    description: {
+      fontSize: 16,
+      textAlign: 'center',
+      marginBottom: 30,
+      color: theme.textColor + '99',
+    },
+    themeButtons: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      width: '100%',
+      marginBottom: 30,
+    },
+    themeButton: {
+      padding: 15,
+      borderRadius: 8,
+      backgroundColor: theme.backgroundColor,
+      borderWidth: 1,
+      borderColor: theme.borderColor,
+      width: '45%',
+      alignItems: 'center',
+    },
+    activeTheme: {
+      backgroundColor: themeName == 'light' ? '#000000' : '#ffffff',
+      borderColor: themeName == 'light' ? '#000000' : '#ffffff',
+      color: themeName == 'light' ? '#ffffff' : '#000000',
+    },
+    themeButtonText: {
+      fontSize: 16,
+      fontWeight: '500',
+      color: theme.textColor,
+    },
+    geoButton: {
+      backgroundColor: theme.buttonColor,
+      padding: 15,
+      borderRadius: 8,
+      width: '100%',
+      alignItems: 'center',
+      marginBottom: 20,
+    },
+    geoButtonText: {
+      color: theme.buttonTextColor,
+      fontSize: 16,
+      fontWeight: '500',
+    },
+    nextButton: {
+      backgroundColor: theme.buttonColor,
+      padding: 15,
+      borderRadius: 8,
+      width: '100%',
+      alignItems: 'center',
+    },
+    nextButtonText: {
+      color: theme.buttonTextColor,
+      fontSize: 16,
+      fontWeight: '500',
+    },
+    finishButton: {
+      backgroundColor: '#34C759',
+      padding: 15,
+      borderRadius: 8,
+      width: '100%',
+      alignItems: 'center',
+    },
+    finishButtonText: {
+      color: theme.buttonTextColor,
+      fontSize: 16,
+      fontWeight: '500',
+    },
+  });
 
   return (
     <View style={styles.container}>
@@ -30,20 +149,28 @@ export const Greeting = () => {
       >
         {/* Страница выбора темы */}
         <View key="1" style={styles.page}>
-          <Text style={styles.title}>Выберите тему</Text>
+          <Text style={styles.title}>Давайте настроим приложение</Text>
           <View style={styles.themeButtons}>
-            <TouchableOpacity 
+            <TouchableOpacity activeOpacity={0.9} onPress={() => handleThemeChange(themeName === 'light' ? 'dark' : 'light')}>
+              <LottieView 
+                ref={animationRef}
+                autoPlay={false}
+                source={require('@/assets/lottie/theme.json')}
+                style={{ width: 300, height: 200 }}
+              />
+            </TouchableOpacity>
+            {/* <TouchableOpacity 
               style={[styles.themeButton, themeName === 'light' && styles.activeTheme]} 
-              onPress={() => setThemeName('light')}
+              onPress={() => handleThemeChange('light')}
             >
-              <Text style={styles.themeButtonText}>Светлая</Text>
+              <Text style={[styles.themeButtonText, themeName === 'light' && styles.activeTheme]}>Светлая</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={[styles.themeButton, themeName === 'dark' && styles.activeTheme]} 
-              onPress={() => setThemeName('dark')}
+              onPress={() => handleThemeChange('dark')}
             >
-              <Text style={styles.themeButtonText}>Тёмная</Text>
-            </TouchableOpacity>
+              <Text style={[styles.themeButtonText, themeName === 'dark' && styles.activeTheme]}>Тёмная</Text>
+            </TouchableOpacity> */}
           </View>
           <TouchableOpacity style={styles.nextButton} onPress={() => handleNext(1)}>
             <Text style={styles.nextButtonText}>Далее</Text>
@@ -81,90 +208,5 @@ export const Greeting = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  pager: {
-    flex: 1,
-  },
-  page: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 30,
-    textAlign: 'center',
-  },
-  description: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 30,
-    color: '#666',
-  },
-  themeButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    marginBottom: 30,
-  },
-  themeButton: {
-    padding: 15,
-    borderRadius: 8,
-    backgroundColor: '#f0f0f0',
-    width: '45%',
-    alignItems: 'center',
-  },
-  activeTheme: {
-    backgroundColor: '#007AFF',
-  },
-  themeButtonText: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  geoButton: {
-    backgroundColor: '#007AFF',
-    padding: 15,
-    borderRadius: 8,
-    width: '100%',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  geoButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  nextButton: {
-    backgroundColor: '#007AFF',
-    padding: 15,
-    borderRadius: 8,
-    width: '100%',
-    alignItems: 'center',
-  },
-  nextButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  finishButton: {
-    backgroundColor: '#34C759',
-    padding: 15,
-    borderRadius: 8,
-    width: '100%',
-    alignItems: 'center',
-  },
-  finishButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-});
 
 export default Greeting;

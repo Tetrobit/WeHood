@@ -6,10 +6,11 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Animated, Easing, useColorScheme } from "react-native";
 import Profile from "@/core/models/profile";
 import { useThemeName } from "@/core/hooks/useTheme";
+import Greeting from "@/core/models/greeting";
 
 export default function App() {
   const systemTheme = useColorScheme();
-  const themeName = useThemeName();
+  const [greeting] = useQuery(Greeting);
   const [theme] = useQuery(Theme);
   const realm = useRealm();
   const [timeLeft, setTimeLeft] = useState(5);
@@ -20,7 +21,7 @@ export default function App() {
   useEffect(() => {
     if (!showNotice) {
       if (profile) {
-        if (!themeName) {
+        if (!greeting) {
           router.replace('/greeting');
         }
         else {
@@ -50,9 +51,9 @@ export default function App() {
     if (timeLeft === 0) {
       setShowNotice(false);
     }
-    if (theme) {
+    if (greeting) {
       realm.write(() => {
-        realm.delete(theme);
+        realm.delete(greeting);
       });
     }
   }, [timeLeft]);
