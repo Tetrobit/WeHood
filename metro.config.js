@@ -6,6 +6,7 @@ config.resolver.assetExts.push(
   'obj',
   'glb',
   'mtl',
+  'lottie',
 );
 
 module.exports = config;

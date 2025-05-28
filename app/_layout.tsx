@@ -4,11 +4,13 @@ import { DARK_THEME } from "@/core/hooks/useTheme";
 import StorageProvider from "@/core/models";
 import React from "react";
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
+import ToastManager from 'toastify-react-native';
 
 export default function RootLayoutWrapper() {
   return (
     <StorageProvider>
       <RootLayout />
+      <ToastManager />
     </StorageProvider>
   )
 }
@@ -27,8 +29,9 @@ function RootLayout() {
 
   return (
     <Stack>
-      <Stack.Screen name="index" options={{ headerShown: false, statusBarStyle: 'light', statusBarBackgroundColor: '#393790' }} />
-      <Stack.Screen name="auth" options={{ headerShown: false, statusBarStyle: 'light', statusBarBackgroundColor: '#393790' }} />
+      <Stack.Screen name="index" options={{ headerShown: false, statusBarStyle: 'light' }} />
+      <Stack.Screen name="auth/index" options={{ headerShown: false, statusBarStyle: 'light', statusBarBackgroundColor: '#393790' }} />
+      <Stack.Screen name="auth/vk" options={{ headerShown: false, statusBarStyle: 'light' }} />
       <Stack.Screen name="(tabs)" options={defaultConfig} />
       <Stack.Screen name="weather" options={defaultConfig} />
       <Stack.Screen name="weather-details" options={defaultConfig} />
