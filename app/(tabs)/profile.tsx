@@ -13,6 +13,7 @@ import { Easing } from 'react-native';
 import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ArrowLeftIcon } from 'lucide-react-native';
 
 const HOBBIES = [
   'Спорт',
@@ -61,6 +62,10 @@ export default function ProfileScreen() {
     age: '',
     hobbies: [] as string[],
   });
+  const [displayName, setDisplayName] = useState({
+    firstName: profile?.firstName || '',
+    lastName: profile?.lastName || '',
+  });
 
   // Загрузка данных из AsyncStorage при открытии формы
   useEffect(() => {
@@ -91,6 +96,7 @@ export default function ProfileScreen() {
   };
   const handleSaveEdit = async () => {
     await AsyncStorage.setItem('profileEditData', JSON.stringify(editData));
+    setDisplayName({ firstName: editData.firstName, lastName: editData.lastName });
     setEditTab(false);
   };
 
@@ -212,23 +218,60 @@ export default function ProfileScreen() {
   if (editTab) {
     return (
       <View style={[styles.container, { padding: 20 }]}> 
-        <Text style={{ fontSize: 22, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Редактировать профиль</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, position: 'relative', height: 36 }}>
+          <TouchableOpacity onPress={() => setEditTab(false)} style={{ position: 'absolute', left: 0, top: 0, padding: 2, zIndex: 2 }}>
+            <ArrowLeftIcon size={22} color={theme === DARK_THEME ? '#fff' : '#222'} />
+          </TouchableOpacity>
+          <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <Text style={{ fontSize: 18, fontWeight: '500', color: theme === DARK_THEME ? '#fff' : '#222', textAlign: 'center' }}>Редактировать профиль</Text>
+          </View>
+        </View>
+        <Text style={{ color: theme === DARK_THEME ? '#aaa' : '#666', fontSize: 15, marginBottom: 2, marginLeft: 4 }}>Имя</Text>
         <TextInput
-          style={[styles.input, { color: theme === DARK_THEME ? '#fff' : '#222', backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5' }]}
+          style={[
+            styles.input,
+            {
+              color: theme === DARK_THEME ? '#fff' : '#222',
+              backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5',
+              borderWidth: 1,
+              borderColor: theme === DARK_THEME ? '#444' : '#ccc',
+              borderRadius: 10,
+            },
+          ]}
           placeholder="Имя"
           placeholderTextColor={theme === DARK_THEME ? '#888' : '#aaa'}
           value={editData.firstName}
           onChangeText={v => handleEditChange('firstName', v)}
         />
+        <Text style={{ color: theme === DARK_THEME ? '#aaa' : '#666', fontSize: 15, marginBottom: 2, marginTop: 8, marginLeft: 4 }}>Фамилия</Text>
         <TextInput
-          style={[styles.input, { color: theme === DARK_THEME ? '#fff' : '#222', backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5' }]}
+          style={[
+            styles.input,
+            {
+              color: theme === DARK_THEME ? '#fff' : '#222',
+              backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5',
+              borderWidth: 1,
+              borderColor: theme === DARK_THEME ? '#444' : '#ccc',
+              borderRadius: 10,
+            },
+          ]}
           placeholder="Фамилия"
           placeholderTextColor={theme === DARK_THEME ? '#888' : '#aaa'}
           value={editData.lastName}
           onChangeText={v => handleEditChange('lastName', v)}
         />
+        <Text style={{ color: theme === DARK_THEME ? '#aaa' : '#666', fontSize: 15, marginBottom: 2, marginTop: 8, marginLeft: 4 }}>Возраст</Text>
         <TextInput
-          style={[styles.input, { color: theme === DARK_THEME ? '#fff' : '#222', backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5' }]}
+          style={[
+            styles.input,
+            {
+              color: theme === DARK_THEME ? '#fff' : '#222',
+              backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5',
+              borderWidth: 1,
+              borderColor: theme === DARK_THEME ? '#444' : '#ccc',
+              borderRadius: 10,
+            },
+          ]}
           placeholder="Возраст"
           placeholderTextColor={theme === DARK_THEME ? '#888' : '#aaa'}
           value={editData.age}
@@ -236,7 +279,7 @@ export default function ProfileScreen() {
           keyboardType="numeric"
         />
         <Text style={{ color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 16, marginTop: 18, marginBottom: 8 }}>Увлечения:</Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
           {HOBBIES.map(hobby => (
             <TouchableOpacity
               key={hobby}
@@ -245,10 +288,11 @@ export default function ProfileScreen() {
                   ? (theme === DARK_THEME ? '#007AFF' : '#007AFF')
                   : (theme === DARK_THEME ? '#333' : '#eee'),
                 borderRadius: 16,
-                paddingHorizontal: 16,
-                paddingVertical: 8,
-                marginBottom: 8,
-                marginRight: 8,
+                paddingHorizontal: 14,
+                paddingVertical: 7,
+                marginBottom: 6,
+                marginRight: 6,
+                marginTop: 0,
               }}
               onPress={() => handleToggleHobby(hobby)}
             >
@@ -261,9 +305,6 @@ export default function ProfileScreen() {
           onPress={handleSaveEdit}
         >
           <Text style={{ color: '#fff', fontSize: 17, fontWeight: '600' }}>Сохранить</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={{ alignItems: 'center', marginTop: 8 }} onPress={() => setEditTab(false)}>
-          <Text style={{ color: '#007AFF', fontSize: 16 }}>Назад</Text>
         </TouchableOpacity>
       </View>
     );
@@ -315,7 +356,7 @@ export default function ProfileScreen() {
               <Ionicons name="camera" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
-          <Text style={styles.name}>{profile?.firstName} {profile?.lastName}</Text>
+          <Text style={styles.name}>{displayName.firstName} {displayName.lastName}</Text>
           <Text style={styles.email}>{profile?.email}</Text>
         </View>
 
