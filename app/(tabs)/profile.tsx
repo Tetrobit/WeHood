@@ -5,13 +5,27 @@ import { useQuery } from '@realm/react';
 import Profile from '@/core/models/profile';
 import { router } from 'expo-router';
 import useApi from '@/core/hooks/useApi';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import * as Notifications from 'expo-notifications';
 import Modal from 'react-native-modal';
 import { Easing } from 'react-native';
 import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const HOBBIES = [
+  'Спорт',
+  'Музыка',
+  'Игры',
+  'Путешествия',
+  'Кулинария',
+  'Чтение',
+  'Кино',
+  'Технологии',
+  'Искусство',
+  'Фотография',
+];
 
 export default function ProfileScreen() {
   const [profile] = useQuery(Profile);
@@ -39,6 +53,46 @@ export default function ProfileScreen() {
     defaultValues: { oldPassword: '', newPassword: '', repeatPassword: '' },
   });
   const newPassword = watch('newPassword');
+
+  const [editTab, setEditTab] = useState(false);
+  const [editData, setEditData] = useState({
+    firstName: '',
+    lastName: '',
+    age: '',
+    hobbies: [] as string[],
+  });
+
+  // Загрузка данных из AsyncStorage при открытии формы
+  useEffect(() => {
+    if (editTab) {
+      (async () => {
+        const saved = await AsyncStorage.getItem('profileEditData');
+        if (saved) setEditData(JSON.parse(saved));
+        else setEditData({
+          firstName: profile?.firstName || '',
+          lastName: profile?.lastName || '',
+          age: '',
+          hobbies: [],
+        });
+      })();
+    }
+  }, [editTab]);
+
+  const handleEditChange = (field: string, value: string) => {
+    setEditData(prev => ({ ...prev, [field]: value }));
+  };
+  const handleToggleHobby = (hobby: string) => {
+    setEditData(prev => ({
+      ...prev,
+      hobbies: prev.hobbies.includes(hobby)
+        ? prev.hobbies.filter(h => h !== hobby)
+        : [...prev.hobbies, hobby],
+    }));
+  };
+  const handleSaveEdit = async () => {
+    await AsyncStorage.setItem('profileEditData', JSON.stringify(editData));
+    setEditTab(false);
+  };
 
   const onChangeTheme = () => {
     setTheme(theme === DARK_THEME ? LIGHT_THEME : DARK_THEME);
@@ -155,6 +209,66 @@ export default function ProfileScreen() {
     }
   };
 
+  if (editTab) {
+    return (
+      <View style={[styles.container, { padding: 20 }]}> 
+        <Text style={{ fontSize: 22, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Редактировать профиль</Text>
+        <TextInput
+          style={[styles.input, { color: theme === DARK_THEME ? '#fff' : '#222', backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5' }]}
+          placeholder="Имя"
+          placeholderTextColor={theme === DARK_THEME ? '#888' : '#aaa'}
+          value={editData.firstName}
+          onChangeText={v => handleEditChange('firstName', v)}
+        />
+        <TextInput
+          style={[styles.input, { color: theme === DARK_THEME ? '#fff' : '#222', backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5' }]}
+          placeholder="Фамилия"
+          placeholderTextColor={theme === DARK_THEME ? '#888' : '#aaa'}
+          value={editData.lastName}
+          onChangeText={v => handleEditChange('lastName', v)}
+        />
+        <TextInput
+          style={[styles.input, { color: theme === DARK_THEME ? '#fff' : '#222', backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5' }]}
+          placeholder="Возраст"
+          placeholderTextColor={theme === DARK_THEME ? '#888' : '#aaa'}
+          value={editData.age}
+          onChangeText={v => handleEditChange('age', v.replace(/[^0-9]/g, ''))}
+          keyboardType="numeric"
+        />
+        <Text style={{ color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 16, marginTop: 18, marginBottom: 8 }}>Увлечения:</Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+          {HOBBIES.map(hobby => (
+            <TouchableOpacity
+              key={hobby}
+              style={{
+                backgroundColor: editData.hobbies.includes(hobby)
+                  ? (theme === DARK_THEME ? '#007AFF' : '#007AFF')
+                  : (theme === DARK_THEME ? '#333' : '#eee'),
+                borderRadius: 16,
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                marginBottom: 8,
+                marginRight: 8,
+              }}
+              onPress={() => handleToggleHobby(hobby)}
+            >
+              <Text style={{ color: editData.hobbies.includes(hobby) ? '#fff' : (theme === DARK_THEME ? '#fff' : '#222'), fontSize: 15 }}>{hobby}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        <TouchableOpacity
+          style={{ backgroundColor: '#007AFF', borderRadius: 12, padding: 16, marginTop: 24, alignItems: 'center' }}
+          onPress={handleSaveEdit}
+        >
+          <Text style={{ color: '#fff', fontSize: 17, fontWeight: '600' }}>Сохранить</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={{ alignItems: 'center', marginTop: 8 }} onPress={() => setEditTab(false)}>
+          <Text style={{ color: '#007AFF', fontSize: 16 }}>Назад</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <>
       {/* Кастомный toast */}
@@ -207,7 +321,7 @@ export default function ProfileScreen() {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Личная информация</Text>
-          <TouchableOpacity style={styles.menuItem}>
+          <TouchableOpacity style={styles.menuItem} onPress={() => setEditTab(true)}>
             <Ionicons name="person-outline" size={24} color={theme === DARK_THEME ? '#fff' : '#222'} />
             <Text style={styles.menuText}>Редактировать профиль</Text>
             <Ionicons name="chevron-forward" size={24} color={theme === DARK_THEME ? '#fff' : '#999'} />
