@@ -107,6 +107,16 @@ const services: Service[] = [
     category: 'Объявления',
     isAccordion: false,
     target: { pathname: '/services/events/events' },
+  },
+  {
+    id: '5',
+    title: 'События',
+    description: 'Городские события и встречи',
+    icon: 'calendar-star',
+    color: '#4ECDC4',
+    category: 'События',
+    isAccordion: false,
+    target: { pathname: '/services/events-city/events' },
   }
 ];
 

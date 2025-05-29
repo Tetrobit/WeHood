@@ -10,14 +10,14 @@ const demoEvents = [
     id: '1',
     title: 'Открытие нового парка',
     description: 'В эту субботу состоится открытие нового парка в центре города. Приглашаем всех!',
-    image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80',
+    image: 'https://static.tildacdn.com/tild3163-3437-4265-a261-353166373462/5353058457198124841.jpg',
     date: '2024-06-10',
   },
   {
     id: '2',
     title: 'Отключение воды',
     description: 'Внимание! 12 июня с 9:00 до 18:00 будет отключена вода в связи с ремонтными работами.',
-    image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=800&q=80',
+    image: 'https://f78e1a6a-ca4c-458a-b3f0-9f53a2bad2a5.selstorage.ru/2025-04-22/MADa2UbcSajCxPqT.png',
     date: '2024-06-12',
   },
 ];
