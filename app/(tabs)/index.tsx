@@ -6,9 +6,6 @@ import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
 import { useQuery } from '@realm/react';
 import Profile from '@/core/models/profile';
 import Carousel from 'react-native-reanimated-carousel';
-import { useQuery } from '@realm/react';
-import Profile from '@/core/models/profile';
-import { useState } from 'react';
 import { useState } from 'react';
 
 
@@ -22,14 +19,14 @@ const mockNews = [
     title: 'Субботник в парке',
     description: 'В эту субботу состоится уборка территории парка. Приглашаем всех желающих!',
     time: '2 часа назад',
-    image: 'https://images.unsplash.com/photo-1519834785169-98be25ec3f84',
+    image: 'https://img.freepik.com/premium-vector/people-collecting-garbage-city-park-men-women-volunteers-cleaning-park-together-from-trash_461812-205.jpg', // люди убираются в парке
   },
   {
     id: '2',
     title: 'Новая детская площадка',
     description: 'В нашем районе открылась современная детская площадка',
     time: '4 часа назад',
-    image: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a',
+    image: 'https://sp-izumrud.ru/wp-content/uploads/2018/08/Sanatorij-Izumrud-19.jpg', // современная детская площадка
   },
 ];
 
@@ -56,13 +53,13 @@ const carouselData = [
     id: '2',
     title: 'Будьте активны',
     description: 'Участвуйте в жизни района',
-    image: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a',
+    image: 'https://img.freepik.com/free-photo/people-attending-therapy-meeting_23-2151083315.jpg', // бегущий человек на фоне природы
   },
   {
     id: '3',
     title: 'Помогайте соседям',
     description: 'Создавайте крепкое сообщество',
-    image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2',
+    image: 'https://img.freepik.com/free-photo/business-agreement-handshake-hand-gesture_53876-130006.jpg',
   },
 ];
 
@@ -76,10 +73,8 @@ const serviceImages: Record<string, string> = {
 export default function HomeScreen() {  
   const [profile] = useQuery(Profile);
   const [avatarUri, setAvatarUri] = useState(profile?.avatar);
-  
   const theme = useThemeName();
   const styles = makeStyles(theme);
-  const [profile] = useQuery(Profile);
 
   const renderCarouselItem = ({ item }: { item: typeof carouselData[0] }) => (
     <View style={styles.carouselItem}>
@@ -139,7 +134,13 @@ export default function HomeScreen() {
               key={service.id}
               style={styles.serviceModernCard}
               activeOpacity={0.85}
-              onPress={() => {router.push(`/services/${service.id}` as any)}}
+              onPress={() => {
+                if (service.title === 'Объявления') {
+                  router.push('/services/events/events');
+                } else {
+                  router.push(`/services/${service.id}` as any);
+                }
+              }}
             >
               <View style={styles.serviceModernContent}>
                 <View style={styles.serviceModernTextBlock}>

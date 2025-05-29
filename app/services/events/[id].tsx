@@ -1,0 +1,104 @@
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useThemeName } from '@/core/hooks/useTheme';
+import { DARK_THEME } from '@/core/hooks/useTheme';
+import { useLocalSearchParams, router } from 'expo-router';
+
+const demoEvents = [
+  {
+    id: '1',
+    title: 'Открытие нового парка',
+    description: 'В эту субботу состоится открытие нового парка в центре города. Приглашаем всех!',
+    image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80',
+    date: '2024-06-10',
+  },
+  {
+    id: '2',
+    title: 'Отключение воды',
+    description: 'Внимание! 12 июня с 9:00 до 18:00 будет отключена вода в связи с ремонтными работами.',
+    image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=800&q=80',
+    date: '2024-06-12',
+  },
+];
+
+export default function EventDetailsScreen() {
+  const { id } = useLocalSearchParams();
+  const event = demoEvents.find(e => e.id === id) || demoEvents[0];
+  const theme = useThemeName();
+  const styles = makeStyles(theme);
+
+  return (
+    <ScrollView style={styles.container}>
+      <Image source={{ uri: event.image }} style={styles.image} />
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.replace('/services/events/events')} style={styles.backButton}>
+            <MaterialCommunityIcons name="arrow-left" size={24} color={theme === DARK_THEME ? '#fff' : '#000'} />
+          </TouchableOpacity>
+          <Text style={styles.date}>{new Date(event.date).toLocaleDateString('ru-RU')}</Text>
+        </View>
+        <Text style={styles.title}>{event.title}</Text>
+        <Text style={styles.description}>{event.description}</Text>
+      </View>
+    </ScrollView>
+  );
+}
+
+const makeStyles = (theme: string) => StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme === DARK_THEME ? '#111' : '#f5f5f5',
+  },
+  image: {
+    width: '100%',
+    height: 240,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    marginBottom: 0,
+  },
+  content: {
+    padding: 20,
+    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    marginTop: -24,
+    minHeight: 200,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  backButton: {
+    padding: 8,
+    marginRight: 8,
+    backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5',
+    borderRadius: 16,
+    elevation: 2,
+  },
+  date: {
+    fontSize: 15,
+    color: theme === DARK_THEME ? '#aaa' : '#666',
+    marginLeft: 4,
+    flex: 1,
+    textAlign: 'right',
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: theme === DARK_THEME ? '#fff' : '#000',
+    marginBottom: 12,
+    textAlign: 'left',
+  },
+  description: {
+    fontSize: 16,
+    color: theme === DARK_THEME ? '#fff' : '#222',
+    textAlign: 'left',
+    lineHeight: 22,
+  },
+}); 
