@@ -97,6 +97,16 @@ const services: Service[] = [
     category: 'Объявления',
     isAccordion: false,
     target: { pathname: '/services/marketplace' },
+  },
+  {
+    id: '4',
+    title: 'Объявления',
+    description: 'Городские мероприятия и новости',
+    icon: 'bullhorn',
+    color: '#007AFF',
+    category: 'Объявления',
+    isAccordion: false,
+    target: { pathname: '/services/events/events' },
   }
 ];
 
