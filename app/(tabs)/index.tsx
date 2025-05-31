@@ -137,6 +137,10 @@ export default function HomeScreen() {
               onPress={() => {
                 if (service.title === 'Объявления') {
                   router.push('/services/events/events');
+                } else if (service.title === 'События') {
+                  router.push('/services/events-city/events');
+                } else if (service.title === 'Помощь') {
+                  router.push('/services/help/events');
                 } else {
                   router.push(`/services/${service.id}` as any);
                 }

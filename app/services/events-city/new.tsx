@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, ScrollView, Alert, TouchableOpacity, Image } from 'react-native';
-import { TextInput, Button } from 'react-native-paper';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { TextInput } from 'react-native-paper';
 import { useState } from 'react';
 import { DARK_THEME } from '@/core/hooks/useTheme';
 import { useThemeName } from '@/core/hooks/useTheme';
@@ -8,7 +8,7 @@ import * as ImagePicker from 'expo-image-picker';
 import Modal from 'react-native-modal';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-export default function NewEventScreen() {
+export default function NewEventCityScreen() {
   const [image, setImage] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -46,10 +46,10 @@ export default function NewEventScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.replace('/services/events/events')} style={styles.backButton}>
+        <TouchableOpacity onPress={() => router.replace('/services/events-city/events')} style={styles.backButton}>
           <MaterialCommunityIcons name="arrow-left" size={24} color={theme === DARK_THEME ? '#fff' : '#000'} />
         </TouchableOpacity>
-        <Text style={styles.title}>Создать объявление</Text>
+        <Text style={styles.title}>Создать событие</Text>
       </View>
       <ScrollView style={styles.form}>
         <Text style={styles.label}>Фото</Text>
@@ -64,13 +64,13 @@ export default function NewEventScreen() {
         {image ? (
           <Image source={{ uri: image }} style={styles.previewImage} />
         ) : null}
-        <Text style={styles.label}>Новость</Text>
+        <Text style={styles.label}>Событие</Text>
         <TextInput
           value={title}
           onChangeText={setTitle}
           mode="outlined"
           style={styles.input}
-          placeholder="Введите заголовок"
+          placeholder="Введите название события"
           theme={{
             colors: {
               primary: '#007AFF',
@@ -115,10 +115,10 @@ export default function NewEventScreen() {
         style={{ justifyContent: 'center', alignItems: 'center', margin: 0 }}
       >
         <View style={{ backgroundColor: theme === DARK_THEME ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 340, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
-          <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Уведомления об объявлении</Text>
-          <Text style={{ color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 16, marginBottom: 18, textAlign: 'center' }}>Ваша новость отправлена на публикацию. Спасибо за активность!</Text>
-          <TouchableOpacity style={styles.returnButton} onPress={() => { setModalVisible(false); router.replace('/services/events/events'); }}>
-            <Text style={styles.returnButtonText}>Вернуться к мероприятиям</Text>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Уведомления о событии</Text>
+          <Text style={{ color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 16, marginBottom: 18, textAlign: 'center' }}>Ваше событие отправлено на публикацию. Спасибо за активность!</Text>
+          <TouchableOpacity style={styles.returnButton} onPress={() => { setModalVisible(false); router.replace('/services/events-city/events'); }}>
+            <Text style={styles.returnButtonText}>Вернуться к событиям</Text>
           </TouchableOpacity>
         </View>
       </Modal>

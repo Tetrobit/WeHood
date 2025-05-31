@@ -405,6 +405,9 @@ export default function ProfileScreen() {
             />
           </View>
         </View>
+        <View style={[styles.rustoreBox, { backgroundColor: theme === DARK_THEME ? '#111' : '#f2f2f7' }]}> 
+          <Text style={[styles.rustoreText, { color: theme === DARK_THEME ? '#fff' : '#222' }]}>Пожалуйста, оставьте отзыв на RuStore, нам важно знать ваше мнение</Text>
+        </View>
 
         <Modal
           isVisible={modalVisible}
@@ -647,5 +650,24 @@ const makeStyles = (theme: string) => StyleSheet.create({
     height: 40,
     padding: 10,
     marginBottom: 10,
+  },
+  rustoreBox: {
+    borderRadius: 16,
+    marginHorizontal: 18,
+    marginTop: 18,
+    marginBottom: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  rustoreText: {
+    fontSize: 15,
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
 });

@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
-import { Card, FAB, Menu, IconButton } from 'react-native-paper';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { Card, FAB, IconButton } from 'react-native-paper';
 import { useState } from 'react';
 import { DARK_THEME } from '@/core/hooks/useTheme';
 import { useThemeName } from '@/core/hooks/useTheme';
@@ -8,26 +8,24 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Modal from 'react-native-modal';
 import { Switch } from 'react-native';
 
-// Демо-мероприятия
 const demoEvents = [
   {
     id: '1',
-    title: 'Открытие нового парка',
-    description: 'В эту субботу состоится открытие нового парка в центре города. Приглашаем всех!',
-    image: 'https://static.tildacdn.com/tild3163-3437-4265-a261-353166373462/5353058457198124841.jpg',
-    date: '2024-06-10',
+    title: 'Встреча соседей',
+    description: 'Приглашаем всех на встречу во дворе для знакомства и общения!',
+    image: 'https://pchela.news/storage/app/uploads/public/491/54f/fcc/thumb__770_490_0_0_crop.jpg',
+    date: '2025-06-15',
   },
   {
     id: '2',
-    title: 'Отключение воды',
-    description: 'Внимание! 12 июня с 9:00 до 18:00 будет отключена вода в связи с ремонтными работами.',
-    image: 'https://f78e1a6a-ca4c-458a-b3f0-9f53a2bad2a5.selstorage.ru/2025-04-22/MADa2UbcSajCxPqT.png',
-    date: '2024-06-12',
+    title: 'Благотворительный забег',
+    description: 'Участвуйте в забеге и помогите собрать средства на детскую площадку.',
+    image: 'https://marathonec.ru/wp-content/uploads/2021/04/beg-vo-blago.jpg',
+    date: '2025-06-20',
   },
 ];
 
-export default function EventsScreen() {
-  const [menuVisible, setMenuVisible] = useState(false);
+export default function EventsCityScreen() {
   const [notifModalVisible, setNotifModalVisible] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const theme = useThemeName();
@@ -47,7 +45,7 @@ export default function EventsScreen() {
           style={styles.headerIcon}
           iconColor={theme === DARK_THEME ? '#fff' : '#000'}
         />
-        <Text style={styles.title}>Объявления района</Text>
+        <Text style={styles.title}>События района</Text>
         <IconButton
           icon="dots-vertical"
           size={28}
@@ -56,7 +54,6 @@ export default function EventsScreen() {
           iconColor={theme === DARK_THEME ? '#fff' : '#000'}
         />
       </View>
-
       <Modal
         isVisible={notifModalVisible}
         onBackdropPress={() => setNotifModalVisible(false)}
@@ -70,7 +67,7 @@ export default function EventsScreen() {
         style={{ justifyContent: 'center', alignItems: 'center', margin: 0 }}
       >
         <View style={{ backgroundColor: theme === DARK_THEME ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 340, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
-          <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Уведомления о мероприятиях</Text>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Уведомления о событиях</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 22 }}>
             <Text style={{ flex: 1, color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 17 }}>Получать уведомления</Text>
             <Switch
@@ -85,13 +82,12 @@ export default function EventsScreen() {
           </TouchableOpacity>
         </View>
       </Modal>
-
       <ScrollView style={styles.eventsContainer}>
         {demoEvents.map((event) => (
           <Card
             key={event.id}
             style={styles.eventCard}
-            onPress={() => router.push({ pathname: '/services/events/[id]', params: { id: event.id } })}
+            onPress={() => router.push({ pathname: '/services/events-city/[id]', params: { id: event.id } })}
           >
             {event.image && (
               <Card.Cover source={{ uri: event.image }} style={styles.eventImage} />
@@ -105,11 +101,10 @@ export default function EventsScreen() {
         ))}
         <View style={styles.bottomSpacer} />
       </ScrollView>
-
       <FAB
         icon="plus"
         style={styles.fabSmall}
-        onPress={() => router.push({ pathname: '/services/events/new' })}
+        onPress={() => router.push({ pathname: '/services/events-city/new' })}
       />
     </View>
   );
