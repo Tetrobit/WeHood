@@ -90,13 +90,13 @@ const services: Service[] = [
   },
   {
     id: '3',
-    title: 'Товары и услуги',
-    description: 'Покупка, продажа и обмен товарами',
-    icon: 'shopping',
+    title: 'Барахолка',
+    description: 'Покупка, продажа и обмен вещами',
+    icon: 'tshirt-crew',
     color: '#FF9800',
     category: 'Объявления',
     isAccordion: false,
-    target: { pathname: '/services/marketplace' },
+    target: { pathname: '/services/flea-market' },
   },
   {
     id: '4',
@@ -127,6 +127,16 @@ const services: Service[] = [
     category: 'Помощь',
     isAccordion: false,
     target: { pathname: '/services/help/events' },
+  },
+  {
+    id: '7',
+    title: 'Местные службы',
+    description: 'Сантехники, электрики, ремонт и другие услуги',
+    icon: 'account-wrench',
+    color: '#00B894',
+    category: 'Объявления',
+    isAccordion: false,
+    target: { pathname: '/services/local-services' },
   }
 ];
 

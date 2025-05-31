@@ -32,6 +32,12 @@ export default function ServicesLayout() {
       <Stack.Screen name="activities/contact" options={{...defaultConfig, title: 'Связаться'}} />
       <Stack.Screen name="marketplace/index" options={{...defaultConfig, title: 'Товары и услуги'}} />
       <Stack.Screen name="marketplace/[id]" options={defaultConfig} />
+      <Stack.Screen name="flea-market/index" options={{...defaultConfig, title: 'Барахолка'}} />
+      <Stack.Screen name="flea-market/[id]" options={defaultConfig} />
+      <Stack.Screen name="flea-market/new" options={{...defaultConfig, title: 'Новое объявление'}} />
+      <Stack.Screen name="local-services/index" options={{...defaultConfig, title: 'Местные службы'}} />
+      <Stack.Screen name="local-services/[id]" options={defaultConfig} />
+      <Stack.Screen name="local-services/new" options={{...defaultConfig, title: 'Добавить услугу'}} />
     </Stack>
   );
 }
