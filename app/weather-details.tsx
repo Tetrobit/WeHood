@@ -37,7 +37,7 @@ const WeatherDetailsScreen: React.FC = () => {
     { day: 'Вс', condition: 'Шторм', highTemp: 21, lowTemp: 18, icon: '⛈️' },
   ];
   
-  const styles = React.useMemo(() => makeStyles(theme), [theme]);
+  const styles = React.useMemo(() => makeStyles(theme!), [theme]);
 
   return (
     <SafeAreaView style={styles.safeArea}>

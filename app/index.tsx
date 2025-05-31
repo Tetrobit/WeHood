@@ -19,7 +19,6 @@ export default function App() {
   const [profile] = useQuery(Profile);
 
   useEffect(() => {
-    console.log(greeting);
     if (!showNotice) {
       if (profile) {
         if (!greeting) {

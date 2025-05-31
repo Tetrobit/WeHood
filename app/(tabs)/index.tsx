@@ -8,7 +8,7 @@ import * as Network from 'expo-network';
 import * as Location from 'expo-location';
 import { useEffect } from 'react';
 import useApi from '@/core/hooks/useApi';
-
+import { useGeolocation } from '@/core/hooks/useGeolocation';
 const { width } = Dimensions.get('window');
 
 type ServiceIcon = 'hand-heart' | 'calendar-star' | 'bullhorn' | 'account-group';
@@ -72,38 +72,8 @@ const serviceImages: Record<string, string> = {
 
 export default function HomeScreen() {
   const theme = useThemeName();
-  const styles = makeStyles(theme);
-  const { forwardGeocode, reverseGeocode, ipGeocode } = useApi();
-
-  useEffect(() => {
-    const getLocation = async () => {
-      try {
-        const response = await Location.requestForegroundPermissionsAsync();
-        let geo: any = null;
-
-        if (response.status === 'granted') {
-          const position = await Location.getCurrentPositionAsync({
-            accuracy: Location.Accuracy.Balanced,
-          });
-          geo = await reverseGeocode(position.coords.latitude, position.coords.longitude);
-        }
-        else {
-          console.log("By  IP");
-          const ip = await Network.getIpAddressAsync();
-          console.log("A",  ip);
-          const position: any = await ipGeocode();
-          geo = await reverseGeocode(position.latitude, position.longitude);
-          console.log(position);
-        }
-
-        console.log(JSON.stringify(geo, null, 2));
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    getLocation();
-  }, []);
+  const styles = makeStyles(theme!);
+  const { lastLocation } = useGeolocation();
 
   const renderCarouselItem = ({ item }: { item: typeof carouselData[0] }) => (
     <View style={styles.carouselItem}>
@@ -125,8 +95,8 @@ export default function HomeScreen() {
             <Text style={styles.temperature}>+23°</Text>
           </TouchableOpacity>
           <View style={styles.locationTextContainer}>
-            <Text style={styles.location}>Вахитовский район</Text>
-            <Text style={styles.city}>Казань</Text>
+            <Text style={styles.location}>{lastLocation?.locality}</Text>
+            <Text style={styles.city}>{lastLocation?.district}</Text>
           </View>
         </View>
         <TouchableOpacity onPress={() => {router.push('/profile')}}>
@@ -149,7 +119,7 @@ export default function HomeScreen() {
           autoPlayInterval={2000}
           data={carouselData}
           style={{ width: "100%" }}
-          onSnapToItem={(index) => console.log("current index:", index)}
+          onSnapToItem={(index) => {}}
           renderItem={renderCarouselItem}
         />
       </View>

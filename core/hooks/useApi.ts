@@ -78,7 +78,7 @@ export interface ReverseGeocodeResponse {
   attributes: {
     country?: string;
     province?: string;
-    city?: string;
+    locality?: string;
     district?: string;
     street?: string;
     house?: string;

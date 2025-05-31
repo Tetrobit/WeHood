@@ -19,7 +19,7 @@ export const GreetingScreen = () => {
   const pagerRef = useRef<PagerView>(null);
   const themeName = useThemeName();
   const setThemeName = useSetTheme();
-  const { location, errorMsg: errorLocation, requestGeolocation } = useGeolocation();
+  const { lastLocation, location, requestGeolocation, errorMsg } = useGeolocation();
   const animationRef = useRef<LottieView>(null);
   const isSwitched = useSharedValue(true);
   const [isThemeSwitched, setIsThemeSwitched] = useState(true);
@@ -249,7 +249,7 @@ export const GreetingScreen = () => {
               <Text style={styles.geoButtonText}>Разрешить доступ</Text>
             </TouchableOpacity>
           )}
-          { !location && errorLocation && (
+          { !location && errorMsg && (
             <TouchableOpacity style={styles.nextButton} onPress={() => Linking.openSettings()}>
               <Text style={styles.nextButtonText}>Открыть настройки</Text>
             </TouchableOpacity>
