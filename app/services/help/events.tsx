@@ -5,6 +5,8 @@ import { DARK_THEME } from '@/core/hooks/useTheme';
 import { useThemeName } from '@/core/hooks/useTheme';
 import { router } from 'expo-router';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import Modal from 'react-native-modal';
+import { Switch } from 'react-native';
 
 const demoHelps = [
   {
@@ -30,6 +32,12 @@ const demoHelps = [
 export default function HelpListScreen() {
   const theme = useThemeName();
   const styles = makeStyles(theme);
+  const [notifModalVisible, setNotifModalVisible] = useState(false);
+  const [notifications, setNotifications] = useState(true);
+
+  const handleToggleNotifications = (value: boolean) => {
+    setNotifications(value);
+  };
 
   return (
     <View style={styles.container}>
@@ -37,14 +45,20 @@ export default function HelpListScreen() {
         <IconButton
           icon="arrow-left"
           size={28}
-          onPress={() => router.replace('/services')}
+          onPress={() => router.replace('/')}
           style={styles.headerIcon}
           iconColor={theme === DARK_THEME ? '#fff' : '#000'}
         />
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' }}>
           <Text style={styles.title}>Помощь района</Text>
         </View>
-        <View style={{ width: 40 }} />
+        <IconButton
+          icon="dots-vertical"
+          size={28}
+          onPress={() => setNotifModalVisible(true)}
+          style={styles.headerIcon}
+          iconColor={theme === DARK_THEME ? '#fff' : '#000'}
+        />
       </View>
       <ScrollView style={styles.helpsContainer}>
         {demoHelps.map((help) => (
@@ -67,6 +81,34 @@ export default function HelpListScreen() {
         onPress={() => router.push('/services/help/new')}
         accessibilityLabel="Добавить помощь"
       />
+      <Modal
+        isVisible={notifModalVisible}
+        onBackdropPress={() => setNotifModalVisible(false)}
+        animationIn="zoomIn"
+        animationOut="zoomOut"
+        animationInTiming={350}
+        animationOutTiming={350}
+        backdropOpacity={0.35}
+        backdropTransitionInTiming={400}
+        backdropTransitionOutTiming={400}
+        style={{ justifyContent: 'center', alignItems: 'center', margin: 0 }}
+      >
+        <View style={{ backgroundColor: theme === DARK_THEME ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 340, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Уведомления о помощи</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 22 }}>
+            <Text style={{ flex: 1, color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 17 }}>Получать уведомления</Text>
+            <Switch
+              value={notifications}
+              onValueChange={handleToggleNotifications}
+              trackColor={{ false: '#767577', true: '#FF6B6B' }}
+              thumbColor={theme === DARK_THEME ? '#FF6B6B' : '#f4f3f4'}
+            />
+          </View>
+          <TouchableOpacity style={{ alignItems: 'center', marginTop: 4 }} onPress={() => setNotifModalVisible(false)}>
+            <Text style={{ color: '#FF6B6B', fontSize: 16 }}>Закрыть</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 }
