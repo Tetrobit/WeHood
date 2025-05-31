@@ -10,10 +10,10 @@ import { Provider as PaperProvider } from 'react-native-paper';
 export default function RootLayoutWrapper() {
   return (
     <PaperProvider>
-      <StorageProvider>
-        <RootLayout />
-        <ToastManager />
-      </StorageProvider>
+    <StorageProvider>
+      <RootLayout />
+      <ToastManager />
+    </StorageProvider>
     </PaperProvider>
   )
 }
