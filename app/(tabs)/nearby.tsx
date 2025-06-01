@@ -25,7 +25,7 @@ const IMAGES = [
 export default function NearbyScreen() {
   const [activeTab, setActiveTab] = useState('images');
   const theme = useThemeName();
-  const styles = makeStyles(theme);
+  const styles = makeStyles(theme!);
 
   return (
     <View style={styles.container}>
