@@ -6,9 +6,10 @@ import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
 import Carousel from 'react-native-reanimated-carousel';
 import * as Network from 'expo-network';
 import * as Location from 'expo-location';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import useApi from '@/core/hooks/useApi';
 import { useGeolocation } from '@/core/hooks/useGeolocation';
+import useWeather from '@/core/hooks/useWeather';
 const { width } = Dimensions.get('window');
 
 type ServiceIcon = 'hand-heart' | 'calendar-star' | 'bullhorn' | 'account-group';
@@ -74,6 +75,7 @@ export default function HomeScreen() {
   const theme = useThemeName();
   const styles = makeStyles(theme!);
   const { lastLocation } = useGeolocation();
+  const { lastWeatherForecast } = useWeather();
 
   const renderCarouselItem = ({ item }: { item: typeof carouselData[0] }) => (
     <View style={styles.carouselItem}>
@@ -85,14 +87,69 @@ export default function HomeScreen() {
     </View>
   );
 
+  let weatherColor = '#ebb010';
+  if (lastWeatherForecast?.list[0]?.weather[0]?.main === 'Clear' && ((new Date().getHours() < 6 || new Date().getHours() > 18))) {
+    if (theme === DARK_THEME) {
+      weatherColor = '#ffffff';
+    } else {
+      weatherColor = '#023e8a';
+    }
+  }
+  else if (lastWeatherForecast?.list[0]?.weather[0]?.main === 'Clear' && ((new Date().getHours() > 6 && new Date().getHours() < 18))) {
+    weatherColor = '#ebb010';
+  }
+  else {
+    if (theme === DARK_THEME) {
+      weatherColor = '#ffffff';
+    } else {
+      weatherColor = '#000000';
+    }
+  }
+
   return (
     <ScrollView style={styles.container}>
       {/* Погода и локация */}
       <View style={styles.header}>
         <View style={styles.locationContainer}>
           <TouchableOpacity onPress={() => {router.push('/weather')}} style={styles.weatherContainer}>
-            <MaterialCommunityIcons name="weather-sunny" size={30} color="#ebb010" />
-            <Text style={styles.temperature}>+23°</Text>
+            {
+              lastWeatherForecast?.list[0]?.weather[0]?.main === 'Clouds' && (
+                <MaterialCommunityIcons name="weather-cloudy" size={30} color={weatherColor} />
+              )
+            }
+            {
+              lastWeatherForecast?.list[0]?.weather[0]?.main === 'Clear' && ((new Date().getHours() > 6 && new Date().getHours() < 18) && (
+                <MaterialCommunityIcons name="weather-sunny" size={30} color={weatherColor} />
+              ))
+            }
+            {
+              lastWeatherForecast?.list[0]?.weather[0]?.main === 'Clear' && ((new Date().getHours() < 6 || new Date().getHours() > 18) && (
+                <MaterialCommunityIcons name="weather-night" size={30} color={weatherColor} />
+              ))
+            }
+            {
+              lastWeatherForecast?.list[0]?.weather[0]?.main === 'Rain' && (
+                <MaterialCommunityIcons name="weather-rainy" size={30} color={weatherColor} />
+              )
+            }
+            {
+              lastWeatherForecast?.list[0]?.weather[0]?.main === 'Snow' && (
+                <MaterialCommunityIcons name="weather-snowy" size={30} color={weatherColor} />
+              )
+            }
+            {
+              lastWeatherForecast?.list[0]?.weather[0]?.main === 'Thunderstorm' && (
+                <MaterialCommunityIcons name="weather-lightning" size={30} color={weatherColor} />
+              )
+            }
+            {
+              lastWeatherForecast?.list[0]?.weather[0]?.main === 'Mist' && (
+                <MaterialCommunityIcons name="weather-fog" size={30} color={weatherColor} />
+              )
+            }
+            <Text style={[styles.temperature, { color: weatherColor }]}>{Math.round(lastWeatherForecast?.list[0]?.main?.temp - 273.15)}°</Text>
+            
+            
           </TouchableOpacity>
           <View style={styles.locationTextContainer}>
             <Text style={styles.location}>{lastLocation?.locality}</Text>

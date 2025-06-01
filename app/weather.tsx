@@ -7,7 +7,9 @@ import WeatherRain from '@/components/weather-rain';
 import { DARK_THEME, LIGHT_THEME, ThemeName } from '@/core/hooks/useTheme';
 import { useSetTheme, useThemeName } from '@/core/hooks/useTheme';
 import { setStatusBarBackgroundColor } from 'expo-status-bar';
-
+import useGeolocation from '@/core/hooks/useGeolocation';
+import useWeather from '@/core/hooks/useWeather';
+import { getWeatherCondition, getWeatherIcon } from '@/core/utils/weather';
 interface WeatherMetric {
   value: string | number;
   label: string;
@@ -16,30 +18,30 @@ interface WeatherMetric {
 interface HourlyForecast {
   time: string;
   temperature: number;
-  icon: string;
+  icon: React.ReactNode;
 }
 
 const WeatherScreen: React.FC = () => {
   const themeName = useThemeName();
-
+  const { lastLocation } = useGeolocation();
+  const { lastWeatherForecast, lastWeatherForecastRecord } = useWeather();
   const metrics: WeatherMetric[] = [
-    { value: '13 км/ч', label: 'Ветер' },
-    { value: '24%', label: 'Влажность' },
-    { value: '87%', label: 'Дождь' },
+    { value: `${lastWeatherForecast?.list[0]?.wind?.speed} км/ч`, label: 'Ветер' },
+    { value: `${lastWeatherForecast?.list[0]?.main?.humidity}%`, label: 'Влажность' },
+    { value: `${lastWeatherForecast?.list[0]?.pop}%`, label: 'Дождь' },
   ];
 
-  const hourlyForecast: HourlyForecast[] = [
-    { time: '6:00', temperature: 23, icon: '🌥️' },
-    { time: '12:00', temperature: 21, icon: '⛈️' },
-    { time: '18:00', temperature: 22, icon: '🌥️' },
-    { time: '23:59', temperature: 19, icon: '🌤️' },
-  ];
+  const hourlyForecast: HourlyForecast[] = lastWeatherForecast?.list.slice(0, 4).map((item) => ({
+    time: new Date(item.dt_txt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
+    temperature: Math.round(item.main.temp - 273.15),
+    icon: getWeatherIcon(item.weather[0].main, 'black', 24),
+  }));
 
   const onBack = () => {
     router.back();
   }
 
-  const styles = React.useMemo(() => makeStyles(themeName), [themeName]);
+  const styles = React.useMemo(() => makeStyles(themeName!), [themeName]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -55,7 +57,7 @@ const WeatherScreen: React.FC = () => {
             </TouchableOpacity>
             <View style={styles.locationContainer}>
               <Ionicons name="location" size={18} color="white" />
-              <Text style={styles.cityText}>Вахитовский район</Text>
+              <Text style={styles.cityText}>{lastLocation?.district ?? lastLocation?.locality}</Text>
             </View>
             <TouchableOpacity>
               <Ionicons name="ellipsis-vertical" size={24} color="white" />
@@ -65,20 +67,21 @@ const WeatherScreen: React.FC = () => {
           {/* Updating Status */}
           <View style={styles.updatingContainer}>
             <View style={styles.updatingPill}>
-              <Text style={styles.updatingText}>• Обновление</Text>
+              <Text style={styles.updatingText}>• Обновлено в {new Date(lastWeatherForecastRecord?.timestamp.getTime()).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</Text>
             </View>
           </View>
 
           {/* Main Weather Icon */}
           <View style={styles.weatherIconContainer}>
-            <Ionicons name="thunderstorm" size={120} color="white" />
+            {/* <Ionicons name="thunderstorm" size={120} color="white" /> */}
+            { getWeatherIcon(lastWeatherForecast?.list[0]?.weather[0]?.main, 'white', 120) }
           </View>
 
           {/* Temperature and Condition */}
           <View style={styles.temperatureContainer}>
-            <Text style={styles.temperature}>21°</Text>
-            <Text style={styles.condition}>Гроза</Text>
-            <Text style={styles.date}>Понедельник, 17 Мая</Text>
+            <Text style={styles.temperature}>{Math.round(lastWeatherForecast?.list[0]?.main?.temp - 273.15)}°</Text>
+            <Text style={styles.condition}>{getWeatherCondition(lastWeatherForecast?.list[0]?.weather[0]?.main)}</Text>
+            <Text style={styles.date}>{new Date(lastWeatherForecast?.list[0]?.dt * 1000).toLocaleDateString('ru-RU', { weekday: 'long', month: 'long', day: 'numeric' })}</Text>
           </View>
 
           {/* Weather Metrics */}
@@ -121,7 +124,7 @@ const WeatherScreen: React.FC = () => {
               key={index} 
               style={[
                 styles.hourlyItem,
-                index === 1 && styles.activeHourly
+                index === 0 && styles.activeHourly
               ]}
             >
               <Text style={styles.hourlyTime}>{hour.time}</Text>
