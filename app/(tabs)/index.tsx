@@ -3,6 +3,8 @@ import { Card, Button } from 'react-native-paper';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router } from 'expo-router';
 import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
+import { useQuery } from '@realm/react';
+import Profile from '@/core/models/profile';
 import Carousel from 'react-native-reanimated-carousel';
 import * as Network from 'expo-network';
 import * as Location from 'expo-location';
@@ -10,6 +12,9 @@ import React, { useEffect } from 'react';
 import useApi from '@/core/hooks/useApi';
 import { useGeolocation } from '@/core/hooks/useGeolocation';
 import useWeather from '@/core/hooks/useWeather';
+import { useState } from 'react';
+
+
 const { width } = Dimensions.get('window');
 
 type ServiceIcon = 'hand-heart' | 'calendar-star' | 'bullhorn' | 'account-group';
@@ -20,14 +25,14 @@ const mockNews = [
     title: 'Субботник в парке',
     description: 'В эту субботу состоится уборка территории парка. Приглашаем всех желающих!',
     time: '2 часа назад',
-    image: 'https://images.unsplash.com/photo-1519834785169-98be25ec3f84',
+    image: 'https://img.freepik.com/premium-vector/people-collecting-garbage-city-park-men-women-volunteers-cleaning-park-together-from-trash_461812-205.jpg', // люди убираются в парке
   },
   {
     id: '2',
     title: 'Новая детская площадка',
     description: 'В нашем районе открылась современная детская площадка',
     time: '4 часа назад',
-    image: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a',
+    image: 'https://sp-izumrud.ru/wp-content/uploads/2018/08/Sanatorij-Izumrud-19.jpg', // современная детская площадка
   },
 ];
 
@@ -54,13 +59,13 @@ const carouselData = [
     id: '2',
     title: 'Будьте активны',
     description: 'Участвуйте в жизни района',
-    image: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a',
+    image: 'https://img.freepik.com/free-photo/people-attending-therapy-meeting_23-2151083315.jpg', // бегущий человек на фоне природы
   },
   {
     id: '3',
     title: 'Помогайте соседям',
     description: 'Создавайте крепкое сообщество',
-    image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2',
+    image: 'https://img.freepik.com/free-photo/business-agreement-handshake-hand-gesture_53876-130006.jpg',
   },
 ];
 
@@ -71,7 +76,9 @@ const serviceImages: Record<string, string> = {
   'Соседи': 'https://cdn-icons-png.flaticon.com/512/2922/2922510.png', // люди, цветные
 };
 
-export default function HomeScreen() {
+export default function HomeScreen() {  
+  const [profile] = useQuery(Profile);
+  const [avatarUri, setAvatarUri] = useState(profile?.avatar);
   const theme = useThemeName();
   const styles = makeStyles(theme!);
   const { lastLocation } = useGeolocation();
@@ -158,7 +165,7 @@ export default function HomeScreen() {
         </View>
         <TouchableOpacity onPress={() => {router.push('/profile')}}>
           <Image 
-            source={{ uri: 'https://randomuser.me/api/portraits/men/1.jpg' }}
+            source={{ uri: profile?.avatar || 'https://randomuser.me/api/portraits/men/1.jpg' }}
             style={styles.profileImage}
           />
         </TouchableOpacity>
@@ -190,7 +197,17 @@ export default function HomeScreen() {
               key={service.id}
               style={styles.serviceModernCard}
               activeOpacity={0.85}
-              onPress={() => {router.push(`/services/${service.id}` as any)}}
+              onPress={() => {
+                if (service.title === 'Объявления') {
+                  router.push('/services/events/events');
+                } else if (service.title === 'События') {
+                  router.push('/services/events-city/events');
+                } else if (service.title === 'Помощь') {
+                  router.push('/services/help/events');
+                } else {
+                  router.push(`/services/${service.id}` as any);
+                }
+              }}
             >
               <View style={styles.serviceModernContent}>
                 <View style={styles.serviceModernTextBlock}>

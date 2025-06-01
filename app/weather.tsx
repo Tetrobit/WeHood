@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, SafeAreaView, TouchableOpacity, LayoutAnimation, UIManager } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text, StyleSheet, Image, SafeAreaView, TouchableOpacity, LayoutAnimation, UIManager, Dimensions, ScrollView, Animated, PanResponder } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather, Fontisto, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -10,6 +10,9 @@ import { setStatusBarBackgroundColor } from 'expo-status-bar';
 import useGeolocation from '@/core/hooks/useGeolocation';
 import useWeather from '@/core/hooks/useWeather';
 import { getWeatherCondition, getWeatherIcon } from '@/core/utils/weather';
+
+const screenHeight = Dimensions.get('window').height;
+
 interface WeatherMetric {
   value: string | number;
   label: string;
@@ -43,8 +46,23 @@ const WeatherScreen: React.FC = () => {
 
   const styles = React.useMemo(() => makeStyles(themeName!), [themeName]);
 
+  const pan = useRef(new Animated.ValueXY()).current;
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderMove: Animated.event([null, {dx: pan.x, dy: pan.y}]),
+      onPanResponderRelease: () => {
+        Animated.spring(pan, {
+          toValue: {x: 0, y: 0},
+          useNativeDriver: true,
+        }).start();
+      },
+    }),
+  ).current;
+
   return (
     <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
       <LinearGradient
         colors={['#7C4585', '#C95792']}
         style={styles.container}
@@ -72,10 +90,16 @@ const WeatherScreen: React.FC = () => {
           </View>
 
           {/* Main Weather Icon */}
-          <View style={styles.weatherIconContainer}>
-            {/* <Ionicons name="thunderstorm" size={120} color="white" /> */}
-            { getWeatherIcon(lastWeatherForecast?.list[0]?.weather[0]?.main, 'white', 120) }
-          </View>
+          <Animated.View
+          style={{
+            transform: [{translateX: pan.x}, {translateY: pan.y}],
+          }}
+          {...panResponder.panHandlers}>
+            <View style={styles.weatherIconContainer}>
+              { getWeatherIcon(lastWeatherForecast?.list[0]?.weather[0]?.main, 'white', 120) }
+            </View>
+          </Animated.View>
+
 
           {/* Temperature and Condition */}
           <View style={styles.temperatureContainer}>
@@ -134,6 +158,7 @@ const WeatherScreen: React.FC = () => {
           ))}
         </View>
       </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -145,6 +170,8 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
     padding: 10,
     paddingBottom: 20,
     zIndex: 1,
+  },
+  scrollViewContainer: { 
   },
   shadow: {
     position: 'absolute',
@@ -168,7 +195,7 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 10,
   },
   locationContainer: {
     flexDirection: 'row',
@@ -225,8 +252,9 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
   metricsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginTop: 30,
+    marginTop: 20,
     paddingHorizontal: 20,
+    marginBottom: 20, // Добавлено
   },
   metricItem: {
     alignItems: 'center',
@@ -242,11 +270,11 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
     marginTop: 2,
   },
   forecastContainer: {
-    position: 'absolute',
     width: '100%',
     left: 0,
-    bottom: 20,
-    marginTop: 40,
+    // bottom: 20,
+    // marginTop: 20,
+    ...(screenHeight > 740 ? {bottom: 20} : {marginTop: 20}),
     paddingHorizontal: 20,
   },
   forecastHeader: {

@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Animated, PanResponder } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { DARK_THEME, ThemeName, useThemeName } from '@/core/hooks/useTheme';
@@ -76,6 +76,20 @@ const WeatherDetailsScreen: React.FC = () => {
   
   const styles = React.useMemo(() => makeStyles(theme!), [theme]);
 
+  const pan = useRef(new Animated.ValueXY()).current;
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderMove: Animated.event([null, {dx: pan.x, dy: pan.y}]),
+      onPanResponderRelease: () => {
+        Animated.spring(pan, {
+          toValue: {x: 0, y: 0},
+          useNativeDriver: true,
+        }).start();
+      },
+    }),
+  ).current;
+
   return (
     <SafeAreaView style={styles.safeArea}>
       {/* Header */}
@@ -92,12 +106,23 @@ const WeatherDetailsScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
 
+      <ScrollView>
       {/* Tomorrow's Forecast */}
       <LinearGradient colors={['#7C4585', '#C95792']} style={styles.tomorrowContainer}>
         <View style={styles.tomorrowSplitContainer}>
+          <View style={styles.tomorrowLeftContainer_2}>
+            <Ionicons name="cloud" size={120} color="white" />
+          </View>
+          <Animated.View
+          style={{
+            transform: [{translateX: pan.x}, {translateY: pan.y}],
+          }}
+          {...panResponder.panHandlers}>
             <View style={styles.tomorrowLeftContainer}>
               {getWeatherIcon(forecastDays[1]?.icon, 'white', 130)}
             </View>
+          </Animated.View>
+
             <View style={styles.tomorrowRightContainer}>
               <View style={styles.mainWeather}>
                 <Text style={styles.tomorrowTitle}>Завтра</Text>
@@ -145,6 +170,7 @@ const WeatherDetailsScreen: React.FC = () => {
           </View>
         ))}
       </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -163,6 +189,7 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 20,
+    marginBottom: 10,
   },
   headerCenter: {
     flexDirection: 'row',
@@ -198,9 +225,17 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
     alignItems: 'center',
   },
   tomorrowLeftContainer: {
+    position: 'relative',
+    left: -118,
+    top: 14,
+    flex: 1,
+  },
+  tomorrowLeftContainer_2: {
     flex: 1,
   },
   tomorrowRightContainer: {
+    position: 'relative',
+    left: -100,
     flex: 1,
   },
   tomorrowTitle: {

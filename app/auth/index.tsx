@@ -20,6 +20,8 @@ import ToastManager, { Toast } from 'toastify-react-native'
 import { useQuery } from "@realm/react";
 import Greeting from "@/core/models/greeting";
 
+const screenHeight = Dimensions.get('window').height;
+
 const gradientColors: [ColorValue, ColorValue][] = [
   ['#f26f8b', '#fdc859'],
   ['#323f94', '#5ab8db'],
@@ -477,7 +479,7 @@ const styles = StyleSheet.create({
     paddingTop: 45
   },
   neighbourhood: {
-    top: 320,
+    top: screenHeight*5/13,
     position: 'absolute',
     zIndex: -1,
   },

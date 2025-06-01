@@ -4,12 +4,17 @@ import { DARK_THEME } from "@/core/hooks/useTheme";
 import StorageProvider from "@/core/models";
 import React from "react";
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
+import ToastManager from 'toastify-react-native';
+import { Provider as PaperProvider } from 'react-native-paper';
 
 export default function RootLayoutWrapper() {
   return (
+    <PaperProvider>
     <StorageProvider>
       <RootLayout />
+      <ToastManager />
     </StorageProvider>
+    </PaperProvider>
   )
 }
 

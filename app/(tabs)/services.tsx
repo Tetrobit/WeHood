@@ -97,6 +97,36 @@ const services: Service[] = [
     category: 'Объявления',
     isAccordion: false,
     target: { pathname: '/services/marketplace' },
+  },
+  {
+    id: '4',
+    title: 'Объявления',
+    description: 'Городские мероприятия и новости',
+    icon: 'bullhorn',
+    color: '#007AFF',
+    category: 'Объявления',
+    isAccordion: false,
+    target: { pathname: '/services/events/events' },
+  },
+  {
+    id: '5',
+    title: 'События',
+    description: 'Городские события и встречи',
+    icon: 'calendar-star',
+    color: '#4ECDC4',
+    category: 'События',
+    isAccordion: false,
+    target: { pathname: '/services/events-city/events' },
+  },
+  {
+    id: '6',
+    title: 'Помощь',
+    description: 'Запросить или предложить помощь',
+    icon: 'hand-heart',
+    color: '#FF6B6B',
+    category: 'Помощь',
+    isAccordion: false,
+    target: { pathname: '/services/help/events' },
   }
 ];
 

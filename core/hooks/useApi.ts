@@ -323,6 +323,19 @@ export const useApi = () => {
     return response.json();
   }
 
+  const changePassword = async (oldPassword: string, newPassword: string): Promise<{ ok: boolean; message?: string }> => {
+    return withAuth<{ ok: boolean; message?: string }>(`${API_URL}/api/auth/change-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        oldPassword,
+        newPassword,
+      }),
+    });
+  };
+
   return {
     sendVerificationCode,
     verifyVerificationCode,
@@ -336,6 +349,7 @@ export const useApi = () => {
     reverseGeocode,
     ipGeocode,
     getWeatherForecast,
+    changePassword,
   }
 }
 
