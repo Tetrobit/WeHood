@@ -82,7 +82,7 @@ export default function HomeScreen() {
   const [avatarUri, setAvatarUri] = useState(profile?.avatar);
   const theme = useThemeName();
   const styles = makeStyles(theme!);
-  const { lastLocation } = useGeolocation();
+  const { lastLocation, requestGeolocation } = useGeolocation();
   const { lastWeatherForecast } = useWeather();
 
   const renderCarouselItem = ({ item }: { item: typeof carouselData[0] }) => (
@@ -113,6 +113,10 @@ export default function HomeScreen() {
       weatherColor = '#000000';
     }
   }
+
+  React.useEffect(() => {
+    requestGeolocation();
+  }, []);
 
   return (
     <ScrollView style={styles.container}>
