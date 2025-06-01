@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Alert, Platform, Animated, TextInput } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Alert, Platform, Animated, TextInput, BackHandler, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { DARK_THEME, LIGHT_THEME, useSetTheme, useThemeName } from '@/core/hooks/useTheme';
 import { useQuery } from '@realm/react';
@@ -32,7 +32,7 @@ export default function ProfileScreen() {
   const [profile] = useQuery(Profile);
   const api = useApi();
   const theme = useThemeName();
-  const styles = makeStyles(theme);
+  const styles = makeStyles(theme!);
   const setTheme = useSetTheme();
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -405,9 +405,9 @@ export default function ProfileScreen() {
             />
           </View>
         </View>
-        <View style={[styles.rustoreBox, { backgroundColor: theme === DARK_THEME ? '#111' : '#f2f2f7' }]}> 
+        <TouchableOpacity style={[styles.rustoreBox, { backgroundColor: theme === DARK_THEME ? '#111' : '#f2f2f7' }]} activeOpacity={0.8} onPress={() => Linking.openURL('https://www.rustore.ru/catalog/app/com.so_dam.wehood')}>
           <Text style={[styles.rustoreText, { color: theme === DARK_THEME ? '#fff' : '#222' }]}>Пожалуйста, оставьте отзыв на RuStore, нам важно знать ваше мнение</Text>
-        </View>
+        </TouchableOpacity> 
 
         <Modal
           isVisible={modalVisible}
@@ -666,6 +666,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     elevation: 2,
   },
   rustoreText: {
+    backgroundColor: 'transparent',
     fontSize: 15,
     textAlign: 'center',
     fontStyle: 'italic',
