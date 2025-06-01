@@ -17,6 +17,8 @@ import PagerView from 'react-native-pager-view';
 import { ArrowLeftIcon } from "lucide-react-native";
 import { AppLogo, CompanyLogo } from "../components/Logo";
 import ToastManager, { Toast } from 'toastify-react-native'
+import { useQuery } from "@realm/react";
+import Greeting from "@/core/models/greeting";
 
 const screenHeight = Dimensions.get('window').height;
 
@@ -27,6 +29,7 @@ const gradientColors: [ColorValue, ColorValue][] = [
 ];
 
 const App = () => {
+  const [greeting] = useQuery(Greeting)
   const [gradientIndex, updateGradientIndex] = React.useReducer((state: number) => (state + 1) % gradientColors.length, 2);
   const { generateVKAuthUrl, loginWithVK, checkEmailExists, sendVerificationCode, verifyVerificationCode, register, login } = useApi();
   const isVKOpen = useSharedValue(false);
@@ -121,7 +124,11 @@ const App = () => {
           handlePagerPage(0);
           setStatus('success');
           await wait(4000);
-          router.replace('/(tabs)');
+          if (!greeting) {
+            router.replace('/greeting');
+          } else {
+            router.replace('/(tabs)');
+          }
         } else {
           Toast.error(response.message || 'Не удалось войти', "top");
         }
@@ -165,7 +172,11 @@ const App = () => {
       await register(email, password, verificationCodeId, firstName, lastName);
       setStatus('register-success');
       await wait(4000);
-      router.replace('/(tabs)');
+      if (!greeting) {
+        router.replace('/greeting');
+      } else {
+        router.replace('/(tabs)');
+      }
     } catch (error) {
       console.error(error);
       Toast.error('Не удалось зарегистрироваться', "top");
@@ -215,7 +226,11 @@ const App = () => {
           await wait(2500);
           setStatus('success');
           await wait(4000);
-          router.replace('/(tabs)');
+          if (!greeting) {
+            router.replace('/greeting');
+          } else {
+            router.replace('/(tabs)');
+          }
         } catch(error) {  
           console.error(error);
           setStatus('idle');

@@ -40,6 +40,8 @@ function RootLayout() {
       <Stack.Screen name="weather-details" options={defaultConfig} />
       <Stack.Screen name="+not-found" options={defaultConfig} />
       <Stack.Screen name="services" options={defaultConfig} />
+      <Stack.Screen name="require-geolocation" options={defaultConfig} />
+      <Stack.Screen name="greeting/index" options={defaultConfig} />
     </Stack>
   );
 }
