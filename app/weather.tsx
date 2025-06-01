@@ -34,7 +34,7 @@ const WeatherScreen: React.FC = () => {
   const hourlyForecast: HourlyForecast[] = lastWeatherForecast?.list.slice(0, 4).map((item) => ({
     time: new Date(item.dt_txt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
     temperature: Math.round(item.main.temp - 273.15),
-    icon: getWeatherIcon(item.weather[0].main, 'black', 24),
+    icon: getWeatherIcon(item.weather[0].main, themeName === DARK_THEME ? 'white' : 'black', 24),
   }));
 
   const onBack = () => {

@@ -71,7 +71,7 @@ const WeatherDetailsScreen: React.FC = () => {
     condition: day.condition,
     highTemp: day.highTemp,
     lowTemp: day.lowTemp,
-    icon: getWeatherIcon(day.icon, 'black', 25),
+    icon: getWeatherIcon(day.icon, theme === DARK_THEME ? 'white' : 'black', 25),
   }));
   
   const styles = React.useMemo(() => makeStyles(theme!), [theme]);
