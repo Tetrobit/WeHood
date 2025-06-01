@@ -2,18 +2,20 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { DARK_THEME, LIGHT_THEME, useThemeName } from '@/core/hooks/useTheme';
+import useGeolocation from '@/core/hooks/useGeolocation';
+import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
 const TABS = [
-  { key: 'geo', label: 'Геоточки' },
   { key: 'images', label: 'Картинки' },
   { key: 'shorts', label: 'Короткие видео' },
+  { key: 'my', label: 'Мои публикации' },
 ];
 
 const IMAGES = [
-  { id: 1, uri: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb', distance: '9,56 км' },
-  { id: 2, uri: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308', distance: '970 м' },
+  { id: 1, uri: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb', distance: '9,56 км', description: 'Красивый пейзаж' },
+  { id: 2, uri: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308', distance: '970 м', description: 'Горы' },
   { id: 3, uri: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca', distance: '30 км' },
   { id: 4, uri: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470', distance: '15 км' },
   { id: 5, uri: 'https://images.unsplash.com/photo-1465101178521-c1a9136a3b99', distance: '350 м' },
@@ -26,14 +28,16 @@ export default function NearbyScreen() {
   const [activeTab, setActiveTab] = useState('images');
   const theme = useThemeName();
   const styles = makeStyles(theme!);
+  const { lastLocation } = useGeolocation();
+  const router = useRouter();
 
   return (
     <View style={styles.container}>
       {/* Верхняя панель */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.district}>Вахитовский район</Text>
-          <Text style={styles.city}>Казань</Text>
+          <Text style={styles.district}>{lastLocation?.district}</Text>
+          <Text style={styles.city}>{lastLocation?.locality}</Text>
         </View>
         <TouchableOpacity style={styles.filterBtn}>
           <MaterialIcons 
@@ -70,10 +74,19 @@ export default function NearbyScreen() {
                   <Text style={styles.distanceText}>{img.distance}</Text>
                 </View>
               )}
+              <Text style={styles.description}>{img.description}</Text>
             </View>
           ))}
         </View>
       </ScrollView>
+
+      {/* Кнопка добавления */}
+      <TouchableOpacity 
+        style={styles.addButton}
+        onPress={() => router.push('/add-content')}
+      >
+        <MaterialIcons name="add" size={30} color="#fff" />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -174,5 +187,33 @@ const makeStyles = (theme: string) => StyleSheet.create({
     color: '#fff',
     fontSize: 13,
     fontWeight: '500',
+  },
+  description: {
+    position: 'absolute',
+    bottom: 8,
+    left: 8,
+    right: 8,
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '500',
+    textShadowColor: 'rgba(0,0,0,0.75)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  addButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#007AFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
 });

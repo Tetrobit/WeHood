@@ -36,7 +36,7 @@ export const useWeather = () => {
     }
 
     const checkUpdate = () => {
-      if (!lastWeatherForecastRecord || lastWeatherForecastRecord.timestamp.getTime() < lastLocation.timestamp.getTime() || (lastWeatherForecastRecord && (Date.now() - lastWeatherForecastRecord.timestamp.getTime()) > 1000 * 60 * 60 * 1)) {
+      if (!lastWeatherForecastRecord || lastWeatherForecastRecord.timestamp.getTime() + 1000 * 60 * 5 * 1 < lastLocation.timestamp.getTime() || (lastWeatherForecastRecord && (Date.now() - lastWeatherForecastRecord.timestamp.getTime()) > 1000 * 60 * 60 * 1)) {
         if (timeout) clearTimeout(timeout);
         timeout = setTimeout(getWeather, 1000);
       }

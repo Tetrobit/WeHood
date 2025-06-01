@@ -47,6 +47,14 @@
             "node_modules/@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf"
           ]
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Разрешение на использование камеры",
+          "microphonePermission": "Разрешение на использование микрофона",
+          "recordAudioAndroid": true
+        }
       ]
     ],
     "experiments": {
@@ -60,7 +68,8 @@
     },
     "owner": "tetrobit",
     "android": {
-      "package": "com.so_dam.wehood"
+      "package": "com.so_dam.wehood",
+      "permissions": ["android.permission.SCHEDULE_EXACT_ALARM"]
     }
   }
 }

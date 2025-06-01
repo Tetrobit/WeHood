@@ -41,6 +41,7 @@ function RootLayout() {
       <Stack.Screen name="+not-found" options={defaultConfig} />
       <Stack.Screen name="services" options={defaultConfig} />
       <Stack.Screen name="greeting/index" options={defaultConfig} />
+      <Stack.Screen name="add-content" options={defaultConfig} />
     </Stack>
   );
 }

@@ -39,29 +39,6 @@ export const useGeolocation = () => {
     }
   };
 
-  React.useEffect(() => {
-    async function geocode() {
-      if (!lastLocation?.geocoded) {
-        const geocoder = await api.reverseGeocode(lastLocation.latitude, lastLocation.longitude);
-        realm.write(() => {
-          lastLocation.geocoded = true;
-          lastLocation.country = geocoder.attributes.country;
-          lastLocation.province = geocoder.attributes.province;
-          lastLocation.locality = geocoder.attributes.locality;
-          lastLocation.district = geocoder.attributes.district;
-          lastLocation.street = geocoder.attributes.street;
-          lastLocation.house = geocoder.attributes.house;
-          lastLocation.other = geocoder.attributes.other;
-        });
-      }
-    }
-
-    if (lastLocation) {
-      geocode();
-    }
-  }, [lastLocation]);
-
-
   return {
     location,
     errorMsg,
