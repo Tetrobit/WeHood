@@ -28,7 +28,7 @@ const WeatherScreen: React.FC = () => {
   const metrics: WeatherMetric[] = [
     { value: `${lastWeatherForecast?.list[0]?.wind?.speed} км/ч`, label: 'Ветер' },
     { value: `${lastWeatherForecast?.list[0]?.main?.humidity}%`, label: 'Влажность' },
-    { value: `${lastWeatherForecast?.list[0]?.pop}%`, label: 'Дождь' },
+    { value: `${lastWeatherForecast?.list[0]?.pop * 100}%`, label: 'Осадки' },
   ];
 
   const hourlyForecast: HourlyForecast[] = lastWeatherForecast?.list.slice(0, 4).map((item) => ({
