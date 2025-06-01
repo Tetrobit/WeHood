@@ -29,12 +29,12 @@ const WeatherScreen: React.FC = () => {
   const { lastLocation } = useGeolocation();
   const { lastWeatherForecast, lastWeatherForecastRecord } = useWeather();
   const metrics: WeatherMetric[] = [
-    { value: `${lastWeatherForecast?.list[0]?.wind?.speed} км/ч`, label: 'Ветер' },
-    { value: `${lastWeatherForecast?.list[0]?.main?.humidity}%`, label: 'Влажность' },
-    { value: `${lastWeatherForecast?.list[0]?.pop * 100}%`, label: 'Осадки' },
+    { value: `${lastWeatherForecast?.list?.[0]?.wind?.speed} км/ч`, label: 'Ветер' },
+    { value: `${lastWeatherForecast?.list?.[0]?.main?.humidity}%`, label: 'Влажность' },
+    { value: `${lastWeatherForecast?.list?.[0]?.pop * 100}%`, label: 'Осадки' },
   ];
 
-  const hourlyForecast: HourlyForecast[] = lastWeatherForecast?.list.slice(0, 4).map((item) => ({
+  const hourlyForecast: HourlyForecast[] = lastWeatherForecast?.list?.slice(0, 4).map((item) => ({
     time: new Date(item.dt_txt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
     temperature: Math.round(item.main.temp - 273.15),
     icon: getWeatherIcon(item.weather[0].main, themeName === DARK_THEME ? 'white' : 'black', 24),
@@ -96,16 +96,16 @@ const WeatherScreen: React.FC = () => {
           }}
           {...panResponder.panHandlers}>
             <View style={styles.weatherIconContainer}>
-              { getWeatherIcon(lastWeatherForecast?.list[0]?.weather[0]?.main, 'white', 120) }
+              { getWeatherIcon(lastWeatherForecast?.list?.[0]?.weather[0]?.main, 'white', 120) }
             </View>
           </Animated.View>
 
 
           {/* Temperature and Condition */}
           <View style={styles.temperatureContainer}>
-            <Text style={styles.temperature}>{Math.round(lastWeatherForecast?.list[0]?.main?.temp - 273.15)}°</Text>
-            <Text style={styles.condition}>{getWeatherCondition(lastWeatherForecast?.list[0]?.weather[0]?.main)}</Text>
-            <Text style={styles.date}>{new Date(lastWeatherForecast?.list[0]?.dt * 1000).toLocaleDateString('ru-RU', { weekday: 'long', month: 'long', day: 'numeric' })}</Text>
+            <Text style={styles.temperature}>{Math.round(lastWeatherForecast?.list?.[0]?.main?.temp - 273.15)}°</Text>
+            <Text style={styles.condition}>{getWeatherCondition(lastWeatherForecast?.list?.[0]?.weather[0]?.main)}</Text>
+            <Text style={styles.date}>{new Date(lastWeatherForecast?.list?.[0]?.dt * 1000).toLocaleDateString('ru-RU', { weekday: 'long', month: 'long', day: 'numeric' })}</Text>
           </View>
 
           {/* Weather Metrics */}

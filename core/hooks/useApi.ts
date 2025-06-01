@@ -116,6 +116,7 @@ export interface WeatherForecast {
 }
 
 export interface WeatherForecastResponse {
+  error?: string;
   cod: string;
   message: number;
   cnt: number;

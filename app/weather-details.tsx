@@ -24,13 +24,13 @@ const WeatherDetailsScreen: React.FC = () => {
   const theme = useThemeName();
   const { lastWeatherForecast } = useWeather();
 
-  let forecast: { [key: string]: (typeof lastWeatherForecast.list[0])[] } = {};
-  for (let i = 0; i < lastWeatherForecast.list.length; i++) {
-    const day = new Date(lastWeatherForecast.list[i].dt_txt).toLocaleDateString('ru-RU', { weekday: 'long' });
+  let forecast: { [key: string]: (typeof lastWeatherForecast.list[number])[] } = {};
+  for (let i = 0; i < lastWeatherForecast.list?.length; i++) {
+    const day = new Date(lastWeatherForecast.list?.[i].dt_txt).toLocaleDateString('ru-RU', { weekday: 'long' });
     if (Object.hasOwn(forecast, day)) {
-      forecast[day].push(lastWeatherForecast.list[i]);
+      forecast[day].push(lastWeatherForecast.list?.[i]);
     } else {
-      forecast[day] = [lastWeatherForecast.list[i]];
+      forecast[day] = [lastWeatherForecast.list?.[i]];
     }
   }
 

@@ -20,10 +20,15 @@ export const useWeather = () => {
 
   React.useEffect(() => {
     const getWeather = async () => {
-      const weather = await api.getWeatherForecast(lastLocation.latitude, lastLocation.longitude);
-      realm.write(() => {
-        realm.create(WeatherForecast, WeatherForecast.generate(JSON.stringify(weather)));
-      });
+      try {
+        const weather = await api.getWeatherForecast(lastLocation.latitude, lastLocation.longitude);
+        if (weather.error) throw new Error(weather.error);
+        realm.write(() => {
+          realm.create(WeatherForecast, WeatherForecast.generate(JSON.stringify(weather)));
+        });
+      } catch (error) {
+        console.log('Error: getWeather', error);
+      }
     }
 
     if (!lastWeatherForecastRecord || (lastWeatherForecastRecord && (Date.now() - lastWeatherForecastRecord.timestamp.getTime()) > 1000 * 60 * 60 * 1)) {
@@ -33,6 +38,8 @@ export const useWeather = () => {
     let interval = setInterval(() => {
       getWeather();
     }, 1000 * 60 * 60 * 1);
+
+    return () => clearInterval(interval);
   }, [lastLocation]);
 
 

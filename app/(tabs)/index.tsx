@@ -13,6 +13,7 @@ import useApi from '@/core/hooks/useApi';
 import { useGeolocation } from '@/core/hooks/useGeolocation';
 import useWeather from '@/core/hooks/useWeather';
 import { useState } from 'react';
+import { getWeatherIcon } from '@/core/utils/weather';
 
 
 const { width } = Dimensions.get('window');
@@ -76,7 +77,7 @@ const serviceImages: Record<string, string> = {
   'Соседи': 'https://cdn-icons-png.flaticon.com/512/2922/2922510.png', // люди, цветные
 };
 
-export default function HomeScreen() {  
+export default function HomeScreen() {
   const [profile] = useQuery(Profile);
   const [avatarUri, setAvatarUri] = useState(profile?.avatar);
   const theme = useThemeName();
@@ -95,14 +96,14 @@ export default function HomeScreen() {
   );
 
   let weatherColor = '#ebb010';
-  if (lastWeatherForecast?.list[0]?.weather[0]?.main === 'Clear' && ((new Date().getHours() < 6 || new Date().getHours() > 18))) {
+  if (lastWeatherForecast?.list?.[0]?.weather[0]?.main === 'Clear' && ((new Date().getHours() < 6 || new Date().getHours() > 18))) {
     if (theme === DARK_THEME) {
       weatherColor = '#ffffff';
     } else {
       weatherColor = '#023e8a';
     }
   }
-  else if (lastWeatherForecast?.list[0]?.weather[0]?.main === 'Clear' && ((new Date().getHours() > 6 && new Date().getHours() < 18))) {
+  else if (lastWeatherForecast?.list?.[0]?.weather[0]?.main === 'Clear' && ((new Date().getHours() > 6 && new Date().getHours() < 18))) {
     weatherColor = '#ebb010';
   }
   else {
@@ -119,42 +120,8 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <View style={styles.locationContainer}>
           <TouchableOpacity onPress={() => {router.push('/weather')}} style={styles.weatherContainer}>
-            {
-              lastWeatherForecast?.list[0]?.weather[0]?.main === 'Clouds' && (
-                <MaterialCommunityIcons name="weather-cloudy" size={30} color={weatherColor} />
-              )
-            }
-            {
-              lastWeatherForecast?.list[0]?.weather[0]?.main === 'Clear' && ((new Date().getHours() > 6 && new Date().getHours() < 18) && (
-                <MaterialCommunityIcons name="weather-sunny" size={30} color={weatherColor} />
-              ))
-            }
-            {
-              lastWeatherForecast?.list[0]?.weather[0]?.main === 'Clear' && ((new Date().getHours() < 6 || new Date().getHours() > 18) && (
-                <MaterialCommunityIcons name="weather-night" size={30} color={weatherColor} />
-              ))
-            }
-            {
-              lastWeatherForecast?.list[0]?.weather[0]?.main === 'Rain' && (
-                <MaterialCommunityIcons name="weather-rainy" size={30} color={weatherColor} />
-              )
-            }
-            {
-              lastWeatherForecast?.list[0]?.weather[0]?.main === 'Snow' && (
-                <MaterialCommunityIcons name="weather-snowy" size={30} color={weatherColor} />
-              )
-            }
-            {
-              lastWeatherForecast?.list[0]?.weather[0]?.main === 'Thunderstorm' && (
-                <MaterialCommunityIcons name="weather-lightning" size={30} color={weatherColor} />
-              )
-            }
-            {
-              lastWeatherForecast?.list[0]?.weather[0]?.main === 'Mist' && (
-                <MaterialCommunityIcons name="weather-fog" size={30} color={weatherColor} />
-              )
-            }
-            <Text style={[styles.temperature, { color: weatherColor }]}>{Math.round(lastWeatherForecast?.list[0]?.main?.temp - 273.15)}°</Text>
+            {getWeatherIcon(lastWeatherForecast?.list?.[0]?.weather?.[0]?.main || 'Clear', weatherColor, 30)}
+            <Text style={[styles.temperature, { color: weatherColor }]}>{Math.round(lastWeatherForecast?.list?.[0]?.main?.temp - 273.15) || '0'}°C</Text>
             
             
           </TouchableOpacity>
