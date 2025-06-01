@@ -110,9 +110,6 @@ const WeatherDetailsScreen: React.FC = () => {
       {/* Tomorrow's Forecast */}
       <LinearGradient colors={['#7C4585', '#C95792']} style={styles.tomorrowContainer}>
         <View style={styles.tomorrowSplitContainer}>
-          <View style={styles.tomorrowLeftContainer_2}>
-            <Ionicons name="cloud" size={120} color="white" />
-          </View>
           <Animated.View
           style={{
             transform: [{translateX: pan.x}, {translateY: pan.y}],
@@ -226,7 +223,6 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
   },
   tomorrowLeftContainer: {
     position: 'relative',
-    left: -118,
     top: 14,
     flex: 1,
   },
@@ -234,14 +230,13 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
     flex: 1,
   },
   tomorrowRightContainer: {
-    position: 'relative',
-    left: -100,
     flex: 1,
   },
   tomorrowTitle: {
     color: 'white',
     fontSize: 24,
     fontWeight: '600',
+    marginLeft: 15,
   },
   temperatureContainer: {
     flexDirection: 'row',
@@ -261,6 +256,7 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
     fontWeight: 'bold',
   },
   weatherCondition: {
+    marginLeft: 20,
     color: 'rgba(255, 255, 255, 0.5)',
     fontSize: 12,
     marginTop: 5,

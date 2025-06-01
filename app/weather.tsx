@@ -272,9 +272,7 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
   forecastContainer: {
     width: '100%',
     left: 0,
-    // bottom: 20,
-    // marginTop: 20,
-    ...(screenHeight > 740 ? {bottom: 20} : {marginTop: 20}),
+    marginTop: 20,
     paddingHorizontal: 20,
   },
   forecastHeader: {
