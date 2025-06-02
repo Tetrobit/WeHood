@@ -104,7 +104,10 @@ export default function ViewPostScreen() {
 
         <View style={styles.overlay}>
           <View style={styles.topBar}>
-            <View style={styles.authorContainer}>
+            <TouchableOpacity 
+              style={styles.authorContainer}
+              onPress={() => router.push(`/services/profile/${currentPost.author.id}`)}
+            >
               {currentPost.author.avatar ? (
                 <Image 
                   source={{ uri: currentPost.author.avatar }} 
@@ -123,7 +126,7 @@ export default function ViewPostScreen() {
                   {new Date(currentPost.createdAt).toLocaleDateString('ru-RU')}
                 </Text>
               </View>
-            </View>
+            </TouchableOpacity>
             <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
               <MaterialIcons name="close" size={28} color="#fff" />
             </TouchableOpacity>
