@@ -73,7 +73,7 @@ export default function NewEventCityScreen() {
           placeholder="Введите название события"
           theme={{
             colors: {
-              primary: '#007AFF',
+              primary: '#00D2D2',
               text: theme === DARK_THEME ? '#fff' : '#000',
               placeholder: theme === DARK_THEME ? '#aaa' : '#666',
               background: theme === DARK_THEME ? '#222' : '#fff',
@@ -91,7 +91,7 @@ export default function NewEventCityScreen() {
           placeholder="Введите описание"
           theme={{
             colors: {
-              primary: '#007AFF',
+              primary: '#00D2D2',
               text: theme === DARK_THEME ? '#fff' : '#000',
               placeholder: theme === DARK_THEME ? '#aaa' : '#666',
               background: theme === DARK_THEME ? '#222' : '#fff',
@@ -181,7 +181,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   photoButtonOutline: {
     flex: 1,
     borderWidth: 2,
-    borderColor: '#007AFF',
+    borderColor: '#00D2D2',
     borderRadius: 12,
     padding: 12,
     marginRight: 8,
@@ -190,7 +190,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     backgroundColor: 'transparent',
   },
   photoButtonOutlineText: {
-    color: '#007AFF',
+    color: '#00D2D2',
     fontSize: 15,
     fontWeight: '500',
   },
@@ -201,7 +201,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     marginBottom: 18,
   },
   publishButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#00D2D2',
     borderRadius: 14,
     padding: 16,
     alignItems: 'center',
@@ -213,7 +213,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     fontWeight: '600',
   },
   returnButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#00D2D2',
     borderRadius: 14,
     padding: 16,
     alignItems: 'center',

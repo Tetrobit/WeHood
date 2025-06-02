@@ -144,7 +144,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     marginTop: 18,
   },
   comeButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#00D2D2',
     borderRadius: 14,
     paddingVertical: 12,
     alignItems: 'center',
@@ -161,7 +161,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   contactButton: {
     borderWidth: 2,
-    borderColor: '#007AFF',
+    borderColor: '#00D2D2',
     borderRadius: 14,
     paddingVertical: 12,
     paddingHorizontal: 14,
@@ -170,14 +170,14 @@ const makeStyles = (theme: string) => StyleSheet.create({
     backgroundColor: 'transparent',
   },
   contactButtonText: {
-    color: '#007AFF',
+    color: '#00D2D2',
     fontSize: 14,
     fontWeight: '600',
     textAlign: 'center',
     textAlignVertical: 'center',
   },
   returnButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#00D2D2',
     borderRadius: 14,
     padding: 16,
     alignItems: 'center',
