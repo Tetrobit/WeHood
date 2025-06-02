@@ -7,17 +7,6 @@ import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import ToastManager from 'toastify-react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
 
-export default function RootLayoutWrapper() {
-  return (
-    <PaperProvider>
-    <StorageProvider>
-      <RootLayout />
-      <ToastManager />
-    </StorageProvider>
-    </PaperProvider>
-  )
-}
-
 function RootLayout() {
   const themeName = useThemeName();
 
@@ -44,4 +33,15 @@ function RootLayout() {
       <Stack.Screen name="add-content" options={defaultConfig} />
     </Stack>
   );
+}
+
+export default function RootLayoutWrapper() {
+  return (
+    <StorageProvider>
+      <PaperProvider>
+        <RootLayout />
+        <ToastManager />
+      </PaperProvider>
+    </StorageProvider>
+  )
 }
