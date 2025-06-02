@@ -122,6 +122,11 @@ export default function ViewPostScreen() {
             </TouchableOpacity>
           </View>
 
+          <View style={styles.descriptionContainer}>
+            <Text style={styles.title}>{currentPost.title || 'Без названия'}</Text>
+            <Text style={styles.description}>{currentPost.description || 'Нет описания'}</Text>
+          </View>
+
           <Modal
             visible={showComments}
             transparent
@@ -305,5 +310,24 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   sendButtonDisabled: {
     opacity: 0.5,
+  },
+  descriptionContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 20,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  title: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  description: {
+    color: '#fff',
+    fontSize: 14,
+    opacity: 0.9,
   },
 }); 
