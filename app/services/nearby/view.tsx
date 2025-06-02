@@ -103,9 +103,31 @@ export default function ViewPostScreen() {
         )}
 
         <View style={styles.overlay}>
-          <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
-            <MaterialIcons name="close" size={28} color="#fff" />
-          </TouchableOpacity>
+          <View style={styles.topBar}>
+            <View style={styles.authorContainer}>
+              {currentPost.author.avatar ? (
+                <Image 
+                  source={{ uri: currentPost.author.avatar }} 
+                  style={styles.authorAvatar}
+                />
+              ) : (
+                <View style={styles.authorAvatarPlaceholder}>
+                  <MaterialIcons name="person" size={24} color="#fff" />
+                </View>
+              )}
+              <View style={styles.authorInfo}>
+                <Text style={styles.authorName}>
+                  {`${currentPost.author.firstName} ${currentPost.author.lastName}`}
+                </Text>
+                <Text style={styles.postDate}>
+                  {new Date(currentPost.createdAt).toLocaleDateString('ru-RU')}
+                </Text>
+              </View>
+            </View>
+            <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
+              <MaterialIcons name="close" size={28} color="#fff" />
+            </TouchableOpacity>
+          </View>
 
           <View style={styles.sideStatsContainer}>
             <View style={styles.statItem}>
@@ -222,11 +244,54 @@ const makeStyles = (theme: string) => StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.3)',
   },
-  closeButton: {
+  topBar: {
     position: 'absolute',
     top: 40,
+    left: 20,
     right: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     zIndex: 1,
+  },
+  authorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 20,
+  },
+  authorAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  authorAvatarPlaceholder: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  authorInfo: {
+    flex: 1,
+  },
+  authorName: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  postDate: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  closeButton: {
+    padding: 8,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 20,
   },
   sideStatsContainer: {
     position: 'absolute',
