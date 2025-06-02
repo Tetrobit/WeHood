@@ -2,38 +2,79 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { DARK_THEME, LIGHT_THEME, useThemeName } from '@/core/hooks/useTheme';
+import useGeolocation from '@/core/hooks/useGeolocation';
+import { useRouter } from 'expo-router';
+import useApi, { NearbyPost } from '@/core/hooks/useApi';
+import { getFileUrl } from '@/core/utils/url';
+import { calculateFormattedDistance } from '@/core/utils/location';
+import { VideoPlayer } from 'expo-video';
+import { AutoVideoView } from '../components/AutoVideoPlayer';
+import LottieView from 'lottie-react-native';
 
 const { width } = Dimensions.get('window');
 
 const TABS = [
-  { key: 'geo', label: 'Геоточки' },
   { key: 'images', label: 'Картинки' },
-  { key: 'shorts', label: 'Короткие видео' },
-];
-
-const IMAGES = [
-  { id: 1, uri: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb', distance: '9,56 км' },
-  { id: 2, uri: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308', distance: '970 м' },
-  { id: 3, uri: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca', distance: '30 км' },
-  { id: 4, uri: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470', distance: '15 км' },
-  { id: 5, uri: 'https://images.unsplash.com/photo-1465101178521-c1a9136a3b99', distance: '350 м' },
-  { id: 6, uri: 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca', distance: '2 км' },
-  { id: 7, uri: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb', distance: '—' },
-  { id: 8, uri: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308', distance: '—' },
+  { key: 'shorts', label: 'Shorts' },
+  { key: 'my', label: 'Мои публикации' },
 ];
 
 export default function NearbyScreen() {
   const [activeTab, setActiveTab] = useState('images');
   const theme = useThemeName();
-  const styles = makeStyles(theme);
+  const styles = makeStyles(theme!);
+  const { lastLocation } = useGeolocation();
+  const router = useRouter();
+  const api = useApi();
+  const [posts, setPosts] = useState<NearbyPost[]>([]);
+
+  React.useEffect(() => {
+    const fetchPosts = async () => {
+      if (lastLocation) {
+        try {
+          const posts = await api.getNearbyPosts(lastLocation.latitude, lastLocation.longitude);
+          if (posts && posts?.length >= 0) {
+            setPosts(posts);
+          }
+          else {
+            console.error(posts);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    }
+
+    fetchPosts();
+    const interval = setInterval(() => {
+      fetchPosts();
+    }, 1000 * 20);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  let relevantPosts = [];
+  if (posts?.filter) {
+    relevantPosts = posts?.filter(post => {
+      if (activeTab === 'images') {
+        return post.type == 'image';
+      }
+      if (activeTab === 'shorts') {
+        return post.type == 'video';
+      }
+      if (activeTab === 'my') {
+        return post.author?.id == api.profile?.id;
+      }
+    });
+  }
 
   return (
     <View style={styles.container}>
       {/* Верхняя панель */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.district}>Вахитовский район</Text>
-          <Text style={styles.city}>Казань</Text>
+          <Text style={styles.district}>{lastLocation?.district}</Text>
+          <Text style={styles.city}>{lastLocation?.locality}</Text>
         </View>
         <TouchableOpacity style={styles.filterBtn}>
           <MaterialIcons 
@@ -62,18 +103,41 @@ export default function NearbyScreen() {
       {/* Сетка картинок */}
       <ScrollView contentContainerStyle={styles.gridScroll} showsVerticalScrollIndicator={false}>
         <View style={styles.grid}>
-          {IMAGES.map((img, idx) => (
-            <View key={img.id} style={[styles.card, idx % 2 === 0 ? { marginRight: 8 } : { marginLeft: 8 }]}> 
-              <Image source={{ uri: img.uri }} style={styles.image} />
-              {img.distance !== '—' && (
-                <View style={styles.distanceBadge}>
-                  <Text style={styles.distanceText}>{img.distance}</Text>
-                </View>
+          {posts.map((post) => (
+            <View key={post.id} style={[styles.card]}>
+              { post.type === 'image' && (
+                <Image source={{ uri: getFileUrl(post.fileId) }} style={styles.image} />
               )}
+
+              { post.type === 'video' && (
+                <AutoVideoView source={getFileUrl(post.fileId)} style={styles.image} />
+              )}
+              
+              <View style={styles.distanceBadge}>
+                <Text style={styles.distanceText}>{calculateFormattedDistance(lastLocation.latitude, lastLocation.longitude, post.latitude, post.longitude)}</Text>
+              </View>
             </View>
           ))}
+      
+          {posts.length === 0 && (
+            <View style={{ flex: 1, marginTop: 50, justifyContent: 'center', alignItems: 'center' }}>
+              <LottieView
+                source={require('@/assets/lottie/empty.json')}
+                autoPlay
+                style={{ width: 300, height: 300 }}
+              />
+            </View>
+          )}
         </View>
       </ScrollView>
+
+      {/* Кнопка добавления */}
+      <TouchableOpacity 
+        style={styles.addButton}
+        onPress={() => router.push('/add-content')}
+      >
+        <MaterialIcons name="add" size={30} color="#fff" />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -91,8 +155,6 @@ const makeStyles = (theme: string) => StyleSheet.create({
     paddingTop: 18,
     paddingBottom: 8,
     backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
-    borderBottomColor: theme === DARK_THEME ? '#333' : '#eee',
-    borderBottomWidth: 1,
   },
   district: {
     fontSize: 18,
@@ -174,5 +236,33 @@ const makeStyles = (theme: string) => StyleSheet.create({
     color: '#fff',
     fontSize: 13,
     fontWeight: '500',
+  },
+  description: {
+    position: 'absolute',
+    bottom: 8,
+    left: 8,
+    right: 8,
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '500',
+    textShadowColor: 'rgba(0,0,0,0.75)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  addButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#007AFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
 });

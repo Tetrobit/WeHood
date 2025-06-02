@@ -1,8 +1,9 @@
-import { API_URL } from "@/core/constants/environment";
+import { API_URL, MEDIA_URL } from "@/core/constants/environment";
 import * as Device from 'expo-device';
 import { useSharedValue } from "react-native-reanimated";
 import { useQuery, useRealm } from "@realm/react";
 import Profile from "../models/profile";
+import { User } from "realm";
 
 export interface VKParameters {
   vkAppId: string;
@@ -134,6 +135,48 @@ export interface WeatherForecastResponse {
       sunrise: number;
       sunset: number;
   };
+}
+
+export interface UploadNearbyPostRequest {
+  latitude: number;
+  longitude: number;
+  title: string;
+  description: string;
+  fileId: string;
+  type: 'image' | 'video';
+}
+
+export interface NearbyPost {
+  title: string;
+  description: string;
+  latitude: number;
+  longitude: number;
+  fileId: string;
+  author: {
+    id: string;
+    vkId: string;
+    avatar: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    createdAt: Date;
+    updatedAt: Date;
+  },
+  type: 'image' | 'video';
+  id: number;
+  views: number;
+  likes: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface UploadNearbyPostResponse extends NearbyPost {};
+
+export interface UploadFileResponse {
+  fileId: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
 }
 
 export const useApi = () => {
@@ -337,7 +380,54 @@ export const useApi = () => {
     });
   };
 
+  const uploadFile = async (uri: string, mimeType: string | null): Promise<UploadFileResponse> => {
+    const formData = new FormData();
+    if (!mimeType) {
+      const fileType = uri.split('.').pop();
+      if (fileType === 'jpg' || fileType === 'jpeg') {
+        mimeType = 'image/jpeg';
+      } else if (fileType === 'png') {
+        mimeType = 'image/png';
+      } else if (fileType === 'mp4') {
+        mimeType = 'video/mp4';
+      }
+    }
+
+    const blob = await fetch(uri).then(res => res.blob());
+    
+    formData.append('file', {
+      uri: uri,
+      name: uri.split('/').pop(),
+      type: blob.type,
+    } as any);
+
+    console.log(`Upload file: ${(blob.size / 1024 / 1024).toPrecision(2)} MB`);
+    const response = await fetch(`${MEDIA_URL}/upload`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      body: formData,
+    });
+    return response.json();
+  }
+
+  const uploadNearbyPost = async (data: UploadNearbyPostRequest): Promise<UploadNearbyPostResponse> => {
+    return await withAuth<UploadNearbyPostResponse>(`${API_URL}/api/nearby/posts`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+  }
+
+  const getNearbyPosts = async (latitude: number, longitude: number): Promise<NearbyPost[]> => {
+    return await withAuth<NearbyPost[]>(`${API_URL}/api/nearby/posts?latitude=${latitude}&longitude=${longitude}&radius=100000`);
+  }
+
   return {
+    profile,
     sendVerificationCode,
     verifyVerificationCode,
     checkEmailExists,
@@ -351,6 +441,9 @@ export const useApi = () => {
     ipGeocode,
     getWeatherForecast,
     changePassword,
+    uploadNearbyPost,
+    uploadFile,
+    getNearbyPosts,
   }
 }
 
