@@ -9,6 +9,7 @@ import { getFileUrl } from '@/core/utils/url';
 import { calculateFormattedDistance } from '@/core/utils/location';
 import { VideoPlayer } from 'expo-video';
 import { AutoVideoView } from '../components/AutoVideoPlayer';
+import LottieView from 'lottie-react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -32,7 +33,12 @@ export default function NearbyScreen() {
       if (lastLocation) {
         try {
           const posts = await api.getNearbyPosts(lastLocation.latitude, lastLocation.longitude);
-          setPosts(posts);
+          if (posts && posts?.length >= 0) {
+            setPosts(posts);
+          }
+          else {
+            console.error(posts);
+          }
         } catch (error) {
           console.error(error);
         }
@@ -47,17 +53,21 @@ export default function NearbyScreen() {
     return () => clearInterval(interval);
   }, []);
 
-  let relevantPosts = posts?.filter(post => {
-    if (activeTab === 'images') {
-      return post.type == 'image';
-    }
-    if (activeTab === 'shorts') {
-      return post.type == 'video';
-    }
-    if (activeTab === 'my') {
-      return post.author?.id == api.profile?.id;
-    }
-  });
+  let relevantPosts = [];
+  if (posts?.filter) {
+    console.log(posts);
+    relevantPosts = posts?.filter(post => {
+      if (activeTab === 'images') {
+        return post.type == 'image';
+      }
+      if (activeTab === 'shorts') {
+        return post.type == 'video';
+      }
+      if (activeTab === 'my') {
+        return post.author?.id == api.profile?.id;
+      }
+    });
+  }
 
   return (
     <View style={styles.container}>
@@ -109,6 +119,16 @@ export default function NearbyScreen() {
               </View>
             </View>
           ))}
+      
+          {posts.length === 0 && (
+            <View style={{ flex: 1, marginTop: 50, justifyContent: 'center', alignItems: 'center' }}>
+              <LottieView
+                source={require('@/assets/lottie/empty.json')}
+                autoPlay
+                style={{ width: 300, height: 300 }}
+              />
+            </View>
+          )}
         </View>
       </ScrollView>
 
