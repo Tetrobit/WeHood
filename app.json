@@ -69,7 +69,7 @@
     "owner": "tetrobit",
     "android": {
       "package": "com.so_dam.wehood",
-      "permissions": ["android.permission.SCHEDULE_EXACT_ALARM"]
+      "permissions": []
     }
   }
 }
