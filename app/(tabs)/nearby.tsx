@@ -15,7 +15,7 @@ const { width } = Dimensions.get('window');
 
 const TABS = [
   { key: 'images', label: 'Картинки' },
-  { key: 'shorts', label: 'Короткие видео' },
+  { key: 'shorts', label: 'Shorts' },
   { key: 'my', label: 'Мои публикации' },
 ];
 
@@ -156,8 +156,6 @@ const makeStyles = (theme: string) => StyleSheet.create({
     paddingTop: 18,
     paddingBottom: 8,
     backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
-    borderBottomColor: theme === DARK_THEME ? '#333' : '#eee',
-    borderBottomWidth: 1,
   },
   district: {
     fontSize: 18,
