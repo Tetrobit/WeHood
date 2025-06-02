@@ -8,7 +8,6 @@ import { DARK_THEME, LIGHT_THEME, useThemeName } from '@/core/hooks/useTheme';
 import useGeolocation from '@/core/hooks/useGeolocation';
 import ToastManager, { Toast } from 'toastify-react-native';
 import { UploadNearbyPostRequest, useApi } from '@/core/hooks/useApi';
-import * as ImagePicker from 'expo-image-picker';
 
 export default function AddContentScreen() {
   const { uploadNearbyPost, uploadFile } = useApi();
@@ -26,7 +25,6 @@ export default function AddContentScreen() {
   const player = useVideoPlayer(contentType === 'video' && mediaUri ? mediaUri : null);
 
   React.useEffect(() => {
-    console.log("Request");
     if (!lastLocation || lastLocation.timestamp.getTime() < Date.now() - 1000 * 60 * 5) {
       requestGeolocation();
     }

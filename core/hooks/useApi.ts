@@ -162,6 +162,7 @@ export interface NearbyPost {
     createdAt: Date;
     updatedAt: Date;
   },
+  type: 'image' | 'video';
   id: number;
   views: number;
   likes: number;
@@ -421,7 +422,12 @@ export const useApi = () => {
     });
   }
 
+  const getNearbyPosts = async (latitude: number, longitude: number): Promise<NearbyPost[]> => {
+    return await withAuth<NearbyPost[]>(`${API_URL}/api/nearby/posts?latitude=${latitude}&longitude=${longitude}&radius=100000`);
+  }
+
   return {
+    profile,
     sendVerificationCode,
     verifyVerificationCode,
     checkEmailExists,
@@ -437,6 +443,7 @@ export const useApi = () => {
     changePassword,
     uploadNearbyPost,
     uploadFile,
+    getNearbyPosts,
   }
 }
 

@@ -5,6 +5,7 @@ import Geolocation from '@/core/models/geolocation';
 import { useApi } from '@/core/hooks/useApi';
 
 let lastAttemptTimestamp = 0;
+let attempting = false;
 
 export const useGeolocation = () => {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
@@ -18,9 +19,13 @@ export const useGeolocation = () => {
   const realm = useRealm();
 
   const requestGeolocation = async (): Promise<boolean> => {
-    if (Date.now() - lastAttemptTimestamp < 1000 * 60 * 5) {
+    console.log(new Date().toLocaleString().split('T')[1].split('.')[0], "Requesting geolocation");
+
+    if (Date.now() - lastAttemptTimestamp < 1000 * 60 * 5 || attempting) {
       return false;
     }
+
+    attempting = true;
 
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -44,6 +49,8 @@ export const useGeolocation = () => {
     } catch (error) {
       setErrorMsg('Ошибка при получении геолокации');
       return false;
+    } finally {
+      attempting = false;
     }
   };
 
