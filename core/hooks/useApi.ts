@@ -148,6 +148,13 @@ export interface UploadNearbyPostRequest {
   type: 'image' | 'video';
 }
 
+export interface Comment {
+  id: number;
+  text: string;
+  userId: number;
+  createdAt: string;
+}
+
 export interface NearbyPost {
   title: string;
   description: string;
@@ -170,6 +177,7 @@ export interface NearbyPost {
   likes: number;
   createdAt: Date;
   updatedAt: Date;
+  comments?: Comment[];
 }
 
 export interface UploadNearbyPostResponse extends NearbyPost {};
@@ -463,6 +471,16 @@ export const useApi = () => {
     });
   };
 
+  const addComment = async (postId: number, text: string): Promise<Comment> => {
+    return await withAuth<Comment>(`${API_URL}/api/nearby/posts/${postId}/comments`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text }),
+    });
+  };
+
   return {
     profile,
     sendVerificationCode,
@@ -483,6 +501,7 @@ export const useApi = () => {
     getNearbyPosts,
     likePost,
     dislikePost,
+    addComment,
   }
 }
 

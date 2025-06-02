@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useThemeName, DARK_THEME } from '@/core/hooks/useTheme';
-import { NearbyPost } from '@/core/hooks/useApi';
+import { NearbyPost, Comment } from '@/core/hooks/useApi';
 import { getFileUrl } from '@/core/utils/url';
 import { AutoVideoView } from '@/app/components/AutoVideoPlayer';
 import { GestureHandlerRootView, PanGestureHandler } from 'react-native-gesture-handler';
@@ -11,17 +11,6 @@ import useApi from '@/core/hooks/useApi';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@realm/react';
 import { NearbyPostModel } from '@/core/models/nearby-post';
-
-interface Comment {
-  id: number;
-  text: string;
-  userId: number;
-  createdAt: string;
-}
-
-interface ExtendedNearbyPost extends NearbyPost {
-  comments?: Comment[];
-}
 
 const { width, height } = Dimensions.get('window');
 
@@ -32,9 +21,11 @@ export default function ViewPostScreen() {
   const styles = makeStyles(theme!);
   const api = useApi();
   const [showComments, setShowComments] = useState(false);
+  const [newComment, setNewComment] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const post = useQuery(NearbyPostModel).filtered('id = $0', parseInt(id))[0];
-  const [currentPost, setCurrentPost] = useState<ExtendedNearbyPost>(post as ExtendedNearbyPost);
+  const [currentPost, setCurrentPost] = useState<NearbyPost>(post);
 
   const handleLike = async () => {
     try {
@@ -50,6 +41,26 @@ export default function ViewPostScreen() {
 
   const toggleComments = () => {
     setShowComments(!showComments);
+  };
+
+  const handleSubmitComment = async () => {
+    if (!newComment.trim() || isSubmitting) return;
+
+    try {
+      setIsSubmitting(true);
+      const response = await api.addComment(currentPost.id, newComment.trim());
+      
+      setCurrentPost(prev => ({
+        ...prev,
+        comments: [...(prev.comments || []), response]
+      }));
+      
+      setNewComment('');
+    } catch (error) {
+      console.error('Ошибка при отправке комментария:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!post) {
@@ -97,18 +108,45 @@ export default function ViewPostScreen() {
           </View>
 
           {showComments && (
-            <View style={styles.commentsContainer}>
+            <KeyboardAvoidingView 
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={styles.commentsContainer}
+            >
               <Text style={styles.commentsTitle}>Комментарии</Text>
-              {currentPost.comments && currentPost.comments.length > 0 ? (
-                currentPost.comments.map((comment, index) => (
-                  <View key={index} style={styles.commentItem}>
-                    <Text style={styles.commentText}>{comment.text}</Text>
-                  </View>
-                ))
-              ) : (
-                <Text style={styles.noCommentsText}>Пока нет комментариев</Text>
-              )}
-            </View>
+              <View style={styles.commentsList}>
+                {currentPost.comments && currentPost.comments.length > 0 ? (
+                  currentPost.comments.map((comment, index) => (
+                    <View key={index} style={styles.commentItem}>
+                      <Text style={styles.commentText}>{comment.text}</Text>
+                    </View>
+                  ))
+                ) : (
+                  <Text style={styles.noCommentsText}>Пока нет комментариев</Text>
+                )}
+              </View>
+              
+              <View style={styles.commentInputContainer}>
+                <TextInput
+                  style={styles.commentInput}
+                  placeholder="Написать комментарий..."
+                  placeholderTextColor="rgba(255,255,255,0.5)"
+                  value={newComment}
+                  onChangeText={setNewComment}
+                  multiline
+                />
+                <TouchableOpacity 
+                  style={[styles.sendButton, !newComment.trim() && styles.sendButtonDisabled]} 
+                  onPress={handleSubmitComment}
+                  disabled={!newComment.trim() || isSubmitting}
+                >
+                  <MaterialIcons 
+                    name="send" 
+                    size={24} 
+                    color={newComment.trim() ? "#fff" : "rgba(255,255,255,0.3)"} 
+                  />
+                </TouchableOpacity>
+              </View>
+            </KeyboardAvoidingView>
           )}
         </View>
       </View>
@@ -193,5 +231,30 @@ const makeStyles = (theme: string) => StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     padding: 20,
+  },
+  commentsList: {
+    flex: 1,
+    marginBottom: 10,
+  },
+  commentInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+  },
+  commentInput: {
+    flex: 1,
+    color: '#fff',
+    fontSize: 14,
+    maxHeight: 100,
+    paddingVertical: 8,
+  },
+  sendButton: {
+    padding: 8,
+  },
+  sendButtonDisabled: {
+    opacity: 0.5,
   },
 }); 
