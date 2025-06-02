@@ -106,7 +106,10 @@ export default function ViewPostScreen() {
           <View style={styles.topBar}>
             <TouchableOpacity 
               style={styles.authorContainer}
-              onPress={() => router.push(`/services/profile/${currentPost.author.id}`)}
+              onPress={() => router.push({
+                pathname: "/services/profile/[id]",
+                params: { id: currentPost.author.id }
+              })}
             >
               {currentPost.author.avatar ? (
                 <Image 
