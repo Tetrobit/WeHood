@@ -92,11 +92,19 @@ export default function ProfileScreen() {
                 )}
                 <View style={styles.postStats}>
                   <View style={styles.postStat}>
-                    <MaterialIcons name="visibility" size={16} color="#fff" />
+                    <MaterialIcons 
+                      name="visibility" 
+                      size={16} 
+                      color={theme === DARK_THEME ? '#fff' : '#000'} 
+                    />
                     <Text style={styles.postStatText}>{post.views || 0}</Text>
                   </View>
                   <View style={styles.postStat}>
-                    <MaterialIcons name="thumb-up" size={16} color="#fff" />
+                    <MaterialIcons 
+                      name="thumb-up" 
+                      size={16} 
+                      color={theme === DARK_THEME ? '#fff' : '#000'} 
+                    />
                     <Text style={styles.postStatText}>{post.likes || 0}</Text>
                   </View>
                 </View>
