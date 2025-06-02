@@ -9,6 +9,7 @@ import useGeolocation from '@/core/hooks/useGeolocation';
 import ToastManager, { Toast } from 'toastify-react-native';
 import { UploadNearbyPostRequest, useApi } from '@/core/hooks/useApi';
 import LottieView from 'lottie-react-native';
+import { compressImage } from '@/core/utils/image';
 
 export default function AddContentScreen() {
   const { uploadNearbyPost, uploadFile } = useApi();
@@ -35,6 +36,7 @@ export default function AddContentScreen() {
     if (cameraRef.current && contentType === 'image') {
       try {
         const photo = await cameraRef.current.takePictureAsync({
+          shutterSound: false,
           quality: 1,
           base64: true,
         });
@@ -87,9 +89,13 @@ export default function AddContentScreen() {
   }, [mediaUri]);
 
   const handleSubmit = async () => {
-    // Здесь будет логика отправки данных на сервер
+    let uri = mediaUri;
+    if (contentType === 'image') {
+      uri = await compressImage(uri!);
+    }
+
     try {
-      const uploadFileResponse = await uploadFile(mediaUri!, contentType!);
+      const uploadFileResponse = await uploadFile(uri!, contentType!);
       const fileId = uploadFileResponse.fileId;
 
       if (!fileId) {

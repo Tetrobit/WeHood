@@ -60,6 +60,7 @@ export default function NearbyScreen() {
   let relevantPosts = [];
   if (posts?.filter) {
     relevantPosts = posts?.filter(post => {
+      console.log(activeTab);
       if (activeTab === 'images') {
         return post.type == 'image';
       }
@@ -116,13 +117,13 @@ export default function NearbyScreen() {
               { post.type === 'video' && (
                 <AutoVideoView source={getFileUrl(post.fileId)} style={styles.image} />
               )}
-              
+
               <View style={styles.distanceBadge}>
                 <Text style={styles.distanceText}>{calculateFormattedDistance(lastLocation.latitude, lastLocation.longitude, post.latitude, post.longitude)}</Text>
               </View>
             </View>
           ))}
-      
+
           {posts.length === 0 && (
             <View style={{ flex: 1, marginTop: 50, justifyContent: 'center', alignItems: 'center' }}>
               <LottieView
