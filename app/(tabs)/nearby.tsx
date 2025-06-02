@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions, RefreshControl } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { DARK_THEME, LIGHT_THEME, useThemeName } from '@/core/hooks/useTheme';
 import useGeolocation from '@/core/hooks/useGeolocation';
@@ -10,6 +10,7 @@ import { calculateFormattedDistance } from '@/core/utils/location';
 import { VideoPlayer } from 'expo-video';
 import { AutoVideoView } from '../components/AutoVideoPlayer';
 import LottieView from 'lottie-react-native';
+import { FullScreenViewer } from '../components/FullScreenViewer';
 
 const { width } = Dimensions.get('window');
 
@@ -21,30 +22,36 @@ const TABS = [
 
 export default function NearbyScreen() {
   const [activeTab, setActiveTab] = useState('images');
+  const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
   const theme = useThemeName();
   const styles = makeStyles(theme!);
   const { lastLocation } = useGeolocation();
   const router = useRouter();
   const api = useApi();
   const [posts, setPosts] = useState<NearbyPost[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
-  React.useEffect(() => {
-    const fetchPosts = async () => {
-      if (lastLocation) {
-        try {
-          const posts = await api.getNearbyPosts(lastLocation.latitude, lastLocation.longitude);
-          if (posts && posts?.length >= 0) {
-            setPosts(posts);
-          }
-          else {
-            console.error(posts);
-          }
-        } catch (error) {
-          console.error(error);
+  const fetchPosts = async () => {
+    setRefreshing(true);
+    if (lastLocation) {
+      try {
+        const posts = await api.getNearbyPosts(lastLocation.latitude, lastLocation.longitude);
+        if (posts && posts?.length >= 0) {
+          setPosts(posts);
         }
+        else {
+          console.error(posts);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+      finally {
+        setRefreshing(false);
       }
     }
+  };
 
+  React.useEffect(() => {
     fetchPosts();
     const interval = setInterval(() => {
       fetchPosts();
@@ -53,9 +60,9 @@ export default function NearbyScreen() {
     return () => clearInterval(interval);
   }, []);
 
-  let relevantPosts = [];
+  let filteredPosts: NearbyPost[] = [];
   if (posts?.filter) {
-    relevantPosts = posts?.filter(post => {
+    filteredPosts = posts?.filter(post => {
       if (activeTab === 'images') {
         return post.type == 'image';
       }
@@ -67,6 +74,13 @@ export default function NearbyScreen() {
       }
     });
   }
+
+  const handleUpdatePost = (updatedPost: NearbyPost) => {
+    const updatedPosts = posts.map(post => 
+      post.id === updatedPost.id ? updatedPost : post
+    );
+    setPosts(updatedPosts);
+  };
 
   return (
     <View style={styles.container}>
@@ -101,10 +115,14 @@ export default function NearbyScreen() {
       </View>
 
       {/* Сетка картинок */}
-      <ScrollView contentContainerStyle={styles.gridScroll} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.gridScroll} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={fetchPosts} />}>
         <View style={styles.grid}>
-          {posts.map((post) => (
-            <View key={post.id} style={[styles.card]}>
+          {filteredPosts.map((post) => (
+            <TouchableOpacity 
+              key={post.id} 
+              style={[styles.card]}
+              onPress={() => router.push(`/services/nearby/view?id=${post.id}`)}
+            >
               { post.type === 'image' && (
                 <Image source={{ uri: getFileUrl(post.fileId) }} style={styles.image} />
               )}
@@ -112,14 +130,14 @@ export default function NearbyScreen() {
               { post.type === 'video' && (
                 <AutoVideoView source={getFileUrl(post.fileId)} style={styles.image} />
               )}
-              
+
               <View style={styles.distanceBadge}>
                 <Text style={styles.distanceText}>{calculateFormattedDistance(lastLocation.latitude, lastLocation.longitude, post.latitude, post.longitude)}</Text>
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
-      
-          {posts.length === 0 && (
+
+          {filteredPosts.length === 0 && (
             <View style={{ flex: 1, marginTop: 50, justifyContent: 'center', alignItems: 'center' }}>
               <LottieView
                 source={require('@/assets/lottie/empty.json')}
@@ -138,6 +156,16 @@ export default function NearbyScreen() {
       >
         <MaterialIcons name="add" size={30} color="#fff" />
       </TouchableOpacity>
+
+      {/* Полноэкранный просмотр */}
+      {selectedPostIndex !== null && (
+        <FullScreenViewer
+          posts={filteredPosts}
+          initialIndex={selectedPostIndex}
+          onClose={() => setSelectedPostIndex(null)}
+          onUpdatePost={handleUpdatePost}
+        />
+      )}
     </View>
   );
 }

@@ -4,6 +4,8 @@ import { useSharedValue } from "react-native-reanimated";
 import { useQuery, useRealm } from "@realm/react";
 import Profile from "../models/profile";
 import { User } from "realm";
+import { NearbyPostModel } from "../models/nearby-post";
+import Realm from "realm";
 
 export interface VKParameters {
   vkAppId: string;
@@ -146,6 +148,13 @@ export interface UploadNearbyPostRequest {
   type: 'image' | 'video';
 }
 
+export interface Comment {
+  id: number;
+  text: string;
+  userId: number;
+  createdAt: string;
+}
+
 export interface NearbyPost {
   title: string;
   description: string;
@@ -168,6 +177,7 @@ export interface NearbyPost {
   likes: number;
   createdAt: Date;
   updatedAt: Date;
+  comments?: Comment[];
 }
 
 export interface UploadNearbyPostResponse extends NearbyPost {};
@@ -423,8 +433,53 @@ export const useApi = () => {
   }
 
   const getNearbyPosts = async (latitude: number, longitude: number): Promise<NearbyPost[]> => {
-    return await withAuth<NearbyPost[]>(`${API_URL}/api/nearby/posts?latitude=${latitude}&longitude=${longitude}&radius=100000`);
+    const posts = await withAuth<NearbyPost[]>(`${API_URL}/api/nearby/posts?latitude=${latitude}&longitude=${longitude}&radius=100000`);
+    
+    // Сохраняем посты в Realm
+    realm.write(() => {
+      posts.forEach(post => {
+        const postData = {
+          ...post,
+          latitude: Number(post.latitude),
+          longitude: Number(post.longitude),
+          views: Math.round(Number(post.views)),
+          likes: Math.round(Number(post.likes)),
+          createdAt: new Date(post.createdAt),
+          updatedAt: new Date(post.updatedAt),
+          author: {
+            ...post.author,
+            createdAt: new Date(post.author.createdAt),
+            updatedAt: new Date(post.author.updatedAt),
+          }
+        };
+        realm.create(NearbyPostModel, NearbyPostModel.fromApi(postData), Realm.UpdateMode.Modified);
+      });
+    });
+
+    return posts;
   }
+
+  const likePost = async (postId: number): Promise<void> => {
+    return await withAuth<void>(`${API_URL}/api/nearby/posts/${postId}/like`, {
+      method: 'POST',
+    });
+  };
+
+  const dislikePost = async (postId: number): Promise<void> => {
+    return await withAuth<void>(`${API_URL}/api/nearby/posts/${postId}/dislike`, {
+      method: 'POST',
+    });
+  };
+
+  const addComment = async (postId: number, text: string): Promise<Comment> => {
+    return await withAuth<Comment>(`${API_URL}/api/nearby/posts/${postId}/comments`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text }),
+    });
+  };
 
   return {
     profile,
@@ -444,6 +499,9 @@ export const useApi = () => {
     uploadNearbyPost,
     uploadFile,
     getNearbyPosts,
+    likePost,
+    dislikePost,
+    addComment,
   }
 }
 

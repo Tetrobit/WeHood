@@ -38,6 +38,8 @@ export default function ServicesLayout() {
       <Stack.Screen name="local-services/index" options={{...defaultConfig, title: 'Местные службы'}} />
       <Stack.Screen name="local-services/[id]" options={defaultConfig} />
       <Stack.Screen name="local-services/new" options={{...defaultConfig, title: 'Добавить услугу'}} />
+      <Stack.Screen name="nearby/view" options={{...defaultConfig, statusBarBackgroundColor: 'black', statusBarStyle: 'light'}} />
+      <Stack.Screen name="profile/[id]" options={{...defaultConfig, title: 'Профиль'}} />
     </Stack>
   );
 }
