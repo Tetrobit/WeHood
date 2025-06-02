@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image, TextInput, KeyboardAvoidingView, Platform, Modal, Animated as RNAnimated } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useThemeName, DARK_THEME } from '@/core/hooks/useTheme';
 import { NearbyPost, Comment } from '@/core/hooks/useApi';
 import { getFileUrl } from '@/core/utils/url';
 import { AutoVideoView } from '@/app/components/AutoVideoPlayer';
 import { GestureHandlerRootView, PanGestureHandler } from 'react-native-gesture-handler';
-import Animated, { useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import useApi from '@/core/hooks/useApi';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@realm/react';
@@ -23,6 +22,7 @@ export default function ViewPostScreen() {
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const slideAnim = React.useRef(new RNAnimated.Value(height)).current;
   
   const post = useQuery(NearbyPostModel).filtered('id = $0', parseInt(id))[0];
   const [currentPost, setCurrentPost] = useState<NearbyPost>(post);
@@ -40,7 +40,22 @@ export default function ViewPostScreen() {
   };
 
   const toggleComments = () => {
-    setShowComments(!showComments);
+    if (!showComments) {
+      setShowComments(true);
+      RNAnimated.timing(slideAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      RNAnimated.timing(slideAnim, {
+        toValue: height,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => {
+        setShowComments(false);
+      });
+    }
   };
 
   const handleSubmitComment = async () => {
@@ -103,51 +118,75 @@ export default function ViewPostScreen() {
             </TouchableOpacity>
             <TouchableOpacity style={styles.statItem} onPress={toggleComments}>
               <MaterialIcons name="chat-bubble" size={24} color="#fff" />
-              <Text style={styles.statText}>Комментарии</Text>
+              <Text style={styles.statText}>{currentPost.comments?.length || 0}</Text>
             </TouchableOpacity>
           </View>
 
-          {showComments && (
-            <KeyboardAvoidingView 
-              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              style={styles.commentsContainer}
+          <Modal
+            visible={showComments}
+            transparent
+            animationType="none"
+            onRequestClose={toggleComments}
+          >
+            <TouchableOpacity 
+              style={styles.modalOverlay} 
+              activeOpacity={1} 
+              onPress={toggleComments}
             >
-              <Text style={styles.commentsTitle}>Комментарии</Text>
-              <View style={styles.commentsList}>
-                {currentPost.comments && currentPost.comments.length > 0 ? (
-                  currentPost.comments.map((comment, index) => (
-                    <View key={index} style={styles.commentItem}>
-                      <Text style={styles.commentText}>{comment.text}</Text>
-                    </View>
-                  ))
-                ) : (
-                  <Text style={styles.noCommentsText}>Пока нет комментариев</Text>
-                )}
-              </View>
-              
-              <View style={styles.commentInputContainer}>
-                <TextInput
-                  style={styles.commentInput}
-                  placeholder="Написать комментарий..."
-                  placeholderTextColor="rgba(255,255,255,0.5)"
-                  value={newComment}
-                  onChangeText={setNewComment}
-                  multiline
-                />
-                <TouchableOpacity 
-                  style={[styles.sendButton, !newComment.trim() && styles.sendButtonDisabled]} 
-                  onPress={handleSubmitComment}
-                  disabled={!newComment.trim() || isSubmitting}
+              <RNAnimated.View 
+                style={[
+                  styles.modalContent,
+                  {
+                    transform: [{ translateY: slideAnim }]
+                  }
+                ]}
+              >
+                <View style={styles.modalHeader}>
+                  <Text style={styles.commentsTitle}>Комментарии</Text>
+                  <TouchableOpacity onPress={toggleComments} style={styles.closeModalButton}>
+                    <MaterialIcons name="close" size={24} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.commentsList}>
+                  {currentPost.comments && currentPost.comments.length > 0 ? (
+                    currentPost.comments.map((comment, index) => (
+                      <View key={index} style={styles.commentItem}>
+                        <Text style={styles.commentText}>{comment.text}</Text>
+                      </View>
+                    ))
+                  ) : (
+                    <Text style={styles.noCommentsText}>Пока нет комментариев</Text>
+                  )}
+                </View>
+
+                <KeyboardAvoidingView 
+                  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                  style={styles.commentInputContainer}
                 >
-                  <MaterialIcons 
-                    name="send" 
-                    size={24} 
-                    color={newComment.trim() ? "#fff" : "rgba(255,255,255,0.3)"} 
+                  <TextInput
+                    style={styles.commentInput}
+                    placeholder="Написать комментарий..."
+                    placeholderTextColor="rgba(255,255,255,0.5)"
+                    value={newComment}
+                    onChangeText={setNewComment}
+                    multiline
                   />
-                </TouchableOpacity>
-              </View>
-            </KeyboardAvoidingView>
-          )}
+                  <TouchableOpacity 
+                    style={[styles.sendButton, !newComment.trim() && styles.sendButtonDisabled]} 
+                    onPress={handleSubmitComment}
+                    disabled={!newComment.trim() || isSubmitting}
+                  >
+                    <MaterialIcons 
+                      name="send" 
+                      size={24} 
+                      color={newComment.trim() ? "#fff" : "rgba(255,255,255,0.3)"} 
+                    />
+                  </TouchableOpacity>
+                </KeyboardAvoidingView>
+              </RNAnimated.View>
+            </TouchableOpacity>
+          </Modal>
         </View>
       </View>
     </GestureHandlerRootView>
@@ -200,22 +239,35 @@ const makeStyles = (theme: string) => StyleSheet.create({
     color: '#fff',
     fontSize: 14,
   },
-  commentsContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(0,0,0,0.8)',
-    padding: 20,
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: 'rgba(0,0,0,0.9)',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    maxHeight: height * 0.4,
+    height: height * 0.5,
+    padding: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  closeModalButton: {
+    padding: 8,
   },
   commentsTitle: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '600',
-    marginBottom: 10,
+  },
+  commentsList: {
+    flex: 1,
+    marginBottom: 5,
   },
   commentItem: {
     padding: 10,
@@ -232,24 +284,21 @@ const makeStyles = (theme: string) => StyleSheet.create({
     textAlign: 'center',
     padding: 20,
   },
-  commentsList: {
-    flex: 1,
-    marginBottom: 10,
-  },
   commentInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.1)',
     borderRadius: 20,
-    paddingHorizontal: 15,
-    paddingVertical: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginTop: 5,
   },
   commentInput: {
     flex: 1,
     color: '#fff',
     fontSize: 14,
-    maxHeight: 100,
-    paddingVertical: 8,
+    maxHeight: 60,
+    paddingVertical: 6,
   },
   sendButton: {
     padding: 8,
