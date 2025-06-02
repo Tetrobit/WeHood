@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions, RefreshControl } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { DARK_THEME, LIGHT_THEME, useThemeName } from '@/core/hooks/useTheme';
 import useGeolocation from '@/core/hooks/useGeolocation';
@@ -27,24 +27,28 @@ export default function NearbyScreen() {
   const router = useRouter();
   const api = useApi();
   const [posts, setPosts] = useState<NearbyPost[]>([]);
-
-  React.useEffect(() => {
-    const fetchPosts = async () => {
-      if (lastLocation) {
-        try {
-          const posts = await api.getNearbyPosts(lastLocation.latitude, lastLocation.longitude);
-          if (posts && posts?.length >= 0) {
-            setPosts(posts);
-          }
-          else {
-            console.error(posts);
-          }
-        } catch (error) {
-          console.error(error);
+  const [refreshing, setRefreshing] = useState(false);
+  const fetchPosts = async () => {
+    setRefreshing(true);
+    if (lastLocation) {
+      try {
+        const posts = await api.getNearbyPosts(lastLocation.latitude, lastLocation.longitude);
+        if (posts && posts?.length >= 0) {
+          setPosts(posts);
         }
+        else {
+          console.error(posts);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+      finally {
+        setRefreshing(false);
       }
     }
+  };
 
+  React.useEffect(() => {
     fetchPosts();
     const interval = setInterval(() => {
       fetchPosts();
@@ -101,7 +105,7 @@ export default function NearbyScreen() {
       </View>
 
       {/* Сетка картинок */}
-      <ScrollView contentContainerStyle={styles.gridScroll} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={styles.gridScroll} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={fetchPosts} />}>
         <View style={styles.grid}>
           {posts.map((post) => (
             <View key={post.id} style={[styles.card]}>
