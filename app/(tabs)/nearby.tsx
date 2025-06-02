@@ -28,6 +28,7 @@ export default function NearbyScreen() {
   const api = useApi();
   const [posts, setPosts] = useState<NearbyPost[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+
   const fetchPosts = async () => {
     setRefreshing(true);
     if (lastLocation) {
@@ -57,10 +58,9 @@ export default function NearbyScreen() {
     return () => clearInterval(interval);
   }, []);
 
-  let relevantPosts = [];
+  let filteredPosts: NearbyPost[] = [];
   if (posts?.filter) {
-    relevantPosts = posts?.filter(post => {
-      console.log(activeTab);
+    filteredPosts = posts?.filter(post => {
       if (activeTab === 'images') {
         return post.type == 'image';
       }
@@ -108,7 +108,7 @@ export default function NearbyScreen() {
       {/* Сетка картинок */}
       <ScrollView contentContainerStyle={styles.gridScroll} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={fetchPosts} />}>
         <View style={styles.grid}>
-          {posts.map((post) => (
+          {filteredPosts.map((post) => (
             <View key={post.id} style={[styles.card]}>
               { post.type === 'image' && (
                 <Image source={{ uri: getFileUrl(post.fileId) }} style={styles.image} />
@@ -124,7 +124,7 @@ export default function NearbyScreen() {
             </View>
           ))}
 
-          {posts.length === 0 && (
+          {filteredPosts.length === 0 && (
             <View style={{ flex: 1, marginTop: 50, justifyContent: 'center', alignItems: 'center' }}>
               <LottieView
                 source={require('@/assets/lottie/empty.json')}
