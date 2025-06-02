@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Linking, ActivityIndicator } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import { useTheme, useThemeName, useSetTheme, THEMES } from '@/core/hooks/useTheme';
 import { useGeolocation } from '@/core/hooks/useGeolocation';
@@ -23,6 +23,7 @@ export const GreetingScreen = () => {
   const animationRef = useRef<LottieView>(null);
   const isSwitched = useSharedValue(true);
   const [isThemeSwitched, setIsThemeSwitched] = useState(true);
+  const [isGeolocationLoading, setIsGeolocationLoading] = useState(false);
   const [realmTheme] = useQuery(Theme)
   const realm = useRealm();
 
@@ -188,6 +189,25 @@ export const GreetingScreen = () => {
     },
   });
 
+  const handleGeolocation = async () => {
+    setIsGeolocationLoading(true);
+    try {
+      const result = await requestGeolocation();
+      if (result) {
+        Toast.success('Геолокация успешно получена');
+      }
+      else {
+        throw new Error('Произошла ошибка при получении геолокации');
+      }
+    }
+    catch (error) {
+      Toast.error('Произошла ошибка при получении геолокации');
+    }
+    finally {
+      setIsGeolocationLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <PagerView
@@ -237,16 +257,13 @@ export const GreetingScreen = () => {
           {!location && (
             <TouchableOpacity 
               style={styles.geoButton} 
-              onPress={() => requestGeolocation().then((result) => {
-                if (!result) {
-                  Toast.error('Произошла ошибка при получении геолокации');
-                }
-                else {
-                  Toast.success('Геолокация успешно получена');
-                }
-              })}
+              onPress={handleGeolocation}
             >
-              <Text style={styles.geoButtonText}>Разрешить доступ</Text>
+              {isGeolocationLoading ? (
+                <ActivityIndicator size="small" color={theme.buttonTextColor} />
+              ) : (
+                <Text style={styles.geoButtonText}>Разрешить доступ</Text>
+              )}
             </TouchableOpacity>
           )}
           { !location && errorMsg && (
