@@ -12,6 +12,17 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@realm/react';
 import { NearbyPostModel } from '@/core/models/nearby-post';
 
+interface Comment {
+  id: number;
+  text: string;
+  userId: number;
+  createdAt: string;
+}
+
+interface ExtendedNearbyPost extends NearbyPost {
+  comments?: Comment[];
+}
+
 const { width, height } = Dimensions.get('window');
 
 export default function ViewPostScreen() {
@@ -20,9 +31,10 @@ export default function ViewPostScreen() {
   const theme = useThemeName();
   const styles = makeStyles(theme!);
   const api = useApi();
+  const [showComments, setShowComments] = useState(false);
   
   const post = useQuery(NearbyPostModel).filtered('id = $0', parseInt(id))[0];
-  const [currentPost, setCurrentPost] = useState<NearbyPost>(post);
+  const [currentPost, setCurrentPost] = useState<ExtendedNearbyPost>(post as ExtendedNearbyPost);
 
   const handleLike = async () => {
     try {
@@ -34,6 +46,10 @@ export default function ViewPostScreen() {
     } catch (error) {
       console.error('Ошибка при лайке:', error);
     }
+  };
+
+  const toggleComments = () => {
+    setShowComments(!showComments);
   };
 
   if (!post) {
@@ -65,7 +81,7 @@ export default function ViewPostScreen() {
             <MaterialIcons name="close" size={28} color="#fff" />
           </TouchableOpacity>
 
-          <View style={styles.statsContainer}>
+          <View style={styles.sideStatsContainer}>
             <View style={styles.statItem}>
               <MaterialIcons name="visibility" size={24} color="#fff" />
               <Text style={styles.statText}>{currentPost.views || 0}</Text>
@@ -74,12 +90,26 @@ export default function ViewPostScreen() {
               <MaterialIcons name="thumb-up" size={24} color="#fff" />
               <Text style={styles.statText}>{currentPost.likes || 0}</Text>
             </TouchableOpacity>
+            <TouchableOpacity style={styles.statItem} onPress={toggleComments}>
+              <MaterialIcons name="chat-bubble" size={24} color="#fff" />
+              <Text style={styles.statText}>Комментарии</Text>
+            </TouchableOpacity>
           </View>
 
-          <View style={styles.commentsContainer}>
-            <Text style={styles.commentsTitle}>Комментарии</Text>
-            {/* Здесь будет список комментариев */}
-          </View>
+          {showComments && (
+            <View style={styles.commentsContainer}>
+              <Text style={styles.commentsTitle}>Комментарии</Text>
+              {currentPost.comments && currentPost.comments.length > 0 ? (
+                currentPost.comments.map((comment, index) => (
+                  <View key={index} style={styles.commentItem}>
+                    <Text style={styles.commentText}>{comment.text}</Text>
+                  </View>
+                ))
+              ) : (
+                <Text style={styles.noCommentsText}>Пока нет комментариев</Text>
+              )}
+            </View>
+          )}
         </View>
       </View>
     </GestureHandlerRootView>
@@ -116,21 +146,21 @@ const makeStyles = (theme: string) => StyleSheet.create({
     right: 20,
     zIndex: 1,
   },
-  statsContainer: {
+  sideStatsContainer: {
     position: 'absolute',
-    bottom: 100,
-    left: 20,
-    flexDirection: 'row',
+    right: 20,
+    top: '50%',
+    transform: [{ translateY: -100 }],
+    alignItems: 'center',
     gap: 20,
   },
   statItem: {
-    flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
   },
   statText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 14,
   },
   commentsContainer: {
     position: 'absolute',
@@ -141,11 +171,27 @@ const makeStyles = (theme: string) => StyleSheet.create({
     padding: 20,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    maxHeight: height * 0.4,
   },
   commentsTitle: {
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 10,
+  },
+  commentItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.1)',
+  },
+  commentText: {
+    color: '#fff',
+    fontSize: 14,
+  },
+  noCommentsText: {
+    color: '#fff',
+    fontSize: 14,
+    textAlign: 'center',
+    padding: 20,
   },
 }); 
