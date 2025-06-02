@@ -73,6 +73,69 @@ export interface LoginResponse {
   }
 }
 
+export interface ReverseGeocodeResponse {
+  original_response: any;
+  attributes: {
+    country?: string;
+    province?: string;
+    locality?: string;
+    district?: string;
+    street?: string;
+    house?: string;
+    other?: string;
+  }
+}
+
+export interface WeatherForecast {
+  dt: number;
+  main: {
+      temp: number;
+      feels_like: number;
+      temp_min: number;
+      temp_max: number;
+      pressure: number;
+      humidity: number;
+  };
+  weather: Array<{
+      id: number;
+      main: string;
+      description: string;
+      icon: string;
+  }>;
+  clouds: {
+      all: number;
+  };
+  wind: {
+      speed: number;
+      deg: number;
+      gust: number;
+  };
+  visibility: number;
+  pop: number;
+  dt_txt: string;
+}
+
+export interface WeatherForecastResponse {
+  error?: string;
+  cod: string;
+  message: number;
+  cnt: number;
+  list: WeatherForecast[];
+  city: {
+      id: number;
+      name: string;
+      coord: {
+          lat: number;
+          lon: number;
+      };
+      country: string;
+      population: number;
+      timezone: number;
+      sunrise: number;
+      sunset: number;
+  };
+}
+
 export const useApi = () => {
   const realm = useRealm();
   const [profile] = useQuery(Profile);
@@ -241,6 +304,26 @@ export const useApi = () => {
     return data;
   }
 
+  const forwardGeocode = async (address: string): Promise<string> => {
+    const response = await fetch(`${API_URL}/api/geocoding/forward?address=${address}`);
+    return response.json();
+  }
+
+  const reverseGeocode = async (latitude: number, longitude: number): Promise<ReverseGeocodeResponse> => {
+    const response = await fetch(`${API_URL}/api/geocoding/reverse?latitude=${latitude}&longitude=${longitude}`);
+    return response.json();
+  }
+
+  const ipGeocode = async (): Promise<string> => {
+    const response = await fetch(`${API_URL}/api/geocoding/ip`);
+    return response.json();
+  }
+
+  const getWeatherForecast = async (latitude: number, longitude: number): Promise<WeatherForecastResponse> => {
+    const response = await fetch(`${API_URL}/api/weather/forecast?latitude=${latitude}&longitude=${longitude}`);
+    return response.json();
+  }
+
   const changePassword = async (oldPassword: string, newPassword: string): Promise<{ ok: boolean; message?: string }> => {
     return withAuth<{ ok: boolean; message?: string }>(`${API_URL}/api/auth/change-password`, {
       method: 'POST',
@@ -263,6 +346,10 @@ export const useApi = () => {
     register,
     login,
     logout,
+    forwardGeocode,
+    reverseGeocode,
+    ipGeocode,
+    getWeatherForecast,
     changePassword,
   }
 }

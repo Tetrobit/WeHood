@@ -1,9 +1,11 @@
 import { useQuery, useRealm } from "@realm/react";
 import Theme from "../models/theme";
+import { useColorScheme } from "react-native";
 
 export const LIGHT_THEME = 'light';
 export const DARK_THEME = 'dark';
-export const THEMES = [LIGHT_THEME, DARK_THEME];
+export const SYSTEM_THEME = 'system';
+export const THEMES = [LIGHT_THEME, DARK_THEME, SYSTEM_THEME] as const;
 
 export type ThemeName = typeof THEMES[number];
 
@@ -28,22 +30,37 @@ export const themes = {
   },
 }
 
-export default function useTheme(): typeof themes[keyof typeof themes] {
+export function useTheme(): typeof themes[keyof typeof themes] {
   const [theme] = useQuery(Theme);
+  const systemTheme = useColorScheme();
+
+  if (theme?.name === SYSTEM_THEME || !theme) {
+    return themes[systemTheme as keyof typeof themes];
+  }
+
   return themes[theme?.name as keyof typeof themes];
 }
 
-export function useSetTheme(): (theme: keyof typeof themes) => void {
+export function useSetTheme(): (theme: typeof THEMES[number]) => void {
   const [theme] = useQuery(Theme);
   const realm = useRealm();
-  return (newThemeName: keyof typeof themes) => {
-    realm.write(() => {
-      theme.name = newThemeName;
-    });
+  return (newThemeName: typeof THEMES[number]) => {
+    if (theme) {
+      realm.write(() => {
+        theme.name = newThemeName;
+      });
+    }
+    else {
+      realm.write(() => {
+        realm.create(Theme, Theme.generate(newThemeName));
+      });
+    }
   }
 }
 
-export function useThemeName(): keyof typeof themes {
+export function useThemeName(): typeof THEMES[number] | null {
   const [theme] = useQuery(Theme);
-  return theme?.name as keyof typeof themes;
+  return theme?.name as typeof THEMES[number] | null;
 }
+
+export default useTheme;

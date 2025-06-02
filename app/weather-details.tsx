@@ -4,7 +4,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { DARK_THEME, ThemeName, useThemeName } from '@/core/hooks/useTheme';
 import { router } from 'expo-router';
-import { Scroll } from 'lucide-react-native';
+import useWeather from '@/core/hooks/useWeather';
+import { getShortDay, getWeatherCondition, getWeatherIcon } from '@/core/utils/weather';
 
 interface WeatherMetric {
   value: string;
@@ -16,29 +17,64 @@ interface DayForecast {
   condition: string;
   highTemp: number;
   lowTemp: number;
-  icon: string;
+  icon: React.ReactNode;
 }
 
 const WeatherDetailsScreen: React.FC = () => {
   const theme = useThemeName();
+  const { lastWeatherForecast } = useWeather();
+
+  let forecast: { [key: string]: (typeof lastWeatherForecast.list[number])[] } = {};
+  for (let i = 0; i < lastWeatherForecast.list?.length; i++) {
+    const day = new Date(lastWeatherForecast.list?.[i].dt_txt).toLocaleDateString('ru-RU', { weekday: 'long' });
+    if (Object.hasOwn(forecast, day)) {
+      forecast[day].push(lastWeatherForecast.list?.[i]);
+    } else {
+      forecast[day] = [lastWeatherForecast.list?.[i]];
+    }
+  }
+
+  let forecastDays = [];
+  for (let i = 0; i < Object.keys(forecast).length; i++) {
+    let day = Object.keys(forecast)[i];
+    let forecastDay = forecast[day];
+    let highTemp = Math.round(forecastDay.reduce((acc, curr) => Math.max(acc, curr.main.temp_max), 0) - 273.15);
+    let lowTemp = Math.round(forecastDay.reduce((acc, curr) => Math.min(acc, curr.main.temp_min), 1000) - 273.15);
+    let condition = getWeatherCondition(forecastDay[0]?.weather[0]?.main);
+    let icon = forecastDay[0]?.weather[0]?.main;
+    let wind = Math.round(forecastDay.reduce((acc, curr) => acc + curr.wind.speed, 0) / forecastDay.length);
+    let humidity = Math.round(forecastDay.reduce((acc, curr) => acc + curr.main.humidity, 0) / forecastDay.length);
+    let pop = Math.round(forecastDay.reduce((acc, curr) => acc + curr.pop, 0) / forecastDay.length * 100);
+    forecastDays.push({
+      day,
+      highTemp,
+      lowTemp,
+      condition,
+      icon,
+      wind,
+      humidity,
+      pop,
+    });
+  }
+
+
+
 
   const metrics: WeatherMetric[] = [
-    { value: '9 км/ч', label: 'Ветер' },
-    { value: '31%', label: 'Влажность' },
-    { value: '93%', label: 'Осадки' },
+    { value: `${forecastDays[1]?.wind} км/ч`, label: 'Ветер' },
+    { value: `${forecastDays[1]?.humidity}%`, label: 'Влажность' },
+    { value: `${forecastDays[1]?.pop}%`, label: 'Осадки' },
   ];
 
-  const weekForecast: DayForecast[] = [
-    { day: 'Пн', condition: 'Дождь', highTemp: 20, lowTemp: 14, icon: '🌧️' },
-    { day: 'Вт', condition: 'Дождь', highTemp: 22, lowTemp: 16, icon: '🌧️' },
-    { day: 'Ср', condition: 'Шторм', highTemp: 19, lowTemp: 13, icon: '⛈️' },
-    { day: 'Чт', condition: 'Облачно', highTemp: 18, lowTemp: 12, icon: '☁️' },
-    { day: 'Пт', condition: 'Гроза', highTemp: 23, lowTemp: 19, icon: '⚡' },
-    { day: 'Сб', condition: 'Дождь', highTemp: 25, lowTemp: 17, icon: '🌧️' },
-    { day: 'Вс', condition: 'Шторм', highTemp: 21, lowTemp: 18, icon: '⛈️' },
-  ];
+  const weekForecast: DayForecast[] = forecastDays.map((day) => ({
+    day: day.day,
+    condition: day.condition,
+    highTemp: day.highTemp,
+    lowTemp: day.lowTemp,
+    icon: getWeatherIcon(day.icon, theme === DARK_THEME ? 'white' : 'black', 25),
+  }));
   
-  const styles = React.useMemo(() => makeStyles(theme), [theme]);
+  const styles = React.useMemo(() => makeStyles(theme!), [theme]);
 
   const pan = useRef(new Animated.ValueXY()).current;
   const panResponder = useRef(
@@ -74,16 +110,13 @@ const WeatherDetailsScreen: React.FC = () => {
       {/* Tomorrow's Forecast */}
       <LinearGradient colors={['#7C4585', '#C95792']} style={styles.tomorrowContainer}>
         <View style={styles.tomorrowSplitContainer}>
-          <View style={styles.tomorrowLeftContainer_2}>
-            <Ionicons name="cloud" size={120} color="white" />
-          </View>
           <Animated.View
           style={{
             transform: [{translateX: pan.x}, {translateY: pan.y}],
           }}
           {...panResponder.panHandlers}>
             <View style={styles.tomorrowLeftContainer}>
-              <Ionicons name="cloud" size={120} color="white" />
+              {getWeatherIcon(forecastDays[1]?.icon, 'white', 130)}
             </View>
           </Animated.View>
 
@@ -91,10 +124,10 @@ const WeatherDetailsScreen: React.FC = () => {
               <View style={styles.mainWeather}>
                 <Text style={styles.tomorrowTitle}>Завтра</Text>
                 <View style={styles.temperatureContainer}>
-                <Text style={styles.mainTemp}>20</Text>
-                <Text style={styles.secondaryTemp}>/17°</Text>
+                <Text style={styles.mainTemp}>{forecastDays[1]?.highTemp}</Text>
+                <Text style={styles.secondaryTemp}>/{forecastDays[1]?.lowTemp}°</Text>
               </View>
-              <Text style={styles.weatherCondition}>Дождь - Облачно</Text>
+              <Text style={styles.weatherCondition}>{forecastDays[1]?.condition}</Text>
             </View>
           </View>
         </View>
@@ -124,9 +157,9 @@ const WeatherDetailsScreen: React.FC = () => {
       <View style={styles.weekContainer}>
         {weekForecast.map((day, index) => (
           <View key={index} style={styles.dayRow}>
-            <Text style={styles.dayText}>{day.day}</Text>
+            <Text style={styles.dayText}>{getShortDay(day.day)}</Text>
+            {day.icon}
             <View style={styles.dayIconContainer}>
-              <Text style={styles.dayIcon}>{day.icon}</Text>
               <Text style={styles.dayCondition}>{day.condition}</Text>
             </View>
             <Text style={styles.dayHighTemp}>+{day.highTemp}° </Text>
@@ -190,7 +223,6 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
   },
   tomorrowLeftContainer: {
     position: 'relative',
-    left: -118,
     top: 14,
     flex: 1,
   },
@@ -198,14 +230,13 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
     flex: 1,
   },
   tomorrowRightContainer: {
-    position: 'relative',
-    left: -100,
     flex: 1,
   },
   tomorrowTitle: {
     color: 'white',
     fontSize: 24,
     fontWeight: '600',
+    marginLeft: 15,
   },
   temperatureContainer: {
     flexDirection: 'row',
@@ -225,6 +256,7 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
     fontWeight: 'bold',
   },
   weatherCondition: {
+    marginLeft: 20,
     color: 'rgba(255, 255, 255, 0.5)',
     fontSize: 12,
     marginTop: 5,

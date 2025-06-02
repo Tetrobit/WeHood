@@ -6,7 +6,14 @@ import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
 import { useQuery } from '@realm/react';
 import Profile from '@/core/models/profile';
 import Carousel from 'react-native-reanimated-carousel';
+import * as Network from 'expo-network';
+import * as Location from 'expo-location';
+import React, { useEffect } from 'react';
+import useApi from '@/core/hooks/useApi';
+import { useGeolocation } from '@/core/hooks/useGeolocation';
+import useWeather from '@/core/hooks/useWeather';
 import { useState } from 'react';
+import { getWeatherIcon } from '@/core/utils/weather';
 
 
 const { width } = Dimensions.get('window');
@@ -70,11 +77,13 @@ const serviceImages: Record<string, string> = {
   'Соседи': 'https://cdn-icons-png.flaticon.com/512/2922/2922510.png', // люди, цветные
 };
 
-export default function HomeScreen() {  
+export default function HomeScreen() {
   const [profile] = useQuery(Profile);
   const [avatarUri, setAvatarUri] = useState(profile?.avatar);
   const theme = useThemeName();
-  const styles = makeStyles(theme);
+  const styles = makeStyles(theme!);
+  const { lastLocation } = useGeolocation();
+  const { lastWeatherForecast } = useWeather();
 
   const renderCarouselItem = ({ item }: { item: typeof carouselData[0] }) => (
     <View style={styles.carouselItem}>
@@ -86,18 +95,39 @@ export default function HomeScreen() {
     </View>
   );
 
+  let weatherColor = '#ebb010';
+  if (lastWeatherForecast?.list?.[0]?.weather[0]?.main === 'Clear' && ((new Date().getHours() < 6 || new Date().getHours() > 18))) {
+    if (theme === DARK_THEME) {
+      weatherColor = '#ffffff';
+    } else {
+      weatherColor = '#023e8a';
+    }
+  }
+  else if (lastWeatherForecast?.list?.[0]?.weather[0]?.main === 'Clear' && ((new Date().getHours() > 6 && new Date().getHours() < 18))) {
+    weatherColor = '#ebb010';
+  }
+  else {
+    if (theme === DARK_THEME) {
+      weatherColor = '#ffffff';
+    } else {
+      weatherColor = '#000000';
+    }
+  }
+
   return (
     <ScrollView style={styles.container}>
       {/* Погода и локация */}
       <View style={styles.header}>
         <View style={styles.locationContainer}>
           <TouchableOpacity onPress={() => {router.push('/weather')}} style={styles.weatherContainer}>
-            <MaterialCommunityIcons name="weather-sunny" size={30} color="#ebb010" />
-            <Text style={styles.temperature}>+23°</Text>
+            {getWeatherIcon(lastWeatherForecast?.list?.[0]?.weather?.[0]?.main || 'Clear', weatherColor, 30)}
+            <Text style={[styles.temperature, { color: weatherColor }]}>{Math.round(lastWeatherForecast?.list?.[0]?.main?.temp - 273.15) || '0'}°C</Text>
+            
+            
           </TouchableOpacity>
           <View style={styles.locationTextContainer}>
-            <Text style={styles.location}>Вахитовский район</Text>
-            <Text style={styles.city}>Казань</Text>
+            <Text style={styles.location}>{lastLocation?.locality}</Text>
+            <Text style={styles.city}>{lastLocation?.district}</Text>
           </View>
         </View>
         <TouchableOpacity onPress={() => {router.push('/profile')}}>
@@ -120,7 +150,7 @@ export default function HomeScreen() {
           autoPlayInterval={2000}
           data={carouselData}
           style={{ width: "100%" }}
-          onSnapToItem={(index) => console.log("current index:", index)}
+          onSnapToItem={(index) => {}}
           renderItem={renderCarouselItem}
         />
       </View>
