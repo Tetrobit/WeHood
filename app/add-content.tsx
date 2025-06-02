@@ -8,6 +8,7 @@ import { DARK_THEME, LIGHT_THEME, useThemeName } from '@/core/hooks/useTheme';
 import useGeolocation from '@/core/hooks/useGeolocation';
 import ToastManager, { Toast } from 'toastify-react-native';
 import { UploadNearbyPostRequest, useApi } from '@/core/hooks/useApi';
+import LottieView from 'lottie-react-native';
 
 export default function AddContentScreen() {
   const { uploadNearbyPost, uploadFile } = useApi();
@@ -122,12 +123,17 @@ export default function AddContentScreen() {
   };
 
   if (!permission) {
-    return <View style={styles.container}><Text>Загрузка разрешений...</Text></View>;
+    return <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}><Text style={styles.message}>Загрузка разрешений...</Text></View>;
   }
 
   if (!permission.granted) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <LottieView
+          source={require('@/assets/lottie/camera-permission.json')}
+          autoPlay
+          style={{ width: 200, height: 200 }}
+        />
         <Text style={styles.message}>Нам нужен доступ к камере</Text>
         <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
           <Text style={styles.buttonText}>Разрешить доступ</Text>

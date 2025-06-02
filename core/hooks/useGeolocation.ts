@@ -19,7 +19,8 @@ export const useGeolocation = () => {
   const realm = useRealm();
 
   const requestGeolocation = async (): Promise<boolean> => {
-    console.log(new Date().toLocaleString().split('T')[1].split('.')[0], "Requesting geolocation");
+    console.log(new Date().toLocaleString().split('T'), "Requesting geolocation");
+
 
     if (Date.now() - lastAttemptTimestamp < 1000 * 60 * 5 || attempting) {
       return false;
