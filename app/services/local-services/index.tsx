@@ -82,7 +82,7 @@ const categories = ['Все', 'Сантехник', 'Электрик', 'Рем�
 export default function LocalServicesScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Все');
-  const theme = useThemeName();
+  const theme = useThemeName() ?? 'light';
   const styles = makeStyles(theme);
 
   const filteredServices = demoServices.filter(service => {
@@ -95,10 +95,11 @@ export default function LocalServicesScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.replace('/services')} style={{ marginRight: 12 }}>
+        <TouchableOpacity onPress={() => router.replace('/services')} style={{ position: 'absolute', left: 16, zIndex: 1 }}>
           <MaterialCommunityIcons name="arrow-left" size={28} color={theme === DARK_THEME ? '#fff' : '#000'} />
         </TouchableOpacity>
-        <Text style={styles.title}>Местные службы</Text>
+        <Text style={[styles.title, { flex: 1, textAlign: 'center' }]}>Местные службы</Text>
+        <View style={{ width: 28, opacity: 0 }} />
       </View>
 
       <View style={styles.searchBarContainer}>
@@ -145,7 +146,7 @@ export default function LocalServicesScreen() {
           <Card 
             key={service.id} 
             style={styles.productCard}
-            onPress={() => router.push({ pathname: '/services/local-services/[id]', params: { id: service.id } })}
+            onPress={() => router.push(`/services/local-services/${service.id}`)}
           >
             {service.image && (
               <Card.Cover source={{ uri: service.image }} style={styles.productImage} />
@@ -172,7 +173,6 @@ export default function LocalServicesScreen() {
         icon="plus"
         style={styles.fab}
         onPress={() => router.push('/services/local-services/new')}
-        label="Добавить услугу"
       />
     </View>
   );
@@ -189,7 +189,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     elevation: 2,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
   },
   title: {
     fontSize: 24,
@@ -224,7 +224,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     backgroundColor: theme === DARK_THEME ? '#222' : '#f5f5f5',
   },
   categoryButtonActive: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#00D26A',
   },
   categoryText: {
     fontSize: 14,
@@ -290,6 +290,6 @@ const makeStyles = (theme: string) => StyleSheet.create({
     margin: 16,
     right: 0,
     bottom: 0,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#00D26A',
   },
 }); 

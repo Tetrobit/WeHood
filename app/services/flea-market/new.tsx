@@ -1,10 +1,11 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import { useState } from 'react';
 import { DARK_THEME } from '@/core/hooks/useTheme';
 import { useThemeName } from '@/core/hooks/useTheme';
 import { router } from 'expo-router';
 import ImagePicker from '../../components/ImagePicker';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 export default function NewProductScreen() {
   const [title, setTitle] = useState('');
@@ -12,19 +13,24 @@ export default function NewProductScreen() {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [images, setImages] = useState<string[]>([]);
+  const [modalVisible, setModalVisible] = useState(false);
 
-  const theme = useThemeName();
+  const theme = useThemeName() ?? 'light';
   const styles = makeStyles(theme);
 
   const handleSubmit = () => {
     // TODO: Implement API call to create product
-    router.back();
+    setModalVisible(true);
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Новое объявление</Text>
+        <TouchableOpacity onPress={() => router.back()} style={{ marginLeft: 16, marginRight: 8 }}>
+          <MaterialCommunityIcons name="arrow-left" size={28} color={theme === DARK_THEME ? '#fff' : '#000'} />
+        </TouchableOpacity>
+        <Text style={[styles.title, { flex: 1, textAlign: 'center' }]}>Новое объявление</Text>
+        <View style={{ width: 36 }} />
       </View>
 
       <ScrollView style={styles.form}>
@@ -107,6 +113,24 @@ export default function NewProductScreen() {
           Опубликовать
         </Button>
       </ScrollView>
+
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' }}>
+          <View style={{ backgroundColor: theme === DARK_THEME ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 340, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
+            <MaterialCommunityIcons name="check-circle" size={48} color="#FF9800" style={{ alignSelf: 'center', marginBottom: 12 }} />
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Вещь отправлена на модерацию</Text>
+            <Text style={{ color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 16, marginBottom: 18, textAlign: 'center' }}>После проверки модератором она появится в списке.</Text>
+            <TouchableOpacity style={{ backgroundColor: '#FF9800', borderRadius: 14, padding: 16, alignItems: 'center', marginTop: 10 }} onPress={() => { setModalVisible(false); router.back(); }}>
+              <Text style={{ color: '#fff', fontSize: 17, fontWeight: '600' }}>Вернуться</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -117,7 +141,11 @@ const makeStyles = (theme: string) => StyleSheet.create({
     backgroundColor: theme === DARK_THEME ? '#000' : '#f5f5f5',
   },
   header: {
-    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 0,
     backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
     elevation: 2,
   },
