@@ -17,6 +17,7 @@ export default function AddContentScreen() {
   const [type, setType] = useState<CameraType>('back');
   const [mediaUri, setMediaUri] = useState<string | null>(null);
   const [description, setDescription] = useState('');
+  const [title, setTitle] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [contentType, setContentType] = useState<'image' | 'video' | null>(null);
   const cameraRef = useRef<CameraView>(null);
@@ -105,7 +106,7 @@ export default function AddContentScreen() {
       const data: UploadNearbyPostRequest = {
         latitude: lastLocation.latitude,
         longitude: lastLocation.longitude,
-        title: description,
+        title: title,
         description: description,
         fileId: fileId,
         type: contentType!,
@@ -205,6 +206,13 @@ export default function AddContentScreen() {
           ) : (
             <VideoView player={player} style={styles.preview}/>
           )}
+          <TextInput
+            style={styles.titleInput}
+            placeholder="Добавьте название..."
+            value={title}
+            onChangeText={setTitle}
+            placeholderTextColor={theme === DARK_THEME ? '#666' : '#999'}
+          />
           <TextInput
             style={styles.descriptionInput}
             placeholder="Добавьте описание..."
@@ -338,6 +346,16 @@ const makeStyles = (theme: string) => StyleSheet.create({
     color: theme === DARK_THEME ? '#fff' : '#222',
     minHeight: 100,
     textAlignVertical: 'top',
+    marginBottom: 15,
+  },
+  titleInput: {
+    borderWidth: 1,
+    borderColor: theme === DARK_THEME ? '#444' : '#ddd',
+    borderRadius: 10,
+    padding: 15,
+    color: theme === DARK_THEME ? '#fff' : '#222',
+    fontSize: 18,
+    fontWeight: '500',
     marginBottom: 15,
   },
   locationInfo: {
