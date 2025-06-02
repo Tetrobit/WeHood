@@ -5,10 +5,11 @@ import Profile from './profile';
 import Greeting from './greeting';
 import Geolocation from './geolocation';
 import WeatherForecast from './weather-forecast';
+import { NearbyPostModel } from './nearby-post';
 
 const StorageProvider = ({ children }: { children: React.ReactNode }) => {
   return (
-    <RealmProvider schema={[Theme, Profile, Greeting, Geolocation, WeatherForecast]}>
+    <RealmProvider schema={[NearbyPostModel, Theme, Profile, Greeting, Geolocation, WeatherForecast]}>
       {children}
     </RealmProvider>
   )

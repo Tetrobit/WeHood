@@ -4,6 +4,8 @@ import { useSharedValue } from "react-native-reanimated";
 import { useQuery, useRealm } from "@realm/react";
 import Profile from "../models/profile";
 import { User } from "realm";
+import { NearbyPostModel } from "../models/nearby-post";
+import Realm from "realm";
 
 export interface VKParameters {
   vkAppId: string;
@@ -423,8 +425,43 @@ export const useApi = () => {
   }
 
   const getNearbyPosts = async (latitude: number, longitude: number): Promise<NearbyPost[]> => {
-    return await withAuth<NearbyPost[]>(`${API_URL}/api/nearby/posts?latitude=${latitude}&longitude=${longitude}&radius=100000`);
+    const posts = await withAuth<NearbyPost[]>(`${API_URL}/api/nearby/posts?latitude=${latitude}&longitude=${longitude}&radius=100000`);
+    
+    // Сохраняем посты в Realm
+    realm.write(() => {
+      posts.forEach(post => {
+        const postData = {
+          ...post,
+          latitude: Number(post.latitude),
+          longitude: Number(post.longitude),
+          views: Math.round(Number(post.views)),
+          likes: Math.round(Number(post.likes)),
+          createdAt: new Date(post.createdAt),
+          updatedAt: new Date(post.updatedAt),
+          author: {
+            ...post.author,
+            createdAt: new Date(post.author.createdAt),
+            updatedAt: new Date(post.author.updatedAt),
+          }
+        };
+        realm.create(NearbyPostModel, NearbyPostModel.fromApi(postData), Realm.UpdateMode.Modified);
+      });
+    });
+
+    return posts;
   }
+
+  const likePost = async (postId: number): Promise<void> => {
+    return await withAuth<void>(`${API_URL}/api/nearby/posts/${postId}/like`, {
+      method: 'POST',
+    });
+  };
+
+  const dislikePost = async (postId: number): Promise<void> => {
+    return await withAuth<void>(`${API_URL}/api/nearby/posts/${postId}/dislike`, {
+      method: 'POST',
+    });
+  };
 
   return {
     profile,
@@ -444,6 +481,8 @@ export const useApi = () => {
     uploadNearbyPost,
     uploadFile,
     getNearbyPosts,
+    likePost,
+    dislikePost,
   }
 }
 

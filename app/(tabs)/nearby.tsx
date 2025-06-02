@@ -10,6 +10,7 @@ import { calculateFormattedDistance } from '@/core/utils/location';
 import { VideoPlayer } from 'expo-video';
 import { AutoVideoView } from '../components/AutoVideoPlayer';
 import LottieView from 'lottie-react-native';
+import { FullScreenViewer } from '../components/FullScreenViewer';
 
 const { width } = Dimensions.get('window');
 
@@ -21,6 +22,7 @@ const TABS = [
 
 export default function NearbyScreen() {
   const [activeTab, setActiveTab] = useState('images');
+  const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
   const theme = useThemeName();
   const styles = makeStyles(theme!);
   const { lastLocation } = useGeolocation();
@@ -73,6 +75,13 @@ export default function NearbyScreen() {
     });
   }
 
+  const handleUpdatePost = (updatedPost: NearbyPost) => {
+    const updatedPosts = posts.map(post => 
+      post.id === updatedPost.id ? updatedPost : post
+    );
+    setPosts(updatedPosts);
+  };
+
   return (
     <View style={styles.container}>
       {/* Верхняя панель */}
@@ -109,7 +118,11 @@ export default function NearbyScreen() {
       <ScrollView contentContainerStyle={styles.gridScroll} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={fetchPosts} />}>
         <View style={styles.grid}>
           {filteredPosts.map((post) => (
-            <View key={post.id} style={[styles.card]}>
+            <TouchableOpacity 
+              key={post.id} 
+              style={[styles.card]}
+              onPress={() => router.push(`/services/nearby/view?id=${post.id}`)}
+            >
               { post.type === 'image' && (
                 <Image source={{ uri: getFileUrl(post.fileId) }} style={styles.image} />
               )}
@@ -121,7 +134,7 @@ export default function NearbyScreen() {
               <View style={styles.distanceBadge}>
                 <Text style={styles.distanceText}>{calculateFormattedDistance(lastLocation.latitude, lastLocation.longitude, post.latitude, post.longitude)}</Text>
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
 
           {filteredPosts.length === 0 && (
@@ -143,6 +156,16 @@ export default function NearbyScreen() {
       >
         <MaterialIcons name="add" size={30} color="#fff" />
       </TouchableOpacity>
+
+      {/* Полноэкранный просмотр */}
+      {selectedPostIndex !== null && (
+        <FullScreenViewer
+          posts={filteredPosts}
+          initialIndex={selectedPostIndex}
+          onClose={() => setSelectedPostIndex(null)}
+          onUpdatePost={handleUpdatePost}
+        />
+      )}
     </View>
   );
 }
