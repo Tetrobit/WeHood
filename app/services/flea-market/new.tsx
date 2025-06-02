@@ -163,7 +163,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   button: {
     marginTop: 16,
-    backgroundColor: '#FF9800',
+    backgroundColor: '#00B894',
     paddingVertical: 8,
   },
   buttonLabel: {
