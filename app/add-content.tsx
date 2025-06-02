@@ -7,8 +7,11 @@ import { useRouter } from 'expo-router';
 import { DARK_THEME, LIGHT_THEME, useThemeName } from '@/core/hooks/useTheme';
 import useGeolocation from '@/core/hooks/useGeolocation';
 import ToastManager, { Toast } from 'toastify-react-native';
+import { UploadNearbyPostRequest, useApi } from '@/core/hooks/useApi';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function AddContentScreen() {
+  const { uploadNearbyPost, uploadFile } = useApi();
   const [permission, requestPermission] = useCameraPermissions();
   const [type, setType] = useState<CameraType>('back');
   const [mediaUri, setMediaUri] = useState<string | null>(null);
@@ -23,8 +26,11 @@ export default function AddContentScreen() {
   const player = useVideoPlayer(contentType === 'video' && mediaUri ? mediaUri : null);
 
   React.useEffect(() => {
-    requestGeolocation();
-  }, []);
+    console.log("Request");
+    if (!lastLocation || lastLocation.timestamp.getTime() < Date.now() - 1000 * 60 * 5) {
+      requestGeolocation();
+    }
+  }, [lastLocation]);
 
   const handleCapture = async () => {
     if (cameraRef.current && contentType === 'image') {
@@ -83,7 +89,34 @@ export default function AddContentScreen() {
 
   const handleSubmit = async () => {
     // Здесь будет логика отправки данных на сервер
-    router.back();
+    try {
+      const uploadFileResponse = await uploadFile(mediaUri!, contentType!);
+      const fileId = uploadFileResponse.fileId;
+
+      if (!fileId) {
+        throw new Error('Ошибка при загрузке файла');
+      }
+
+      const data: UploadNearbyPostRequest = {
+        latitude: lastLocation.latitude,
+        longitude: lastLocation.longitude,
+        title: description,
+        description: description,
+        fileId: fileId,
+        type: contentType!,
+      }
+
+      const response = await uploadNearbyPost(data);
+      if (!response.id) {
+        throw new Error('Ошибка при публикации контента');
+      }
+
+      Toast.success('Контент успешно опубликован');
+      router.back();
+    } catch (error) {
+      Toast.error('Ошибка при публикации контента');
+      console.error('Ошибка при публикации контента:', error);
+    }
   };
 
   const handleCancel = () => {

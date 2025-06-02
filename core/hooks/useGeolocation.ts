@@ -4,6 +4,8 @@ import { useQuery, useRealm } from '@realm/react';
 import Geolocation from '@/core/models/geolocation';
 import { useApi } from '@/core/hooks/useApi';
 
+let lastAttemptTimestamp = 0;
+
 export const useGeolocation = () => {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -16,6 +18,10 @@ export const useGeolocation = () => {
   const realm = useRealm();
 
   const requestGeolocation = async (): Promise<boolean> => {
+    if (Date.now() - lastAttemptTimestamp < 1000 * 60 * 5) {
+      return false;
+    }
+
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
@@ -31,6 +37,8 @@ export const useGeolocation = () => {
       realm.write(() => {
         realm.create(Geolocation, Geolocation.generate(location.coords.latitude, location.coords.longitude, new Date(), geocoder.attributes));
       });
+
+      lastAttemptTimestamp = Date.now();
 
       return true;
     } catch (error) {
