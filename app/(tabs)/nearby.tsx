@@ -55,7 +55,6 @@ export default function NearbyScreen() {
 
   let relevantPosts = [];
   if (posts?.filter) {
-    console.log(posts);
     relevantPosts = posts?.filter(post => {
       if (activeTab === 'images') {
         return post.type == 'image';
