@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { UserAvatar } from './UserAvatar';
 
 interface CommentProps {
   author: {
@@ -19,9 +20,11 @@ export const Comment: React.FC<CommentProps> = ({ author, text, createdAt }) => 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Image 
-          source={{ uri: author.avatar }} 
-          style={styles.avatar}
+        <UserAvatar
+          firstName={author.firstName}
+          lastName={author.lastName}
+          avatar={author.avatar}
+          size={40}
         />
         <View style={styles.authorInfo}>
           <Text style={styles.authorName}>
@@ -55,14 +58,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
-  avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 12,
-  },
   authorInfo: {
     flex: 1,
+    marginLeft: 12,
   },
   authorName: {
     fontSize: 16,
