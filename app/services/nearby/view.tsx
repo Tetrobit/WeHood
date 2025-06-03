@@ -27,6 +27,7 @@ export default function ViewPostScreen() {
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const slideAnim = React.useRef(new RNAnimated.Value(height)).current;
+  const opacityAnim = React.useRef(new RNAnimated.Value(0)).current;
   const [refreshing, setRefreshing] = useState(false);
   const likeScale = React.useRef(new RNAnimated.Value(1)).current;
   const [isLiked, setIsLiked] = useState(false);
@@ -82,12 +83,20 @@ export default function ViewPostScreen() {
 
   const toggleComments = () => {
     if (!showComments) {
+      slideAnim.setValue(height);
       setShowComments(true);
-      RNAnimated.timing(slideAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
+      setTimeout(() => {
+        RNAnimated.timing(slideAnim, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }).start();
+        RNAnimated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }).start();
+      }, 50);
     } else {
       RNAnimated.timing(slideAnim, {
         toValue: height,
@@ -96,6 +105,11 @@ export default function ViewPostScreen() {
       }).start(() => {
         setShowComments(false);
       });
+      RNAnimated.timing(opacityAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
     }
   };
 
@@ -210,15 +224,21 @@ export default function ViewPostScreen() {
             transparent
             animationType="none"
             onRequestClose={toggleComments}
+            statusBarTranslucent
           >
             <View 
-              style={styles.modalOverlay} 
+              style={[
+                styles.modalOverlay,
+                { opacity: showComments ? 1 : 0 }
+              ]} 
             >
               <RNAnimated.View 
                 style={[
                   styles.modalContent,
                   {
-                    transform: [{ translateY: slideAnim }]
+                    transform: [{ translateY: slideAnim }],
+                    opacity: opacityAnim,
+                    width: Dimensions.get('window').width,
                   }
                 ]}
               >
