@@ -149,10 +149,12 @@ export default function ViewPostScreen() {
           <View style={styles.topBar}>
             <TouchableOpacity 
               style={styles.authorContainer}
-              onPress={() => router.push({
-                pathname: "/services/profile/[id]",
-                params: { id: currentPost.author.id }
-              })}
+              onPress={() => {
+                router.push({
+                  pathname: "/services/profile/[id]",
+                  params: { id: currentPost.authorId }
+                });
+              }}
             >
               <UserAvatar
                 firstName={currentPost.authorFirstName}
@@ -170,7 +172,7 @@ export default function ViewPostScreen() {
               </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
-              <MaterialIcons name="close" size={28} color="#fff" />
+              <MaterialIcons name="close" size={28} color={theme === 'dark' ? '#fff' : '#000'} />
             </TouchableOpacity>
           </View>
 
@@ -343,7 +345,6 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   closeButton: {
     padding: 8,
-    backgroundColor: 'rgba(0,0,0,0.5)',
     borderRadius: 20,
   },
   sideStatsContainer: {
