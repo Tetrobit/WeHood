@@ -222,7 +222,7 @@ export default function ViewPostScreen() {
                 <View style={styles.modalHeader}>
                   <Text style={styles.commentsTitle}>Комментарии</Text>
                   <TouchableOpacity onPress={toggleComments} style={styles.closeModalButton}>
-                    <MaterialIcons name="close" size={24} color="#fff" />
+                    <MaterialIcons name="close" size={24} color={theme === 'dark' ? '#fff' : '#000'} />
                   </TouchableOpacity>
                 </View>
 
@@ -261,7 +261,7 @@ export default function ViewPostScreen() {
                   <TextInput
                     style={styles.commentInput}
                     placeholder="Написать комментарий..."
-                    placeholderTextColor="rgba(255,255,255,0.5)"
+                    placeholderTextColor={theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'}
                     value={newComment}
                     onChangeText={setNewComment}
                     multiline
@@ -274,7 +274,8 @@ export default function ViewPostScreen() {
                     <MaterialIcons 
                       name="send" 
                       size={24} 
-                      color={newComment.trim() ? "#fff" : "rgba(255,255,255,0.3)"} 
+                      color={theme === 'dark' ? "#fff" : "#000"}
+                      style={{ opacity: newComment.trim() ? 1 : 0.5 }}
                     />
                   </TouchableOpacity>
                 </KeyboardAvoidingView>
@@ -290,14 +291,14 @@ export default function ViewPostScreen() {
 const makeStyles = (theme: string) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: theme === 'dark' ? '#000' : '#fff',
   },
   centerContent: {
     justifyContent: 'center',
     alignItems: 'center',
   },
   errorText: {
-    color: '#fff',
+    color: theme === 'dark' ? '#fff' : '#000',
     fontSize: 16,
   },
   content: {
@@ -309,7 +310,6 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.3)',
   },
   topBar: {
     position: 'absolute',
@@ -332,12 +332,12 @@ const makeStyles = (theme: string) => StyleSheet.create({
     marginLeft: 12,
   },
   authorName: {
-    color: '#fff',
+    color: theme === 'dark' ? '#fff' : '#000',
     fontSize: 16,
     fontWeight: '500',
   },
   postDate: {
-    color: 'rgba(255,255,255,0.7)',
+    color: theme === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
     fontSize: 12,
     marginTop: 2,
   },
@@ -348,10 +348,16 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   sideStatsContainer: {
     position: 'absolute',
-    right: 20,
+    right: 0,
     top: '50%',
     transform: [{ translateY: -100 }],
     alignItems: 'center',
+    paddingRight: 15,
+    backgroundColor: '#0006',
+    paddingLeft: 10,
+    paddingVertical: 10,
+    borderTopLeftRadius: 20,
+    borderBottomLeftRadius: 20,
     gap: 20,
   },
   statItem: {
@@ -368,7 +374,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: 'rgba(0,0,0,0.9)',
+    backgroundColor: theme === 'dark' ? 'rgba(0,0,0,1)' : 'rgba(255,255,255,1)',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     height: height * 0.5,
@@ -384,7 +390,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     padding: 8,
   },
   commentsTitle: {
-    color: '#fff',
+    color: theme === 'dark' ? '#fff' : '#000',
     fontSize: 20,
     fontWeight: '600',
   },
@@ -393,7 +399,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     marginBottom: 5,
   },
   noCommentsText: {
-    color: '#fff',
+    color: theme === 'dark' ? '#fff' : '#000',
     fontSize: 14,
     textAlign: 'center',
     padding: 20,
@@ -401,7 +407,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   commentInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -409,7 +415,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   commentInput: {
     flex: 1,
-    color: '#fff',
+    color: theme === 'dark' ? '#fff' : '#000',
     fontSize: 14,
     maxHeight: 60,
     paddingVertical: 6,
@@ -426,16 +432,16 @@ const makeStyles = (theme: string) => StyleSheet.create({
     left: 0,
     right: 0,
     padding: 20,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: theme === 'dark' ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.5)',
   },
   title: {
-    color: '#fff',
+    color: theme === 'dark' ? '#fff' : '#000',
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 8,
   },
   description: {
-    color: '#fff',
+    color: theme === 'dark' ? '#fff' : '#000',
     fontSize: 14,
     opacity: 0.9,
   },
