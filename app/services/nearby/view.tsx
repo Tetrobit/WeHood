@@ -11,6 +11,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, Realm } from '@realm/react';
 import { NearbyPostModel } from '@/core/models/nearby-post';
 import { CommentModel } from '@/core/models/comment';
+import { Comment } from '@/components/Comment';
+import { UserAvatar } from '@/components/UserAvatar';
 
 const { width, height } = Dimensions.get('window');
 
@@ -152,16 +154,12 @@ export default function ViewPostScreen() {
                 params: { id: currentPost.author.id }
               })}
             >
-              {currentPost.authorAvatar ? (
-                <Image 
-                  source={{ uri: currentPost.authorAvatar }} 
-                  style={styles.authorAvatar}
-                />
-              ) : (
-                <View style={styles.authorAvatarPlaceholder}>
-                  <MaterialIcons name="person" size={24} color="#fff" />
-                </View>
-              )}
+              <UserAvatar
+                firstName={currentPost.authorFirstName}
+                lastName={currentPost.authorLastName}
+                avatar={currentPost.authorAvatar}
+                size={40}
+              />
               <View style={styles.authorInfo}>
                 <Text style={styles.authorName}>
                   {`${currentPost.authorFirstName} ${currentPost.authorLastName}`}
@@ -240,9 +238,16 @@ export default function ViewPostScreen() {
                 >
                   {comments.length > 0 ? (
                     comments.map((comment) => (
-                      <View key={comment.id} style={styles.commentItem}>
-                        <Text style={styles.commentText}>{comment.text}</Text>
-                      </View>
+                      <Comment
+                        key={comment.id}
+                        author={{
+                          firstName: comment.authorFirstName,
+                          lastName: comment.authorLastName,
+                          avatar: comment.authorAvatar
+                        }}
+                        text={comment.text}
+                        createdAt={comment.createdAt.toISOString()}
+                      />
                     ))
                   ) : (
                     <Text style={styles.noCommentsText}>Пока нет комментариев</Text>
@@ -322,23 +327,9 @@ const makeStyles = (theme: string) => StyleSheet.create({
     flex: 1,
     marginRight: 20,
   },
-  authorAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 10,
-  },
-  authorAvatarPlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
   authorInfo: {
     flex: 1,
+    marginLeft: 12,
   },
   authorName: {
     color: '#fff',
@@ -400,15 +391,6 @@ const makeStyles = (theme: string) => StyleSheet.create({
   commentsList: {
     flex: 1,
     marginBottom: 5,
-  },
-  commentItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
-  },
-  commentText: {
-    color: '#fff',
-    fontSize: 14,
   },
   noCommentsText: {
     color: '#fff',
