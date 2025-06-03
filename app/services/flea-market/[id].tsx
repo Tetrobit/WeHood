@@ -130,6 +130,7 @@ export default function FleaMarketDetailsScreen() {
             mode="contained"
             onPress={() => Linking.openURL(`tel:${product.author.phone}`)}
             style={styles.button}
+            labelStyle={styles.buttonLabel}
             icon="phone"
           >
             Позвонить продавцу
@@ -222,7 +223,11 @@ const makeStyles = (theme: string) => StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: theme === DARK_THEME ? '#333' : '#eee',
   },
+  buttonLabel: {
+    fontSize: 16,
+    color: '#fff'
+  },
   button: {
-    backgroundColor: '#00B894',
+    backgroundColor: '#FF9800',
   },
 }); 

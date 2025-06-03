@@ -30,7 +30,7 @@ export default function EventsScreen() {
   const [menuVisible, setMenuVisible] = useState(false);
   const [notifModalVisible, setNotifModalVisible] = useState(false);
   const [notifications, setNotifications] = useState(true);
-  const theme = useThemeName();
+  const theme = useThemeName() ?? 'light';
   const styles = makeStyles(theme);
 
   const handleToggleNotifications = (value: boolean) => {
@@ -43,7 +43,7 @@ export default function EventsScreen() {
         <IconButton
           icon="arrow-left"
           size={28}
-          onPress={() => router.replace('/')}
+          onPress={() => router.back()}
           style={styles.headerIcon}
           iconColor={theme === DARK_THEME ? '#fff' : '#000'}
         />

@@ -14,7 +14,7 @@ const demoHelps = [
     title: 'Нужна помощь с покупками',
     description: 'Пожилой человек, нужна помощь с покупкой продуктов на неделю.',
     image: 'https://media.istockphoto.com/id/1130450531/ru/%D1%84%D0%BE%D1%82%D0%BE/%D0%BF%D0%BE%D0%BC%D0%BE%D1%89%D1%8C-%D0%B4%D0%B5%D0%B4%D1%83-%D1%81-%D0%BF%D0%BE%D0%BA%D1%83%D0%BF%D0%BA%D0%B0%D0%BC%D0%B8.jpg?s=1024x1024&w=is&k=20&c=dGRjj3z78NQjpEjUaHESgC_73AG7I60Wk5knUDZcXQM=',
-    price: '500',
+    price: '500 ₽',
     name: 'Анна Сергеевна',
     phone: '+7 (999) 111-22-33',
   },
@@ -30,7 +30,7 @@ const demoHelps = [
 ];
 
 export default function HelpListScreen() {
-  const theme = useThemeName();
+  const theme = useThemeName() ?? 'light';
   const styles = makeStyles(theme);
   const [notifModalVisible, setNotifModalVisible] = useState(false);
   const [notifications, setNotifications] = useState(true);
@@ -45,7 +45,7 @@ export default function HelpListScreen() {
         <IconButton
           icon="arrow-left"
           size={28}
-          onPress={() => router.replace('/')}
+          onPress={() => router.back()}
           style={styles.headerIcon}
           iconColor={theme === DARK_THEME ? '#fff' : '#000'}
         />
@@ -62,14 +62,24 @@ export default function HelpListScreen() {
       </View>
       <ScrollView style={styles.helpsContainer}>
         {demoHelps.map((help) => (
-          <Card key={help.id} style={styles.helpCard} onPress={() => router.push({ pathname: '/services/help/[id]', params: { id: help.id } })}>
-            <Image source={{ uri: help.image }} style={styles.helpImage} />
+          <Card
+            key={help.id}
+            style={styles.helpCard}
+            onPress={() => router.push({ pathname: '/services/help/[id]', params: { id: help.id } })}
+          >
+            <Card.Cover source={{ uri: help.image }} style={styles.helpImage} />
             <Card.Content>
               <Text style={styles.helpTitle}>{help.title}</Text>
+              <Text style={styles.helpPrice}>{help.price}</Text>
               <Text style={styles.helpDescription}>{help.description}</Text>
-              <Text style={styles.helpPrice}>Цена: {help.price}</Text>
-              <Text style={styles.helpName}>Имя: {help.name}</Text>
-              <Text style={styles.helpPhone}>Телефон: {help.phone}</Text>
+              <View style={styles.authorContainer}>
+                <MaterialCommunityIcons name="account" size={20} color={theme === DARK_THEME ? '#aaa' : '#666'} />
+                <Text style={styles.helpName}>{help.name}</Text>
+              </View>
+              <View style={styles.authorContainer}>
+                <MaterialCommunityIcons name="phone" size={20} color={theme === DARK_THEME ? '#aaa' : '#666'} />
+                <Text style={styles.helpPhone}>{help.phone}</Text>
+              </View>
             </Card.Content>
           </Card>
         ))}
@@ -157,24 +167,32 @@ const makeStyles = (theme: string) => StyleSheet.create({
     marginTop: 8,
     color: theme === DARK_THEME ? '#fff' : '#000',
   },
+  helpPrice: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginVertical: 8,
+    color: '#FF6B6B',
+  },
   helpDescription: {
     fontSize: 14,
     color: theme === DARK_THEME ? '#aaa' : '#666',
-    marginBottom: 4,
+    marginBottom: 8,
   },
-  helpPrice: {
-    fontSize: 15,
-    color: '#FF6B6B',
+  authorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
     marginBottom: 2,
   },
   helpName: {
-    fontSize: 14,
-    color: theme === DARK_THEME ? '#fff' : '#000',
-  },
-  helpPhone: {
+    marginLeft: 8,
     fontSize: 14,
     color: theme === DARK_THEME ? '#aaa' : '#666',
-    marginBottom: 2,
+  },
+  helpPhone: {
+    marginLeft: 8,
+    fontSize: 14,
+    color: theme === DARK_THEME ? '#aaa' : '#666',
   },
   bottomSpacer: {
     height: 80,
