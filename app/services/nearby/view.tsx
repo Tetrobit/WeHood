@@ -13,6 +13,7 @@ import { NearbyPostModel } from '@/core/models/nearby-post';
 import { CommentModel } from '@/core/models/comment';
 import { Comment } from '@/components/Comment';
 import { UserAvatar } from '@/components/UserAvatar';
+import LottieView from 'lottie-react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -252,7 +253,15 @@ export default function ViewPostScreen() {
                       />
                     ))
                   ) : (
-                    <Text style={styles.noCommentsText}>Пока нет комментариев</Text>
+                    <View style={styles.noCommentsContainer}>
+                      <Text style={styles.noCommentsText}>Пока нет комментариев</Text>
+                      <LottieView
+                        source={require('@/assets/lottie/comments.json')}
+                        autoPlay
+                        loop
+                        style={{ width: 200, height: 200 }}
+                      />
+                    </View>
                   )}
                 </ScrollView>
 
@@ -403,7 +412,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     color: theme === 'dark' ? '#fff' : '#000',
     fontSize: 14,
     textAlign: 'center',
-    padding: 20,
+    marginTop: 20,
   },
   commentInputContainer: {
     flexDirection: 'row',
@@ -448,5 +457,10 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   likedText: {
     color: "#FF4081",
+  },
+  noCommentsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 }); 
