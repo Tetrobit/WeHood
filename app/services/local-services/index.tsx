@@ -27,7 +27,7 @@ const demoServices: Service[] = [
     price: 1200,
     description: 'Устранение протечек, замена смесителей, установка сантехники',
     category: 'Сантехник',
-    image: 'https://images.unsplash.com/photo-1503389152951-9c3d029fd6a0?auto=format&fit=crop&w=400&q=80',
+    image: 'https://31tv.ru/wp-content/uploads/2023/08/сантехник.jpg',
     author: { name: 'Павел', rating: 4.8 },
   },
   {
@@ -36,7 +36,7 @@ const demoServices: Service[] = [
     price: 1500,
     description: 'Проводка, розетки, светильники, устранение коротких замыканий',
     category: 'Электрик',
-    image: 'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80',
+    image: 'https://s12.stc.yc.kpcdn.net/share/i/12/10559593/wr-960.webp',
     author: { name: 'Андрей', rating: 4.7 },
   },
   {
@@ -54,7 +54,7 @@ const demoServices: Service[] = [
     price: 1000,
     description: 'Генеральная и поддерживающая уборка квартир и офисов',
     category: 'Уборка',
-    image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80',
+    image: 'https://kazan-luxcleaning.ru/wp-content/uploads/2020/05/8a80b3fe46ffab30b695f24963aef4b6.jpeg',
     author: { name: 'Мария', rating: 4.6 },
   },
   {
@@ -63,7 +63,7 @@ const demoServices: Service[] = [
     price: 500,
     description: 'Доставка документов, покупок, еды по району',
     category: 'Курьер',
-    image: 'https://images.unsplash.com/photo-1519864600265-abb23847ef2c?auto=format&fit=crop&w=400&q=80',
+    image: 'https://a.d-cd.net/a55f70ds-960.jpg',
     author: { name: 'Игорь', rating: 4.5 },
   },
   {

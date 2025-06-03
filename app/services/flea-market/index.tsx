@@ -224,7 +224,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     backgroundColor: theme === DARK_THEME ? '#222' : '#f5f5f5',
   },
   categoryButtonActive: {
-    backgroundColor: '#00B894',
+    backgroundColor: '#FF9800',
   },
   categoryText: {
     fontSize: 14,

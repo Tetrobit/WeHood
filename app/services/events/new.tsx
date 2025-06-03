@@ -13,7 +13,7 @@ export default function NewEventScreen() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const theme = useThemeName();
+  const theme = useThemeName() ?? 'light';
   const styles = makeStyles(theme);
 
   const pickImage = async () => {
