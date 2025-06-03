@@ -11,6 +11,7 @@ export class NearbyPostModel extends Realm.Object {
   type!: 'image' | 'video';
   views!: number;
   likes!: number;
+  liked!: boolean;
   dislikes!: number;
   createdAt!: Date;
   updatedAt!: Date;
@@ -49,6 +50,7 @@ export class NearbyPostModel extends Realm.Object {
       type: 'string',
       views: 'int',
       likes: 'int',
+      liked: 'bool',
       createdAt: 'date',
       updatedAt: 'date',
       authorId: 'string',
@@ -73,6 +75,7 @@ export class NearbyPostModel extends Realm.Object {
       type: post.type,
       views: post.views,
       likes: post.likes,
+      liked: post.liked,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
       authorId: post.author.id,
@@ -97,6 +100,7 @@ export class NearbyPostModel extends Realm.Object {
       type: this.type as 'image' | 'video',
       views: this.views,
       likes: this.likes,
+      liked: this.liked,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       author: this.author,
