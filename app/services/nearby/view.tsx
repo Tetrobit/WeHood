@@ -25,6 +25,8 @@ export default function ViewPostScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const slideAnim = React.useRef(new RNAnimated.Value(height)).current;
   const [refreshing, setRefreshing] = useState(false);
+  const likeScale = React.useRef(new RNAnimated.Value(1)).current;
+  const [isLiked, setIsLiked] = useState(false);
   
   const post = useQuery(NearbyPostModel).filtered('id = $0', parseInt(id))[0];
   const comments = useQuery(CommentModel).filtered('postId = $0', parseInt(id));
@@ -41,6 +43,22 @@ export default function ViewPostScreen() {
         liked: response.liked,
         likes: response.likes
       } as NearbyPostModel);
+      
+      // Анимация при лайке
+      RNAnimated.sequence([
+        RNAnimated.timing(likeScale, {
+          toValue: 1.3,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+        RNAnimated.timing(likeScale, {
+          toValue: 1,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+      ]).start();
+      
+      setIsLiked(response.liked);
     } catch (error) {
       console.error('Ошибка при лайке:', error);
     }
@@ -166,8 +184,16 @@ export default function ViewPostScreen() {
               <Text style={styles.statText}>{currentPost.views || 0}</Text>
             </View>
             <TouchableOpacity style={styles.statItem} onPress={handleLike}>
-              <MaterialIcons name="thumb-up" size={24} color="#fff" />
-              <Text style={styles.statText}>{currentPost.likes || 0}</Text>
+              <RNAnimated.View style={{ transform: [{ scale: likeScale }] }}>
+                <MaterialIcons 
+                  name="thumb-up" 
+                  size={24} 
+                  color={currentPost.liked ? "#FF4081" : "#fff"} 
+                />
+              </RNAnimated.View>
+              <Text style={[styles.statText, currentPost.liked && styles.likedText]}>
+                {currentPost.likes || 0}
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.statItem} onPress={toggleComments}>
               <MaterialIcons name="chat-bubble" size={24} color="#fff" />
@@ -432,5 +458,8 @@ const makeStyles = (theme: string) => StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     opacity: 0.9,
+  },
+  likedText: {
+    color: "#FF4081",
   },
 }); 
