@@ -6,6 +6,7 @@ import Profile from "../models/profile";
 import { User } from "realm";
 import { NearbyPostModel } from "../models/nearby-post";
 import Realm from "realm";
+import { CommentModel } from "../models/comment";
 
 export interface VKParameters {
   vkAppId: string;
@@ -469,25 +470,48 @@ export const useApi = () => {
   }
 
   const likePost = async (postId: number): Promise<{ views: number, liked: boolean, likes: number }> => {
-    return await withAuth<{ views: number, liked: boolean, likes: number }>(`${API_URL}/api/nearby/posts/${postId}/like`, {
+    const response = await withAuth<NearbyPost>(`${API_URL}/api/nearby/posts/${postId}/like`, {
       method: 'POST',
     });
+    realm.write(() => {
+      const post = realm.objectForPrimaryKey(NearbyPostModel, postId);
+      if (post) {
+        post.liked = response.liked;
+        post.likes = response.likes;
+        realm.create(NearbyPostModel, post, Realm.UpdateMode.Modified);
+      }
+    });
+    return response;
   };
 
   const incerementViews = async (postId: number): Promise<{ views: number, liked: boolean, likes: number }> => {
-    return await withAuth<{ views: number, liked: boolean, likes: number }>(`${API_URL}/api/nearby/posts/${postId}/view`, {
+    const response = await withAuth<NearbyPost>(`${API_URL}/api/nearby/posts/${postId}/view`, {
       method: 'POST',
     });
+    realm.write(() => {
+      const post = realm.objectForPrimaryKey(NearbyPostModel, postId);
+      if (post) {
+        post.views = response.views;
+        post.liked = response.liked;
+        post.likes = response.likes;
+        realm.create(NearbyPostModel, post, Realm.UpdateMode.Modified);
+      }
+    });
+    return response;
   };
 
   const addComment = async (postId: number, text: string): Promise<Comment> => {
-    return await withAuth<Comment>(`${API_URL}/api/nearby/posts/${postId}/comments`, {
+    const comment = await withAuth<Comment>(`${API_URL}/api/nearby/posts/${postId}/comments`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ text }),
     });
+    // realm.write(() => {
+    //   realm.create(CommentModel, CommentModel.fromApi(comment), Realm.UpdateMode.Modified);
+    // });
+    return comment;
   };
 
   const getComments = async (postId: number): Promise<Comment[]> => {

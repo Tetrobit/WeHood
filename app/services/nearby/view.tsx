@@ -30,18 +30,17 @@ export default function ViewPostScreen() {
   const comments = useQuery(CommentModel).filtered('postId = $0', parseInt(id));
   const [currentPost, setCurrentPost] = useState<NearbyPostModel>(post);
 
+  console.log("CurrentPost: ", currentPost);
+  console.log("Post: ", post);
   const handleLike = async () => {
     try {
       const response = await api.likePost(currentPost.id);
-      console.log("Response: ", response);
-      console.log("CurrentPost: ", currentPost);
-      console.log("Post: ", post);
-      // setCurrentPost({
-      //   ...currentPost,
-      //   views,
-      //   liked,
-      //   likes
-      // });
+      setCurrentPost({
+        ...currentPost,
+        views: response.views,
+        liked: response.liked,
+        likes: response.likes
+      } as NearbyPostModel);
     } catch (error) {
       console.error('Ошибка при лайке:', error);
     }
@@ -149,7 +148,7 @@ export default function ViewPostScreen() {
               )}
               <View style={styles.authorInfo}>
                 <Text style={styles.authorName}>
-                  {`${currentPost.author.firstName} ${currentPost.author.lastName}`}
+                  {`${currentPost.authorFirstName} ${currentPost.authorLastName}`}
                 </Text>
                 <Text style={styles.postDate}>
                   {new Date(currentPost.createdAt).toLocaleDateString('ru-RU')}
