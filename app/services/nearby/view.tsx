@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image, TextInput, KeyboardAvoidingView, Platform, Modal, Animated as RNAnimated, RefreshControl, ScrollView } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useThemeName, DARK_THEME } from '@/core/hooks/useTheme';
-import { NearbyPost, Comment } from '@/core/hooks/useApi';
+import { NearbyPost } from '@/core/hooks/useApi';
 import { getFileUrl } from '@/core/utils/url';
 import { AutoVideoView } from '@/app/components/AutoVideoPlayer';
 import { GestureHandlerRootView, PanGestureHandler } from 'react-native-gesture-handler';
@@ -99,8 +99,7 @@ export default function ViewPostScreen() {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      // Здесь можно добавить обновление данных с сервера
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await api.getComments(currentPost.id);
     } finally {
       setRefreshing(false);
     }
@@ -112,20 +111,6 @@ export default function ViewPostScreen() {
     try {
       setIsSubmitting(true);
       const response = await api.addComment(currentPost.id, newComment.trim());
-      
-      // Создаем новый комментарий в Realm
-      const realm = await Realm.open();
-      realm.write(() => {
-        realm.create('Comment', {
-          id: response.id,
-          text: response.text,
-          authorId: response.author.id,
-          postId: currentPost.id,
-          createdAt: new Date(response.createdAt),
-          updatedAt: new Date(response.updatedAt)
-        });
-      });
-      
       setNewComment('');
     } catch (error) {
       console.error('Ошибка при отправке комментария:', error);

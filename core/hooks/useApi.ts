@@ -149,17 +149,39 @@ export interface UploadNearbyPostRequest {
   type: 'image' | 'video';
 }
 
-export interface Comment {
-  id: number;
-  text: string;
-  createdAt: string;
-  updatedAt: string;
+export interface CommentResponse {
   author: {
-    id: number;
-    firstName: string;
-    lastName: string;
     avatar: string;
-  }
+    createdAt: string;
+    email: string;
+    firstName: string;
+    id: string;
+    lastName: string;
+    password: string | null;
+    updatedAt: string;
+    vkId: string;
+  },
+  createdAt: string;
+  id: number;
+  post: {
+    createdAt: string;
+    description: string;
+    fileId: string;
+    id: number;
+    latitude: string;
+    likes: number;
+    location: {
+      coordinates: string[];
+      type: string;
+    };
+    longitude: string;
+    title: string;
+    type: string;
+    updatedAt: string;
+    views: number;
+  },
+  text: string;
+  updatedAt: string;
 }
 
 export interface NearbyPost {
@@ -500,22 +522,38 @@ export const useApi = () => {
     return response;
   };
 
-  const addComment = async (postId: number, text: string): Promise<Comment> => {
-    const comment = await withAuth<Comment>(`${API_URL}/api/nearby/posts/${postId}/comments`, {
+  const addComment = async (postId: number, text: string): Promise<CommentResponse> => {
+    const comment = await withAuth<CommentResponse>(`${API_URL}/api/nearby/posts/${postId}/comments`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ text }),
     });
-    // realm.write(() => {
-    //   realm.create(CommentModel, CommentModel.fromApi(comment), Realm.UpdateMode.Modified);
-    // });
+
+    realm.write(() => {
+      realm.create(CommentModel, CommentModel.fromApi(comment), Realm.UpdateMode.Modified);
+    });
+
+    console.log("Comment: ", comment);
+
     return comment;
   };
 
-  const getComments = async (postId: number): Promise<Comment[]> => {
-    return await withAuth<Comment[]>(`${API_URL}/api/nearby/posts/${postId}/comments`);
+  const getComments = async (postId: number): Promise<CommentResponse[]> => {
+    const comments = await withAuth<CommentResponse[]>(`${API_URL}/api/nearby/posts/${postId}/comments`);
+    console.log("Comments: ", comments);
+    realm.write(() => {
+      comments.forEach(comment => {
+        realm.create(CommentModel, CommentModel.fromApi({
+          ...comment,
+          post: {
+            id: postId,
+          }
+        } as CommentResponse), Realm.UpdateMode.Modified);
+      });
+    });
+    return comments;
   };
 
   return {
@@ -539,6 +577,7 @@ export const useApi = () => {
     likePost,
     incerementViews,
     addComment,
+    getComments,
   }
 }
 
