@@ -144,6 +144,8 @@ export default function ViewPostScreen() {
     );
   }
 
+  console.log("CurrentPost: ", currentPost);
+
   return (
     <GestureHandlerRootView style={styles.container}>
       <View style={styles.content}>
@@ -216,6 +218,11 @@ export default function ViewPostScreen() {
 
           <View style={styles.descriptionContainer}>
             <Text style={styles.title}>{currentPost.title || 'Без названия'}</Text>
+            {currentPost.address && (
+              <Text style={styles.address}>
+                <MaterialIcons name="location-on" size={16} color={theme === 'dark' ? '#fff' : '#000'} /> {currentPost.address}
+              </Text>
+            )}
             <Text style={styles.description}>{currentPost.description || 'Нет описания'}</Text>
           </View>
 
@@ -469,6 +476,14 @@ const makeStyles = (theme: string) => StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 8,
+  },
+  address: {
+    color: theme === 'dark' ? '#fff' : '#000',
+    fontSize: 14,
+    opacity: 0.9,
+    marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   description: {
     color: theme === 'dark' ? '#fff' : '#000',

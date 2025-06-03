@@ -147,6 +147,7 @@ export interface UploadNearbyPostRequest {
   description: string;
   fileId: string;
   type: 'image' | 'video';
+  address?: string;
 }
 
 export interface CommentResponse {
@@ -190,6 +191,7 @@ export interface NearbyPost {
   latitude: number;
   longitude: number;
   fileId: string;
+  address?: string;
   author: {
     id: string;
     vkId: string;

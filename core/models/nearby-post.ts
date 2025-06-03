@@ -23,6 +23,7 @@ export class NearbyPostModel extends Realm.Object {
   authorLastName!: string;
   authorCreatedAt!: Date;
   authorUpdatedAt!: Date;
+  address?: string;
 
   get author() {
     return {
@@ -43,6 +44,7 @@ export class NearbyPostModel extends Realm.Object {
     properties: {
       id: 'int',
       title: 'string',
+      address: 'string?',
       description: 'string',
       latitude: 'double',
       longitude: 'double',
@@ -76,6 +78,7 @@ export class NearbyPostModel extends Realm.Object {
       views: post.views,
       likes: post.likes,
       liked: post.liked,
+      address: post.address,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
       authorId: post.author.id,
@@ -93,6 +96,7 @@ export class NearbyPostModel extends Realm.Object {
     return {
       id: this.id,
       title: this.title,
+      address: this.address,
       description: this.description,
       latitude: this.latitude,
       longitude: this.longitude,

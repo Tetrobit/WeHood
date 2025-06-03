@@ -109,8 +109,11 @@ export default function AddContentScreen() {
         title: title,
         description: description,
         fileId: fileId,
+        address: [lastLocation.locality, lastLocation.district, lastLocation.street, lastLocation.house].filter(v => v && v.length).join(', '),
         type: contentType!,
       }
+
+      console.log("Data: ", data);
 
       const response = await uploadNearbyPost(data);
       if (!response.id) {
