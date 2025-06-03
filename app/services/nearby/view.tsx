@@ -32,8 +32,21 @@ export default function ViewPostScreen() {
   const comments = useQuery(CommentModel).filtered('postId = $0', parseInt(id));
   const [currentPost, setCurrentPost] = useState<NearbyPostModel>(post);
 
-  console.log("CurrentPost: ", currentPost);
-  console.log("Post: ", post);
+  const incrementViews = async () => {
+    const response = await api.incerementViews(currentPost.id);
+    setCurrentPost({
+      ...currentPost,
+      views: response.views,
+      liked: response.liked,
+      likes: response.likes
+    } as NearbyPostModel);
+    console.log("CurrentPost: ", currentPost);
+  };
+
+  React.useEffect(() => {
+    incrementViews();
+  }, []);
+
   const handleLike = async () => {
     try {
       const response = await api.likePost(currentPost.id);
