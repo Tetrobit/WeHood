@@ -27,6 +27,8 @@ const mockNews = [
     description: 'В эту субботу состоится уборка территории парка. Приглашаем всех желающих!',
     time: '2 часа назад',
     image: 'https://img.freepik.com/premium-vector/people-collecting-garbage-city-park-men-women-volunteers-cleaning-park-together-from-trash_461812-205.jpg', // люди убираются в парке
+    likes: 12,
+    comments: 3,
   },
   {
     id: '2',
@@ -34,6 +36,8 @@ const mockNews = [
     description: 'В нашем районе открылась современная детская площадка',
     time: '4 часа назад',
     image: 'https://sp-izumrud.ru/wp-content/uploads/2018/08/Sanatorij-Izumrud-19.jpg', // современная детская площадка
+    likes: 8,
+    comments: 1,
   },
 ];
 
@@ -201,14 +205,22 @@ export default function HomeScreen() {
       <View style={styles.newsContainer}>
         <Text style={styles.newsTitle}>Лента новостей</Text>
         {mockNews.map((news) => (
-          <Card key={news.id} style={styles.newsCard}>
-            <Card.Cover source={{ uri: news.image }} style={styles.newsImage} />
-            <Card.Content>
-              <Text style={styles.newsItemTitle}>{news.title}</Text>
-              <Text style={styles.newsDescription}>{news.description}</Text>
-              <Text style={styles.newsTime}>{news.time}</Text>
-            </Card.Content>
-          </Card>
+          <TouchableOpacity key={news.id} activeOpacity={0.9} onPress={() => router.push({ pathname: '/news/[id]', params: { id: news.id } })}>
+            <Card style={styles.newsCard}>
+              <Card.Cover source={{ uri: news.image }} style={styles.newsImage} />
+              <Card.Content>
+                <Text style={styles.newsItemTitle}>{news.title}</Text>
+                <Text style={styles.newsDescription}>{news.description}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                  <MaterialCommunityIcons name="heart-outline" size={18} color="#FF6B6B" style={{ marginRight: 4 }} />
+                  <Text style={{ color: '#FF6B6B', marginRight: 16, fontSize: 13 }}>{news.likes}</Text>
+                  <MaterialCommunityIcons name="comment-outline" size={18} color="#00D26A" style={{ marginRight: 4 }} />
+                  <Text style={{ color: '#00D26A', fontSize: 13 }}>{news.comments}</Text>
+                </View>
+                <Text style={styles.newsTime}>{news.time}</Text>
+              </Card.Content>
+            </Card>
+          </TouchableOpacity>
         ))}
       </View>
     </ScrollView>
