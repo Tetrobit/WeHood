@@ -151,8 +151,14 @@ export interface UploadNearbyPostRequest {
 export interface Comment {
   id: number;
   text: string;
-  userId: number;
   createdAt: string;
+  updatedAt: string;
+  author: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    avatar: string;
+  }
 }
 
 export interface NearbyPost {
@@ -175,6 +181,7 @@ export interface NearbyPost {
   id: number;
   views: number;
   likes: number;
+  liked: boolean;
   createdAt: Date;
   updatedAt: Date;
   comments?: Comment[];
@@ -435,6 +442,7 @@ export const useApi = () => {
   const getNearbyPosts = async (latitude: number, longitude: number): Promise<NearbyPost[]> => {
     const posts = await withAuth<NearbyPost[]>(`${API_URL}/api/nearby/posts?latitude=${latitude}&longitude=${longitude}&radius=100000`);
     
+    console.log(posts);
     // Сохраняем посты в Realm
     realm.write(() => {
       posts.forEach(post => {
@@ -444,6 +452,7 @@ export const useApi = () => {
           longitude: Number(post.longitude),
           views: Math.round(Number(post.views)),
           likes: Math.round(Number(post.likes)),
+          liked: post.liked,
           createdAt: new Date(post.createdAt),
           updatedAt: new Date(post.updatedAt),
           author: {
@@ -459,14 +468,14 @@ export const useApi = () => {
     return posts;
   }
 
-  const likePost = async (postId: number): Promise<void> => {
-    return await withAuth<void>(`${API_URL}/api/nearby/posts/${postId}/like`, {
+  const likePost = async (postId: number): Promise<{ views: number, liked: boolean, likes: number }> => {
+    return await withAuth<{ views: number, liked: boolean, likes: number }>(`${API_URL}/api/nearby/posts/${postId}/like`, {
       method: 'POST',
     });
   };
 
-  const dislikePost = async (postId: number): Promise<void> => {
-    return await withAuth<void>(`${API_URL}/api/nearby/posts/${postId}/dislike`, {
+  const incerementViews = async (postId: number): Promise<{ views: number, liked: boolean, likes: number }> => {
+    return await withAuth<{ views: number, liked: boolean, likes: number }>(`${API_URL}/api/nearby/posts/${postId}/view`, {
       method: 'POST',
     });
   };
@@ -479,6 +488,10 @@ export const useApi = () => {
       },
       body: JSON.stringify({ text }),
     });
+  };
+
+  const getComments = async (postId: number): Promise<Comment[]> => {
+    return await withAuth<Comment[]>(`${API_URL}/api/nearby/posts/${postId}/comments`);
   };
 
   return {
@@ -500,7 +513,7 @@ export const useApi = () => {
     uploadFile,
     getNearbyPosts,
     likePost,
-    dislikePost,
+    incerementViews,
     addComment,
   }
 }

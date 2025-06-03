@@ -53,11 +53,11 @@ export default function NearbyScreen() {
 
   React.useEffect(() => {
     fetchPosts();
-    const interval = setInterval(() => {
-      fetchPosts();
-    }, 1000 * 20);
+    // const interval = setInterval(() => {
+    //   fetchPosts();
+    // }, 1000 * 20);
 
-    return () => clearInterval(interval);
+    // return () => clearInterval(interval);
   }, []);
 
   let filteredPosts: NearbyPost[] = [];

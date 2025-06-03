@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image, TextInput, KeyboardAvoidingView, Platform, Modal, Animated as RNAnimated } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image, TextInput, KeyboardAvoidingView, Platform, Modal, Animated as RNAnimated, RefreshControl, ScrollView } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useThemeName, DARK_THEME } from '@/core/hooks/useTheme';
 import { NearbyPost, Comment } from '@/core/hooks/useApi';
@@ -8,8 +8,9 @@ import { AutoVideoView } from '@/app/components/AutoVideoPlayer';
 import { GestureHandlerRootView, PanGestureHandler } from 'react-native-gesture-handler';
 import useApi from '@/core/hooks/useApi';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useQuery } from '@realm/react';
+import { useQuery, Realm } from '@realm/react';
 import { NearbyPostModel } from '@/core/models/nearby-post';
+import { CommentModel } from '@/core/models/comment';
 
 const { width, height } = Dimensions.get('window');
 
@@ -23,17 +24,24 @@ export default function ViewPostScreen() {
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const slideAnim = React.useRef(new RNAnimated.Value(height)).current;
+  const [refreshing, setRefreshing] = useState(false);
   
   const post = useQuery(NearbyPostModel).filtered('id = $0', parseInt(id))[0];
-  const [currentPost, setCurrentPost] = useState<NearbyPost>(post);
+  const comments = useQuery(CommentModel).filtered('postId = $0', parseInt(id));
+  const [currentPost, setCurrentPost] = useState<NearbyPostModel>(post);
 
   const handleLike = async () => {
     try {
-      await api.likePost(currentPost.id);
-      setCurrentPost({
-        ...currentPost,
-        likes: currentPost.likes + 1
-      });
+      const response = await api.likePost(currentPost.id);
+      console.log("Response: ", response);
+      console.log("CurrentPost: ", currentPost);
+      console.log("Post: ", post);
+      // setCurrentPost({
+      //   ...currentPost,
+      //   views,
+      //   liked,
+      //   likes
+      // });
     } catch (error) {
       console.error('Ошибка при лайке:', error);
     }
@@ -58,6 +66,16 @@ export default function ViewPostScreen() {
     }
   };
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      // Здесь можно добавить обновление данных с сервера
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
+
   const handleSubmitComment = async () => {
     if (!newComment.trim() || isSubmitting) return;
 
@@ -65,10 +83,18 @@ export default function ViewPostScreen() {
       setIsSubmitting(true);
       const response = await api.addComment(currentPost.id, newComment.trim());
       
-      setCurrentPost(prev => ({
-        ...prev,
-        comments: [...(prev.comments || []), response]
-      }));
+      // Создаем новый комментарий в Realm
+      const realm = await Realm.open();
+      realm.write(() => {
+        realm.create('Comment', {
+          id: response.id,
+          text: response.text,
+          authorId: response.author.id,
+          postId: currentPost.id,
+          createdAt: new Date(response.createdAt),
+          updatedAt: new Date(response.updatedAt)
+        });
+      });
       
       setNewComment('');
     } catch (error) {
@@ -111,9 +137,9 @@ export default function ViewPostScreen() {
                 params: { id: currentPost.author.id }
               })}
             >
-              {currentPost.author.avatar ? (
+              {currentPost.authorAvatar ? (
                 <Image 
-                  source={{ uri: currentPost.author.avatar }} 
+                  source={{ uri: currentPost.authorAvatar }} 
                   style={styles.authorAvatar}
                 />
               ) : (
@@ -146,7 +172,7 @@ export default function ViewPostScreen() {
             </TouchableOpacity>
             <TouchableOpacity style={styles.statItem} onPress={toggleComments}>
               <MaterialIcons name="chat-bubble" size={24} color="#fff" />
-              <Text style={styles.statText}>{currentPost.comments?.length || 0}</Text>
+              <Text style={styles.statText}>{comments.length || 0}</Text>
             </TouchableOpacity>
           </View>
 
@@ -161,10 +187,8 @@ export default function ViewPostScreen() {
             animationType="none"
             onRequestClose={toggleComments}
           >
-            <TouchableOpacity 
+            <View 
               style={styles.modalOverlay} 
-              activeOpacity={1} 
-              onPress={toggleComments}
             >
               <RNAnimated.View 
                 style={[
@@ -181,17 +205,26 @@ export default function ViewPostScreen() {
                   </TouchableOpacity>
                 </View>
 
-                <View style={styles.commentsList}>
-                  {currentPost.comments && currentPost.comments.length > 0 ? (
-                    currentPost.comments.map((comment, index) => (
-                      <View key={index} style={styles.commentItem}>
+                <ScrollView 
+                  style={styles.commentsList}
+                  refreshControl={
+                    <RefreshControl
+                      refreshing={refreshing}
+                      onRefresh={onRefresh}
+                      tintColor="#fff"
+                    />
+                  }
+                >
+                  {comments.length > 0 ? (
+                    comments.map((comment) => (
+                      <View key={comment.id} style={styles.commentItem}>
                         <Text style={styles.commentText}>{comment.text}</Text>
                       </View>
                     ))
                   ) : (
                     <Text style={styles.noCommentsText}>Пока нет комментариев</Text>
                   )}
-                </View>
+                </ScrollView>
 
                 <KeyboardAvoidingView 
                   behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -218,7 +251,7 @@ export default function ViewPostScreen() {
                   </TouchableOpacity>
                 </KeyboardAvoidingView>
               </RNAnimated.View>
-            </TouchableOpacity>
+            </View>
           </Modal>
         </View>
       </View>
