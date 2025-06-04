@@ -24,12 +24,11 @@ function RootLayout() {
       <Stack.Screen name="index" options={{ headerShown: false, statusBarStyle: 'light' }} />
       <Stack.Screen name="auth/index" options={{ headerShown: false, statusBarStyle: 'light', statusBarBackgroundColor: '#393790' }} />
       <Stack.Screen name="(tabs)" options={defaultConfig} />
-      <Stack.Screen name="weather" options={defaultConfig} />
-      <Stack.Screen name="weather-details" options={defaultConfig} />
+      <Stack.Screen name="weather/index" options={defaultConfig} />
+      <Stack.Screen name="weather/forecast" options={defaultConfig} />
       <Stack.Screen name="+not-found" options={defaultConfig} />
       <Stack.Screen name="services" options={defaultConfig} />
       <Stack.Screen name="greeting/index" options={defaultConfig} />
-      <Stack.Screen name="add-content" options={defaultConfig} />
     </Stack>
   );
 }

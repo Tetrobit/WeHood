@@ -10,7 +10,7 @@ import ToastManager, { Toast } from 'toastify-react-native';
 import { UploadNearbyPostRequest, useApi } from '@/core/hooks/useApi';
 import LottieView from 'lottie-react-native';
 import { compressImage } from '@/core/utils/image';
-import { AnimatedText } from './components/AnimatedText';
+import AnimatedText from '@/app/components/AnimatedText';
 
 export default function AddContentScreen() {
   const { uploadNearbyPost, uploadFile } = useApi();

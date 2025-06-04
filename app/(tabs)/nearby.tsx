@@ -184,7 +184,7 @@ export default function NearbyScreen() {
       {/* Кнопка добавления */}
       <TouchableOpacity 
         style={styles.addButton}
-        onPress={() => router.push('/add-content')}
+        onPress={() => router.push('/services/nearby/add')}
       >
         <MaterialIcons name="add" size={30} color="#fff" />
       </TouchableOpacity>

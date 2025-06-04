@@ -136,7 +136,7 @@ const WeatherScreen: React.FC = () => {
           <Text style={styles.forecastTitle}>Сегодня</Text>
           <TouchableOpacity 
             style={styles.daysButton}
-            onPress={() => router.push('/weather-details')}
+            onPress={() => router.push('/weather/forecast')}
           >
             <Text style={styles.daysButtonText}>7 дней</Text>
             <Ionicons name="chevron-forward" size={20} color={themeName === DARK_THEME ? 'white' : 'black'} />
