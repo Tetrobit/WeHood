@@ -108,13 +108,13 @@ const Neighbourhood = (props: NeighbourhoodProps) => {
       renderer.setSize(gl.drawingBufferWidth, gl.drawingBufferHeight);
 
       const ground = await loadObjAsync({
-        asset: require('../assets/models/neighborhood_ground_object.obj'),
-        mtlAsset: require('../assets/models/neighborhood_ground_material.mtl'),
+        asset: require('@/assets/models/neighborhood_ground_object.obj'),
+        mtlAsset: require('@/assets/models/neighborhood_ground_material.mtl'),
       }).catch(err => console.error(err));
       
       const carObj = await loadObjAsync({
-        asset: require('../assets/models/neighborhood_car_object.obj'),
-        mtlAsset: require('../assets/models/neighborhood_car_material.mtl'),
+        asset: require('@/assets/models/neighborhood_car_object.obj'),
+        mtlAsset: require('@/assets/models/neighborhood_car_material.mtl'),
       }).catch(err => console.error(err));
 
       const light = new THREE.DirectionalLight(0xffffff, 15);

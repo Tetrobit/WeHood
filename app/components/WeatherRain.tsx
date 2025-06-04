@@ -7,7 +7,7 @@ import Svg, {
   Path
 } from "react-native-svg"
 
-function SvgComponent() {
+export default function WeatherRain() {
   return (
     <Svg
       width={200}
@@ -65,5 +65,3 @@ function SvgComponent() {
     </Svg>
   )
 }
-
-export default SvgComponent

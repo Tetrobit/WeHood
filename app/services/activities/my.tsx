@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Card, Button, Chip } from 'react-native-paper';
-import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
+import { useTheme, Theme } from '@/core/hooks/useTheme';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router } from 'expo-router';
 
@@ -59,7 +59,7 @@ const statusConfig = {
 };
 
 export default function MyApplicationsScreen() {
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme);
 
   return (
@@ -135,26 +135,26 @@ export default function MyApplicationsScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#000' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#000' : '#f5f5f5',
   },
   header: {
     padding: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   applicationsContainer: {
     padding: 16,
   },
   applicationCard: {
     marginBottom: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   applicationHeader: {
     flexDirection: 'row',
@@ -165,7 +165,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   activityName: {
     fontSize: 18,
     fontWeight: '600',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     flex: 1,
     marginRight: 16,
   },
@@ -186,7 +186,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     gap: 8,
   },
   detailText: {
-    color: theme === DARK_THEME ? '#ccc' : '#666',
+    color: theme === 'dark' ? '#ccc' : '#666',
     flex: 1,
   },
   actionButton: {

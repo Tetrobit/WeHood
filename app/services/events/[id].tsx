@@ -1,8 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useThemeName } from '@/core/hooks/useTheme';
-import { DARK_THEME } from '@/core/hooks/useTheme';
+import { useTheme, Theme } from '@/core/hooks/useTheme';
 import { useLocalSearchParams, router } from 'expo-router';
 
 const demoEvents = [
@@ -25,7 +24,7 @@ const demoEvents = [
 export default function EventDetailsScreen() {
   const { id } = useLocalSearchParams();
   const event = demoEvents.find(e => e.id === id) || demoEvents[0];
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme);
 
   return (
@@ -34,7 +33,7 @@ export default function EventDetailsScreen() {
       <View style={styles.content}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.replace('/services/events/events')} style={styles.backButton}>
-            <MaterialCommunityIcons name="arrow-left" size={24} color={theme === DARK_THEME ? '#fff' : '#000'} />
+            <MaterialCommunityIcons name="arrow-left" size={24} color={theme === 'dark' ? '#fff' : '#000'} />
           </TouchableOpacity>
           <Text style={styles.date}>{new Date(event.date).toLocaleDateString('ru-RU')}</Text>
         </View>
@@ -45,10 +44,10 @@ export default function EventDetailsScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#111' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#111' : '#f5f5f5',
   },
   image: {
     width: '100%',
@@ -59,7 +58,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   content: {
     padding: 20,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
     marginTop: -24,
@@ -77,13 +76,13 @@ const makeStyles = (theme: string) => StyleSheet.create({
   backButton: {
     padding: 8,
     marginRight: 8,
-    backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#333' : '#f5f5f5',
     borderRadius: 16,
     elevation: 2,
   },
   date: {
     fontSize: 15,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
     marginLeft: 4,
     flex: 1,
     textAlign: 'right',
@@ -91,13 +90,13 @@ const makeStyles = (theme: string) => StyleSheet.create({
   title: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     marginBottom: 12,
     textAlign: 'left',
   },
   description: {
     fontSize: 16,
-    color: theme === DARK_THEME ? '#fff' : '#222',
+    color: theme === 'dark' ? '#fff' : '#222',
     textAlign: 'left',
     lineHeight: 22,
   },

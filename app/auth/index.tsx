@@ -3,8 +3,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useSharedValue } from "react-native-reanimated";
 import { ActivityIndicator, Dimensions, StyleSheet, Text, View, TextInput, TouchableOpacity, Linking, Alert, ColorValue, BackHandler } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import Neighbourhood from "@/components/neighbourhood";
-import VKLogo from "@/components/vk-logo";
+import Neighbourhood from "@/app/components/Neighbourhood";
+import VKLogo from "@/app/components/VKLogo";
 import { router } from "expo-router";
 import * as ExpoLinking from 'expo-linking';
 import { parseQueryParams } from "@/core/utils/url";
@@ -17,8 +17,7 @@ import PagerView from 'react-native-pager-view';
 import { ArrowLeftIcon } from "lucide-react-native";
 import { AppLogo, CompanyLogo } from "../components/Logo";
 import ToastManager, { Toast } from 'toastify-react-native'
-import { useQuery } from "@realm/react";
-import Greeting from "@/core/models/greeting";
+import * as SecureStorage from 'expo-secure-store';
 
 const screenHeight = Dimensions.get('window').height;
 
@@ -29,7 +28,6 @@ const gradientColors: [ColorValue, ColorValue][] = [
 ];
 
 const App = () => {
-  const [greeting] = useQuery(Greeting)
   const [gradientIndex, updateGradientIndex] = React.useReducer((state: number) => (state + 1) % gradientColors.length, 2);
   const { generateVKAuthUrl, loginWithVK, checkEmailExists, sendVerificationCode, verifyVerificationCode, register, login } = useApi();
   const isVKOpen = useSharedValue(false);
@@ -124,7 +122,8 @@ const App = () => {
           handlePagerPage(0);
           setStatus('success');
           await wait(4000);
-          if (!greeting) {
+          const passed_greeting = await SecureStorage.getItem('passed_greeting');
+          if (!passed_greeting) {
             router.replace('/greeting');
           } else {
             router.replace('/(tabs)');
@@ -172,7 +171,8 @@ const App = () => {
       await register(email, password, verificationCodeId, firstName, lastName);
       setStatus('register-success');
       await wait(4000);
-      if (!greeting) {
+      const passed_greeting = await SecureStorage.getItem('passed_greeting');
+      if (!passed_greeting) {
         router.replace('/greeting');
       } else {
         router.replace('/(tabs)');
@@ -226,7 +226,8 @@ const App = () => {
           await wait(2500);
           setStatus('success');
           await wait(4000);
-          if (!greeting) {
+          const passed_greeting = await SecureStorage.getItem('passed_greeting');
+          if (!passed_greeting) {
             router.replace('/greeting');
           } else {
             router.replace('/(tabs)');

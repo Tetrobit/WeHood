@@ -2,18 +2,18 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Modal, Animated as RNAnimated, RefreshControl, ScrollView, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { useThemeName, DARK_THEME } from '@/core/hooks/useTheme';
+import { useTheme, Theme } from '@/core/hooks/useTheme';
 import { NearbyPost } from '@/core/hooks/useApi';
 import { getFileUrl } from '@/core/utils/url';
-import { AutoVideoView } from '@/app/components/AutoVideoPlayer';
+import { AutoVideoPlayer } from '@/app/components/AutoVideoPlayer';
 import { GestureHandlerRootView, PanGestureHandler } from 'react-native-gesture-handler';
 import useApi from '@/core/hooks/useApi';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, Realm } from '@realm/react';
-import { NearbyPostModel } from '@/core/models/nearby-post';
-import { CommentModel } from '@/core/models/comment';
-import { Comment } from '@/components/Comment';
-import { UserAvatar } from '@/components/UserAvatar';
+import { NearbyPostModel } from '@/core/models/NearbyPostModel';
+import { CommentModel } from '@/core/models/CommentModel';
+import { Comment } from '@/app/components/Comment';
+import { UserAvatar } from '@/app/components/UserAvatar';
 import LottieView from 'lottie-react-native';
 import { AnimatedText } from '@/app/components/AnimatedText';
 import ToastManager, { Toast } from 'toastify-react-native';
@@ -23,12 +23,13 @@ const { width, height } = Dimensions.get('window');
 export default function ViewPostScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme!);
   const api = useApi();
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const slideAnim = React.useRef(new RNAnimated.Value(height)).current;
   const opacityAnim = React.useRef(new RNAnimated.Value(0)).current;
   const [refreshing, setRefreshing] = useState(false);
@@ -150,6 +151,19 @@ export default function ViewPostScreen() {
     }
   };
 
+  const handleDeleteComment = async (commentId: number) => {
+    try {
+      setIsDeleting(true);
+      await api.deleteComment(commentId);
+      Toast.success('Комментарий удалён');
+    } catch (error) {
+      Toast.error("Не удалось удалить комментарий");
+      console.error('Ошибка при удалении комментария:', error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (!post) {
     return (
       <View style={[styles.container, styles.centerContent]}>
@@ -170,7 +184,7 @@ export default function ViewPostScreen() {
                 contentFit="contain"
               />
             ) : (
-              <AutoVideoView 
+              <AutoVideoPlayer 
                 source={getFileUrl(currentPost.fileId)} 
                 style={styles.media}
               />
@@ -305,6 +319,8 @@ export default function ViewPostScreen() {
                         }}
                         text={comment.text}
                         createdAt={comment.createdAt.toISOString()}
+                        isAuthor={comment.authorId === api.profile?.id}
+                        onDelete={() => handleDeleteComment(comment.id)}
                       />
                     ))
                   ) : (
@@ -386,7 +402,7 @@ export default function ViewPostScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme === 'dark' ? '#000' : '#fff',

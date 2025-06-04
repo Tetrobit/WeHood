@@ -1,8 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { Card, FAB, Menu, IconButton } from 'react-native-paper';
 import { useState } from 'react';
-import { DARK_THEME } from '@/core/hooks/useTheme';
-import { useThemeName } from '@/core/hooks/useTheme';
+import { useTheme, Theme } from '@/core/hooks/useTheme';
 import { router } from 'expo-router';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Modal from 'react-native-modal';
@@ -30,7 +29,7 @@ export default function EventsScreen() {
   const [menuVisible, setMenuVisible] = useState(false);
   const [notifModalVisible, setNotifModalVisible] = useState(false);
   const [notifications, setNotifications] = useState(true);
-  const theme = useThemeName() ?? 'light';
+  const [theme] = useTheme();
   const styles = makeStyles(theme);
 
   const handleToggleNotifications = (value: boolean) => {
@@ -45,7 +44,7 @@ export default function EventsScreen() {
           size={28}
           onPress={() => router.back()}
           style={styles.headerIcon}
-          iconColor={theme === DARK_THEME ? '#fff' : '#000'}
+          iconColor={theme === 'dark' ? '#fff' : '#000'}
         />
         <Text style={styles.title}>Объявления района</Text>
         <IconButton
@@ -53,7 +52,7 @@ export default function EventsScreen() {
           size={28}
           onPress={() => setNotifModalVisible(true)}
           style={styles.headerIcon}
-          iconColor={theme === DARK_THEME ? '#fff' : '#000'}
+          iconColor={theme === 'dark' ? '#fff' : '#000'}
         />
       </View>
 
@@ -69,15 +68,15 @@ export default function EventsScreen() {
         backdropTransitionOutTiming={400}
         style={{ justifyContent: 'center', alignItems: 'center', margin: 0 }}
       >
-        <View style={{ backgroundColor: theme === DARK_THEME ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 340, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
-          <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Уведомления о мероприятиях</Text>
+        <View style={{ backgroundColor: theme === 'dark' ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 340, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === 'dark' ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Уведомления о мероприятиях</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 22 }}>
-            <Text style={{ flex: 1, color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 17 }}>Получать уведомления</Text>
+            <Text style={{ flex: 1, color: theme === 'dark' ? '#fff' : '#222', fontSize: 17 }}>Получать уведомления</Text>
             <Switch
               value={notifications}
               onValueChange={handleToggleNotifications}
               trackColor={{ false: '#767577', true: '#FFD600' }}
-              thumbColor={theme === DARK_THEME ? '#FFD600' : '#f4f3f4'}
+              thumbColor={theme === 'dark' ? '#FFD600' : '#f4f3f4'}
             />
           </View>
           <TouchableOpacity style={{ alignItems: 'center', marginTop: 4 }} onPress={() => setNotifModalVisible(false)}>
@@ -115,10 +114,10 @@ export default function EventsScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#000' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#000' : '#f5f5f5',
   },
   header: {
     flexDirection: 'row',
@@ -126,7 +125,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 8,
     paddingVertical: 12,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
     elevation: 2,
   },
   headerIcon: {
@@ -136,7 +135,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     flex: 1,
     fontSize: 22,
     fontWeight: 'bold',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     textAlign: 'center',
   },
   eventsContainer: {
@@ -145,7 +144,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   eventCard: {
     marginBottom: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   eventImage: {
     height: 180,
@@ -154,16 +153,16 @@ const makeStyles = (theme: string) => StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginTop: 8,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   eventDate: {
     fontSize: 14,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
     marginBottom: 4,
   },
   eventDescription: {
     fontSize: 14,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
     marginBottom: 8,
   },
   bottomSpacer: {

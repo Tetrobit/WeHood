@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
+import { useTheme, Theme } from '@/core/hooks/useTheme';
 import CustomImagePicker from '@/app/components/ImagePicker';
 
 interface FormData {
@@ -18,7 +18,7 @@ interface FormData {
 }
 
 export default function NewFlatScreen() {
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme);
 
   const [formData, setFormData] = useState<FormData>({
@@ -54,7 +54,7 @@ export default function NewFlatScreen() {
             <MaterialCommunityIcons 
               name="close" 
               size={24} 
-              color={theme === DARK_THEME ? '#fff' : '#000'} 
+              color={theme === 'dark' ? '#fff' : '#000'} 
             />
           </TouchableOpacity>
           <Text style={styles.title}>Новое объявление</Text>
@@ -86,14 +86,14 @@ export default function NewFlatScreen() {
             <TextInput
               style={styles.input}
               placeholder="Заголовок объявления"
-              placeholderTextColor={theme === DARK_THEME ? '#666' : '#999'}
+              placeholderTextColor={theme === 'dark' ? '#666' : '#999'}
               value={formData.title}
               onChangeText={(value) => updateField('title', value)}
             />
             <TextInput
               style={[styles.input, styles.textArea]}
               placeholder="Описание квартиры"
-              placeholderTextColor={theme === DARK_THEME ? '#666' : '#999'}
+              placeholderTextColor={theme === 'dark' ? '#666' : '#999'}
               multiline
               numberOfLines={4}
               value={formData.description}
@@ -102,7 +102,7 @@ export default function NewFlatScreen() {
             <TextInput
               style={styles.input}
               placeholder="Адрес"
-              placeholderTextColor={theme === DARK_THEME ? '#666' : '#999'}
+              placeholderTextColor={theme === 'dark' ? '#666' : '#999'}
               value={formData.address}
               onChangeText={(value) => updateField('address', value)}
             />
@@ -116,7 +116,7 @@ export default function NewFlatScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Цена ₽/мес"
-                  placeholderTextColor={theme === DARK_THEME ? '#666' : '#999'}
+                  placeholderTextColor={theme === 'dark' ? '#666' : '#999'}
                   keyboardType="numeric"
                   value={formData.price}
                   onChangeText={(value) => updateField('price', value)}
@@ -126,7 +126,7 @@ export default function NewFlatScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Комнат"
-                  placeholderTextColor={theme === DARK_THEME ? '#666' : '#999'}
+                  placeholderTextColor={theme === 'dark' ? '#666' : '#999'}
                   keyboardType="numeric"
                   value={formData.rooms}
                   onChangeText={(value) => updateField('rooms', value)}
@@ -138,7 +138,7 @@ export default function NewFlatScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Площадь м²"
-                  placeholderTextColor={theme === DARK_THEME ? '#666' : '#999'}
+                  placeholderTextColor={theme === 'dark' ? '#666' : '#999'}
                   keyboardType="numeric"
                   value={formData.area}
                   onChangeText={(value) => updateField('area', value)}
@@ -148,7 +148,7 @@ export default function NewFlatScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="Этаж"
-                  placeholderTextColor={theme === DARK_THEME ? '#666' : '#999'}
+                  placeholderTextColor={theme === 'dark' ? '#666' : '#999'}
                   keyboardType="numeric"
                   value={formData.floor}
                   onChangeText={(value) => updateField('floor', value)}
@@ -158,7 +158,7 @@ export default function NewFlatScreen() {
             <TextInput
               style={styles.input}
               placeholder="Этажей в доме"
-              placeholderTextColor={theme === DARK_THEME ? '#666' : '#999'}
+              placeholderTextColor={theme === 'dark' ? '#666' : '#999'}
               keyboardType="numeric"
               value={formData.totalFloors}
               onChangeText={(value) => updateField('totalFloors', value)}
@@ -170,10 +170,10 @@ export default function NewFlatScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#111' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#111' : '#f5f5f5',
   },
   scrollView: {
     flex: 1,
@@ -183,14 +183,14 @@ const makeStyles = (theme: string) => StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: theme === DARK_THEME ? '#333' : '#eee',
+    borderBottomColor: theme === 'dark' ? '#333' : '#eee',
   },
   title: {
     fontSize: 18,
     fontWeight: '500',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   submitButton: {
     backgroundColor: '#4ECDC4',
@@ -215,17 +215,17 @@ const makeStyles = (theme: string) => StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '500',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     marginBottom: 12,
   },
   input: {
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
     borderRadius: 8,
     padding: 12,
     marginBottom: 12,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     borderWidth: 1,
-    borderColor: theme === DARK_THEME ? '#333' : '#eee',
+    borderColor: theme === 'dark' ? '#333' : '#eee',
   },
   textArea: {
     height: 100,

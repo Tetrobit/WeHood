@@ -3,8 +3,7 @@ import { Card, ProgressBar, Button } from 'react-native-paper';
 import { LineChart } from 'react-native-chart-kit';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useState, useRef } from 'react';
-import { DARK_THEME } from '@/core/hooks/useTheme';
-import { useThemeName } from '@/core/hooks/useTheme';
+import { useTheme, Theme } from '@/core/hooks/useTheme';
 import { Dimensions } from 'react-native';
 import { router } from 'expo-router';
 
@@ -113,7 +112,7 @@ export default function MyListingsScreen() {
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([]);
   const [isLoadingAiSuggestions, setIsLoadingAiSuggestions] = useState(false);
   const rotationAnimations = useRef<{ [key: string]: Animated.Value }>({}).current;
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme);
 
   // Инициализация анимации для каждого листинга
@@ -193,7 +192,7 @@ export default function MyListingsScreen() {
             <MaterialCommunityIcons 
               name="arrow-left" 
               size={24} 
-              color={theme === DARK_THEME ? '#fff' : '#000'} 
+              color={theme === 'dark' ? '#fff' : '#000'} 
             />
           </TouchableOpacity>
           <View>
@@ -236,7 +235,7 @@ export default function MyListingsScreen() {
                         <MaterialCommunityIcons 
                           name="chevron-down" 
                           size={20} 
-                          color={theme === DARK_THEME ? '#fff' : '#666'} 
+                          color={theme === 'dark' ? '#fff' : '#666'} 
                         />
                       </Animated.View>
                     </View>
@@ -278,9 +277,9 @@ export default function MyListingsScreen() {
                     width={Dimensions.get('window').width - 64}
                     height={180}
                     chartConfig={{
-                      backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
-                      backgroundGradientFrom: theme === DARK_THEME ? '#222' : '#fff',
-                      backgroundGradientTo: theme === DARK_THEME ? '#222' : '#fff',
+                      backgroundColor: theme === 'dark' ? '#222' : '#fff',
+                      backgroundGradientFrom: theme === 'dark' ? '#222' : '#fff',
+                      backgroundGradientTo: theme === 'dark' ? '#222' : '#fff',
                       decimalPlaces: 0,
                       color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`,
                       style: {
@@ -326,7 +325,7 @@ export default function MyListingsScreen() {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Редактирование объявления</Text>
             <TouchableOpacity onPress={() => setShowEditModal(false)}>
-              <MaterialCommunityIcons name="close" size={24} color={theme === DARK_THEME ? '#fff' : '#000'} />
+              <MaterialCommunityIcons name="close" size={24} color={theme === 'dark' ? '#fff' : '#000'} />
             </TouchableOpacity>
           </View>
 
@@ -426,7 +425,7 @@ export default function MyListingsScreen() {
                     <MaterialCommunityIcons 
                       name={editingListing.hasParking ? "checkbox-marked" : "checkbox-blank-outline"} 
                       size={24} 
-                      color={theme === DARK_THEME ? '#fff' : '#000'} 
+                      color={theme === 'dark' ? '#fff' : '#000'} 
                     />
                     <Text style={styles.checkboxLabel}>Парковка</Text>
                   </TouchableOpacity>
@@ -441,7 +440,7 @@ export default function MyListingsScreen() {
                     <MaterialCommunityIcons 
                       name={editingListing.hasFurniture ? "checkbox-marked" : "checkbox-blank-outline"} 
                       size={24} 
-                      color={theme === DARK_THEME ? '#fff' : '#000'} 
+                      color={theme === 'dark' ? '#fff' : '#000'} 
                     />
                     <Text style={styles.checkboxLabel}>Мебель</Text>
                   </TouchableOpacity>
@@ -456,7 +455,7 @@ export default function MyListingsScreen() {
                     <MaterialCommunityIcons 
                       name={editingListing.hasAppliances ? "checkbox-marked" : "checkbox-blank-outline"} 
                       size={24} 
-                      color={theme === DARK_THEME ? '#fff' : '#000'} 
+                      color={theme === 'dark' ? '#fff' : '#000'} 
                     />
                     <Text style={styles.checkboxLabel}>Бытовая техника</Text>
                   </TouchableOpacity>
@@ -471,7 +470,7 @@ export default function MyListingsScreen() {
                     <MaterialCommunityIcons 
                       name={editingListing.petsAllowed ? "checkbox-marked" : "checkbox-blank-outline"} 
                       size={24} 
-                      color={theme === DARK_THEME ? '#fff' : '#000'} 
+                      color={theme === 'dark' ? '#fff' : '#000'} 
                     />
                     <Text style={styles.checkboxLabel}>Можно с животными</Text>
                   </TouchableOpacity>
@@ -531,7 +530,7 @@ export default function MyListingsScreen() {
                         <MaterialCommunityIcons 
                           name="lightbulb-outline" 
                           size={20} 
-                          color={theme === DARK_THEME ? '#FFD700' : '#FFA500'} 
+                          color={theme === 'dark' ? '#FFD700' : '#FFA500'} 
                         />
                         <Text style={styles.suggestionText}>{suggestion}</Text>
                       </View>
@@ -564,14 +563,14 @@ export default function MyListingsScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#000' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#000' : '#f5f5f5',
   },
   header: {
     padding: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   headerContent: {
     flexDirection: 'row',
@@ -584,19 +583,19 @@ const makeStyles = (theme: string) => StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
   },
   listingsContainer: {
     padding: 16,
   },
   listingCard: {
     marginBottom: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   listingHeader: {
     flexDirection: 'row',
@@ -608,7 +607,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   listingTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     marginBottom: 4,
   },
   listingPrice: {
@@ -619,7 +618,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   listingAddress: {
     fontSize: 14,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
   },
   listingStats: {
     alignItems: 'flex-end',
@@ -636,18 +635,18 @@ const makeStyles = (theme: string) => StyleSheet.create({
   statsText: {
     marginLeft: 4,
     fontSize: 14,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
   },
   analytics: {
     marginTop: 16,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: theme === DARK_THEME ? '#333' : '#eee',
+    borderTopColor: theme === 'dark' ? '#333' : '#eee',
   },
   analyticsTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     marginBottom: 16,
   },
   metricsContainer: {
@@ -666,12 +665,12 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   metricLabel: {
     fontSize: 12,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
   },
   chartTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     marginBottom: 16,
   },
   chart: {
@@ -679,14 +678,14 @@ const makeStyles = (theme: string) => StyleSheet.create({
     borderRadius: 16,
   },
   recommendationsContainer: {
-    backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#333' : '#f5f5f5',
     padding: 16,
     borderRadius: 12,
   },
   recommendationsTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     marginBottom: 12,
   },
   recommendationItem: {
@@ -697,7 +696,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   recommendationText: {
     marginLeft: 8,
     fontSize: 14,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     flex: 1,
   },
   actionButtons: {
@@ -712,7 +711,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     backgroundColor: '#007AFF',
   },
   aiSuggestionContainer: {
-    backgroundColor: theme === DARK_THEME ? '#2c2c2c' : '#f0f0f0',
+    backgroundColor: theme === 'dark' ? '#2c2c2c' : '#f0f0f0',
     padding: 16,
     borderRadius: 8,
     marginTop: 16,
@@ -720,16 +719,16 @@ const makeStyles = (theme: string) => StyleSheet.create({
   aiSuggestionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     marginBottom: 8,
   },
   aiSuggestionText: {
     fontSize: 14,
-    color: theme === DARK_THEME ? '#ddd' : '#333',
+    color: theme === 'dark' ? '#ddd' : '#333',
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#000' : '#fff',
+    backgroundColor: theme === 'dark' ? '#000' : '#fff',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -737,12 +736,12 @@ const makeStyles = (theme: string) => StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: theme === DARK_THEME ? '#333' : '#eee',
+    borderBottomColor: theme === 'dark' ? '#333' : '#eee',
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   modalContent: {
     padding: 16,
@@ -750,15 +749,15 @@ const makeStyles = (theme: string) => StyleSheet.create({
   inputLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     marginBottom: 8,
   },
   input: {
-    backgroundColor: theme === DARK_THEME ? '#222' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#222' : '#f5f5f5',
     borderRadius: 8,
     padding: 12,
     marginBottom: 16,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   textArea: {
     height: 120,
@@ -773,11 +772,11 @@ const makeStyles = (theme: string) => StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     marginBottom: 16,
   },
   aiSuggestionsContainer: {
-    backgroundColor: theme === DARK_THEME ? '#2c2c2c' : '#f0f0f0',
+    backgroundColor: theme === 'dark' ? '#2c2c2c' : '#f0f0f0',
     padding: 16,
     borderRadius: 8,
   },
@@ -790,14 +789,14 @@ const makeStyles = (theme: string) => StyleSheet.create({
     flex: 1,
     marginLeft: 12,
     fontSize: 14,
-    color: theme === DARK_THEME ? '#ddd' : '#333',
+    color: theme === 'dark' ? '#ddd' : '#333',
   },
   loadingContainer: {
     padding: 16,
     alignItems: 'center',
   },
   loadingText: {
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
     fontSize: 14,
   },
   refreshButton: {
@@ -822,7 +821,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   checkboxLabel: {
     marginLeft: 8,
     fontSize: 16,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   bottomPadding: {
     height: 100, // Отступ для нижней навигации Android

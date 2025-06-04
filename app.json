@@ -55,7 +55,8 @@
           "microphonePermission": "Разрешение на использование микрофона",
           "recordAudioAndroid": true
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true

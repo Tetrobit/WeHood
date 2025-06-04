@@ -1,8 +1,7 @@
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { TextInput, Button } from 'react-native-paper';
 import { useState } from 'react';
-import { DARK_THEME } from '@/core/hooks/useTheme';
-import { useThemeName } from '@/core/hooks/useTheme';
+import { useTheme, Theme } from '@/core/hooks/useTheme';
 import { router } from 'expo-router';
 
 export default function NewListingScreen() {
@@ -11,7 +10,7 @@ export default function NewListingScreen() {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme);
 
   const handleSubmit = () => {
@@ -35,9 +34,9 @@ export default function NewListingScreen() {
           theme={{
             colors: {
               primary: '#007AFF',
-              text: theme === DARK_THEME ? '#fff' : '#000',
-              placeholder: theme === DARK_THEME ? '#aaa' : '#666',
-              background: theme === DARK_THEME ? '#222' : '#fff',
+              text: theme === 'dark' ? '#fff' : '#000',
+              placeholder: theme === 'dark' ? '#aaa' : '#666',
+              background: theme === 'dark' ? '#222' : '#fff',
             },
           }}
         />
@@ -53,9 +52,9 @@ export default function NewListingScreen() {
           theme={{
             colors: {
               primary: '#007AFF',
-              text: theme === DARK_THEME ? '#fff' : '#000',
-              placeholder: theme === DARK_THEME ? '#aaa' : '#666',
-              background: theme === DARK_THEME ? '#222' : '#fff',
+              text: theme === 'dark' ? '#fff' : '#000',
+              placeholder: theme === 'dark' ? '#aaa' : '#666',
+              background: theme === 'dark' ? '#222' : '#fff',
             },
           }}
         />
@@ -69,9 +68,9 @@ export default function NewListingScreen() {
           theme={{
             colors: {
               primary: '#007AFF',
-              text: theme === DARK_THEME ? '#fff' : '#000',
-              placeholder: theme === DARK_THEME ? '#aaa' : '#666',
-              background: theme === DARK_THEME ? '#222' : '#fff',
+              text: theme === 'dark' ? '#fff' : '#000',
+              placeholder: theme === 'dark' ? '#aaa' : '#666',
+              background: theme === 'dark' ? '#222' : '#fff',
             },
           }}
         />
@@ -87,9 +86,9 @@ export default function NewListingScreen() {
           theme={{
             colors: {
               primary: '#007AFF',
-              text: theme === DARK_THEME ? '#fff' : '#000',
-              placeholder: theme === DARK_THEME ? '#aaa' : '#666',
-              background: theme === DARK_THEME ? '#222' : '#fff',
+              text: theme === 'dark' ? '#fff' : '#000',
+              placeholder: theme === 'dark' ? '#aaa' : '#666',
+              background: theme === 'dark' ? '#222' : '#fff',
             },
           }}
         />
@@ -107,27 +106,27 @@ export default function NewListingScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#000' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#000' : '#f5f5f5',
   },
   header: {
     padding: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
     elevation: 2,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   form: {
     padding: 16,
   },
   input: {
     marginBottom: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   button: {
     marginTop: 16,

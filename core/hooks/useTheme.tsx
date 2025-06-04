@@ -1,66 +1,44 @@
-import { useQuery, useRealm } from "@realm/react";
-import Theme from "../models/theme";
-import { useColorScheme } from "react-native";
+import * as SecureStorage from 'expo-secure-store';
+import React, { createContext } from "react";
+import { useColorScheme } from 'react-native';
 
-export const LIGHT_THEME = 'light';
-export const DARK_THEME = 'dark';
-export const SYSTEM_THEME = 'system';
-export const THEMES = [LIGHT_THEME, DARK_THEME, SYSTEM_THEME] as const;
+export type Theme = 'light' | 'dark';
 
-export type ThemeName = typeof THEMES[number];
-
-export const themes = {
-  [LIGHT_THEME]: {
-    backgroundColor: '#ffffff',
-    textColor: '#000000',
-    borderColor: '#000000',
-    buttonColor: '#000000',
-    buttonTextColor: '#ffffff',
-  },
-  [DARK_THEME]: {
-    backgroundColor: '#000000',
-    textColor: '#ffffff',
-    borderColor: '#ffffff',
-    buttonColor: '#ffffff',
-    buttonTextColor: '#000000',
-    backgroundGradient: {
-      start: '#000000',
-      end: '#000000',
-    },
-  },
+export type ThemeContextType = {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
 }
 
-export function useTheme(): typeof themes[keyof typeof themes] {
-  const [theme] = useQuery(Theme);
+export const ThemeContext = createContext<ThemeContextType>({
+  theme: 'light',
+  setTheme: (theme: Theme) => {},
+});
+
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const systemTheme = useColorScheme();
+  const [theme, setTheme] = React.useState<Theme>((SecureStorage.getItem('theme') as (Theme | null)) || systemTheme || 'light');
 
-  if (theme?.name === SYSTEM_THEME || !theme) {
-    return themes[systemTheme as keyof typeof themes];
-  }
-
-  return themes[theme?.name as keyof typeof themes];
-}
-
-export function useSetTheme(): (theme: typeof THEMES[number]) => void {
-  const [theme] = useQuery(Theme);
-  const realm = useRealm();
-  return (newThemeName: typeof THEMES[number]) => {
-    if (theme) {
-      realm.write(() => {
-        theme.name = newThemeName;
-      });
+  React.useEffect(() => {
+    if (!SecureStorage.getItem('theme')) {
+      SecureStorage.setItemAsync('theme', theme as Theme);
     }
-    else {
-      realm.write(() => {
-        realm.create(Theme, Theme.generate(newThemeName));
-      });
-    }
-  }
+  }, []);
+
+  return (
+    <ThemeContext.Provider value={{ theme, setTheme: (theme: Theme) => {
+      console.log('getTheme', SecureStorage.getItem('theme'));
+      console.log('setTheme', theme);
+      setTheme(theme as Theme);
+      SecureStorage.setItem('theme', theme as Theme);
+    } }}>
+      {children}
+    </ThemeContext.Provider>
+  )
 }
 
-export function useThemeName(): typeof THEMES[number] | null {
-  const [theme] = useQuery(Theme);
-  return theme?.name as typeof THEMES[number] | null;
+export const useTheme = (): [Theme, (theme: Theme) => void] => {
+  const { theme, setTheme } = React.useContext(ThemeContext);
+  return [theme, setTheme];
 }
 
-export default useTheme;
+export default ThemeProvider;
