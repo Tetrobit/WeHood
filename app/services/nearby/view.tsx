@@ -29,6 +29,7 @@ export default function ViewPostScreen() {
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const slideAnim = React.useRef(new RNAnimated.Value(height)).current;
   const opacityAnim = React.useRef(new RNAnimated.Value(0)).current;
   const [refreshing, setRefreshing] = useState(false);
@@ -147,6 +148,19 @@ export default function ViewPostScreen() {
       console.error('Ошибка при отправке комментария:', error);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: number) => {
+    try {
+      setIsDeleting(true);
+      await api.deleteComment(commentId);
+      Toast.success('Комментарий удалён');
+    } catch (error) {
+      Toast.error("Не удалось удалить комментарий");
+      console.error('Ошибка при удалении комментария:', error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -305,6 +319,8 @@ export default function ViewPostScreen() {
                         }}
                         text={comment.text}
                         createdAt={comment.createdAt.toISOString()}
+                        isAuthor={comment.authorId === api.profile?.id}
+                        onDelete={() => handleDeleteComment(comment.id)}
                       />
                     ))
                   ) : (

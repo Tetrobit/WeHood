@@ -2,11 +2,11 @@ import { API_URL, MEDIA_URL } from "@/core/constants/environment";
 import * as Device from 'expo-device';
 import { useSharedValue } from "react-native-reanimated";
 import { useQuery, useRealm } from "@realm/react";
-import Profile from "../models/profile";
-import { User } from "realm";
+import User from "../models/user";
 import { NearbyPostModel } from "../models/nearby-post";
 import Realm from "realm";
 import { CommentModel } from "../models/comment";
+import * as SecureStorage from 'expo-secure-store';
 
 export interface VKParameters {
   vkAppId: string;
@@ -227,7 +227,7 @@ export interface UploadFileResponse {
 
 export const useApi = () => {
   const realm = useRealm();
-  const [profile] = useQuery(Profile);
+  const [profile] = useQuery(User);
   const codeVerifier = useSharedValue<string | null>(null);
 
   const getVKParameters = async (): Promise<VKParameters> => {
@@ -270,12 +270,12 @@ export const useApi = () => {
     const data = await response.json();
 
     realm.write(() => {
-      realm.delete(realm.objects(Profile));
+      realm.create(User, User.fromLoginWithVK(data));
     });
 
-    realm.write(() => {
-      realm.create(Profile, Profile.fromLoginWithVK(data));
-    });
+    SecureStorage.setItem('token', data.token);
+    SecureStorage.setItem('user_id', data.user.id);
+    SecureStorage.setItem('device_id', data.device.id);
 
     return data;
   }
@@ -285,16 +285,16 @@ export const useApi = () => {
       ...options,
       headers: {
         ...options.headers,
-        'Authorization': `Bearer ${profile?.token}`,
+        'Authorization': `Bearer ${SecureStorage.getItem('token')}`,
       },
     });
     return response.json();
   }
 
   const logout = async () => {
-    realm.write(() => {
-      realm.delete(realm.objects(Profile));
-    })
+    await SecureStorage.deleteItemAsync('token');
+    await SecureStorage.deleteItemAsync('user_id');
+    await SecureStorage.deleteItemAsync('device_id');
   }
 
   const checkEmailExists = async (email: string): Promise<CheckEmailExistsResponse> => {
@@ -346,13 +346,9 @@ export const useApi = () => {
 
     const data = await response.json();
 
-    realm.write(() => {
-      realm.delete(realm.objects(Profile));
-    });
-
-    realm.write(() => {
-      realm.create(Profile, Profile.fromRegister(data));
-    });
+    SecureStorage.setItem('token', data.token);
+    SecureStorage.setItem('user_id', data.user.id);
+    SecureStorage.setItem('device_id', data.device.id);
 
     return data;
   }
@@ -382,13 +378,9 @@ export const useApi = () => {
       return data;
     }
 
-    realm.write(() => {
-      realm.delete(realm.objects(Profile));
-    });
-
-    realm.write(() => {
-      realm.create(Profile, Profile.fromLogin(data));
-    });
+    SecureStorage.setItem('token', data.token);
+    SecureStorage.setItem('user_id', data.user.id);
+    SecureStorage.setItem('device_id', data.device.id);
 
     return data;
   }
@@ -562,14 +554,24 @@ export const useApi = () => {
     return comments;
   };
 
-  const deletePost = async (postId: number): Promise<void> => {
+  const deletePost = async (postId: number): Promise<NearbyPost> => {
     const post = await withAuth<NearbyPost>(`${API_URL}/api/nearby/posts/${postId}`, {
       method: 'DELETE',
     });
     realm.write(() => {
-      console.log("Post: ", post);
       realm.create(NearbyPostModel, NearbyPostModel.fromApi(post), Realm.UpdateMode.Modified);
     });
+    return post;
+  };
+
+  const deleteComment = async (commentId: number): Promise<CommentResponse> => {
+    const comment = await withAuth<CommentResponse>(`${API_URL}/api/nearby/comments/${commentId}`, {
+      method: 'DELETE',
+    });
+    realm.write(() => {
+      realm.create(CommentModel, CommentModel.fromApi(comment), Realm.UpdateMode.Modified);
+    });
+    return comment;
   };
 
   return {
@@ -595,6 +597,7 @@ export const useApi = () => {
     addComment,
     getComments,
     deletePost,
+    deleteComment,
   }
 }
 

@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Location from 'expo-location';
-import Realm from 'realm';
 
 // Схема для хранения координат
 const CoordinatesSchema = {

@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Al
 import { Ionicons } from '@expo/vector-icons';
 import { DARK_THEME, LIGHT_THEME, useSetTheme, useThemeName } from '@/core/hooks/useTheme';
 import { useQuery } from '@realm/react';
-import Profile from '@/core/models/profile';
+import User from '@/core/models/user';
 import { router } from 'expo-router';
 import useApi from '@/core/hooks/useApi';
 import { useState, useRef, useEffect } from 'react';
@@ -29,7 +29,7 @@ const HOBBIES = [
 ];
 
 export default function ProfileScreen() {
-  const [profile] = useQuery(Profile);
+  const [profile] = useQuery(User);
   const api = useApi();
   const theme = useThemeName();
   const styles = makeStyles(theme!);

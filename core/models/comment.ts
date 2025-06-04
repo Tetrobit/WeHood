@@ -13,7 +13,6 @@ export class CommentModel extends Realm.Object {
   updatedAt!: Date;
 
   static fromApi(comment: CommentResponse): CommentModel {
-    console.log("Comment: ", comment);
     return {
       id: comment.id,
       text: comment.text,

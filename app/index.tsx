@@ -1,27 +1,20 @@
-import { useQuery } from "@realm/react";
-import Theme from "@/core/models/theme";
-import { useRealm } from "@realm/react";
-import { Redirect, router } from "expo-router";
+import { router } from "expo-router";
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Animated, Easing, useColorScheme } from "react-native";
-import Profile from "@/core/models/profile";
-import { useThemeName } from "@/core/hooks/useTheme";
-import Greeting from "@/core/models/greeting";
+import { View, Text, TouchableOpacity, StyleSheet, Animated, Easing } from "react-native";
+import * as SecureStorage from 'expo-secure-store';
 
 export default function App() {
-  const systemTheme = useColorScheme();
-  const [greeting] = useQuery(Greeting);
-  const [theme] = useQuery(Theme);
-  const realm = useRealm();
   const [timeLeft, setTimeLeft] = useState(5);
   const [showNotice, setShowNotice] = useState(true);
   const progressAnimation = React.useRef(new Animated.Value(1)).current;
-  const [profile] = useQuery(Profile);
 
   useEffect(() => {
+    SecureStorage.deleteItemAsync('theme');
     if (!showNotice) {
-      if (profile) {
-        if (!greeting) {
+      const token = SecureStorage.getItem('token');
+      if (token) {
+        const passed_greeting = SecureStorage.getItem('passed_greeting');
+        if (!passed_greeting) {
           router.replace('/greeting');
         }
         else {

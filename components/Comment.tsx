@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { UserAvatar } from './UserAvatar';
 import { useThemeName } from '@/core/hooks/useTheme';
+import { MaterialIcons } from '@expo/vector-icons';
 
 interface CommentProps {
   author: {
@@ -13,9 +14,11 @@ interface CommentProps {
   };
   text: string;
   createdAt: string;
+  isAuthor?: boolean;
+  onDelete?: () => void;
 }
 
-export const Comment: React.FC<CommentProps> = ({ author, text, createdAt }) => {
+export const Comment: React.FC<CommentProps> = ({ author, text, createdAt, isAuthor, onDelete }) => {
   const theme = useThemeName() || 'light';
   const styles = makeStyles(theme);
   const formattedDate = format(new Date(createdAt), 'd MMMM yyyy, HH:mm', { locale: ru });
@@ -35,6 +38,11 @@ export const Comment: React.FC<CommentProps> = ({ author, text, createdAt }) => 
           </Text>
           <Text style={styles.date}>{formattedDate}</Text>
         </View>
+        {isAuthor && onDelete && (
+          <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
+            <MaterialIcons name="delete-outline" size={20} color={theme === 'dark' ? '#ff4444' : '#ff0000'} />
+          </TouchableOpacity>
+        )}
       </View>
       <Text style={styles.text}>{text}</Text>
     </View>
@@ -79,5 +87,8 @@ const makeStyles = (theme: string) => StyleSheet.create({
     fontSize: 14,
     color: theme === 'dark' ? '#fff' : '#333',
     lineHeight: 20,
+  },
+  deleteButton: {
+    padding: 8,
   },
 }); 

@@ -4,37 +4,31 @@ import PagerView from 'react-native-pager-view';
 import { useTheme, useThemeName, useSetTheme, THEMES } from '@/core/hooks/useTheme';
 import { useGeolocation } from '@/core/hooks/useGeolocation';
 import { router } from 'expo-router';
-import { setStatusBarBackgroundColor } from 'expo-status-bar';
+import { setStatusBarBackgroundColor, setStatusBarStyle } from 'expo-status-bar';
 import LottieView from 'lottie-react-native';
 import { wait } from '@/core/utils/time';
 import { useSharedValue } from 'react-native-reanimated';
-import { useQuery, useRealm } from '@realm/react';
-import Theme from '@/core/models/theme';
 import { useColorScheme } from 'react-native';
 import ToastManager, { Toast } from 'toastify-react-native';
-import { Greeting } from '@/core/models/greeting';
+import * as SecureStorage from 'expo-secure-store';
 
 export const GreetingScreen = () => {
   const systemTheme = useColorScheme();
   const pagerRef = useRef<PagerView>(null);
   const themeName = useThemeName();
   const setThemeName = useSetTheme();
-  const { lastLocation, location, requestGeolocation, errorMsg } = useGeolocation();
+  const { location, requestGeolocation, errorMsg } = useGeolocation();
   const animationRef = useRef<LottieView>(null);
   const isSwitched = useSharedValue(true);
   const [isThemeSwitched, setIsThemeSwitched] = useState(true);
   const [isGeolocationLoading, setIsGeolocationLoading] = useState(false);
-  const [realmTheme] = useQuery(Theme)
-  const realm = useRealm();
 
   const handleNext = (page: number) => {
     pagerRef.current?.setPage(page);
   };
 
   const handleFinish = () => {
-    realm.write(() => {
-      realm.create(Greeting, Greeting.generate(true));
-    });
+    SecureStorage.setItem('passed_greeting', 'true');
     router.replace('/(tabs)');
   };
 
@@ -43,7 +37,10 @@ export const GreetingScreen = () => {
     setIsThemeSwitched(false);
     isSwitched.value = false;
     setThemeName(theme);
+
     setStatusBarBackgroundColor(theme === 'light' ? '#ffffff' : '#000000');
+    setStatusBarStyle(theme === 'light' ? 'dark' : 'light');
+
     if (theme === 'dark') {
       animationRef.current!.setState({ direction: 1 });
       animationRef.current?.play(60, 100);
@@ -62,16 +59,10 @@ export const GreetingScreen = () => {
 
   React.useEffect(() => { 
     async function init() {
-      if (realmTheme) {
-        realm.write(() => {
-          realmTheme.name = systemTheme === 'dark' ? 'dark' : 'light';
-        });
-      }
-      else {
-        realm.write(() => {
-          realm.create(Theme, Theme.generate(systemTheme === 'dark' ? 'dark' : 'light'));
-        });
-      }
+      console.log(SecureStorage.getItem('theme'));
+      SecureStorage.setItem('theme', systemTheme === 'dark' ? 'dark' : 'light');
+      setStatusBarBackgroundColor(systemTheme === 'dark' ? '#000000' : '#ffffff');
+      setStatusBarStyle(systemTheme === 'dark' ? 'light' : 'dark');
 
       if (systemTheme === 'dark') {
         animationRef.current?.play(100, 100);

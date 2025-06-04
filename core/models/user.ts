@@ -1,45 +1,36 @@
 import { Realm } from '@realm/react';
 import { LoginResponse, LoginWithVKResponse, RegisterResponse } from '@/core/hooks/useApi';
 
-class Profile extends Realm.Object<Profile, "id" | "token" | "email" | "deviceId"> {
-  _id = new Realm.BSON.ObjectId();
+class User extends Realm.Object<User, "id" | "firstName" | "lastName"> {
   id!: string;
-  deviceId!: string;
-  email!: string;
-  token!: string;
+  email?: string;
   firstName?: string;
   lastName?: string;
   avatar?: string;
   vkId?: string;
 
-  static primaryKey = "_id";
+  static primaryKey = "id";
 
-  constructor(realm: Realm, id: string, token: string, email: string, deviceId: string, firstName?: string, lastName?: string, avatar?: string, vkId?: string) {
-    super(realm, { id, token, email, deviceId, firstName, lastName, avatar, vkId });
+  constructor(realm: Realm, id: string, firstName?: string, lastName?: string, avatar?: string, vkId?: string) {
+    super(realm, { id, firstName, lastName, avatar, vkId });
   }
 
   static fromLoginWithVK(data: LoginWithVKResponse) {
     return {
-      _id: new Realm.BSON.ObjectId(),
       id: data.user.id,
-      token: data.token,
       firstName: data.user.firstName,
       lastName: data.user.lastName,
       avatar: data.user.avatar,
       email: data.user.email,
       vkId: data.user.vkId,
-      deviceId: data.device.id,
     }
   }
 
 
   static fromRegister(data: RegisterResponse) {
     return {
-      _id: new Realm.BSON.ObjectId(),
       id: data.user.id,
-      token: data.token,
       email: data.user.email,
-      deviceId: data.device.id,
       firstName: data.user.firstName || '',
       lastName: data.user.lastName || '',
     }
@@ -47,32 +38,26 @@ class Profile extends Realm.Object<Profile, "id" | "token" | "email" | "deviceId
 
   static fromLogin(data: LoginResponse) {
     return {
-      _id: new Realm.BSON.ObjectId(),
       id: data.user!.id,
-      token: data.token!,
       firstName: data.user!.firstName,
       lastName: data.user!.lastName,
       avatar: data.user!.avatar,
       email: data.user!.email,
       vkId: data.user!.vkId,
-      deviceId: data.device!.id,
     }
   }
 
   static schema = {
-    name: 'Profile',
+    name: 'User',
     properties: {
-      _id: 'objectId',
       id: 'string',
-      token: 'string',
       firstName: 'string?',
       lastName: 'string?',
       avatar: 'string?',
-      email: 'string',
+      email: 'string?',
       vkId: 'string?',
-      deviceId: 'string',
     },
   };
 }
 
-export default Profile;
+export default User;
