@@ -1,7 +1,6 @@
-import { useQuery, useRealm } from "@realm/react";
-import { useColorScheme } from "react-native";
 import * as SecureStorage from 'expo-secure-store';
 import React, { createContext } from "react";
+import { useColorScheme } from 'react-native';
 
 export type Theme = 'light' | 'dark';
 
@@ -16,14 +15,22 @@ export const ThemeContext = createContext<ThemeContextType>({
 });
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [theme, setTheme] = React.useState<Theme>(SecureStorage.getItem('theme') as Theme);
+  const systemTheme = useColorScheme();
+  const [theme, setTheme] = React.useState<Theme>((SecureStorage.getItem('theme') as (Theme | null)) || systemTheme || 'light');
 
   React.useEffect(() => {
-    SecureStorage.setItem('theme', theme);
-  }, [theme]);
+    if (!SecureStorage.getItem('theme')) {
+      SecureStorage.setItemAsync('theme', theme as Theme);
+    }
+  }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme: (theme: Theme) => setTheme(theme as Theme) }}>
+    <ThemeContext.Provider value={{ theme, setTheme: (theme: Theme) => {
+      console.log('getTheme', SecureStorage.getItem('theme'));
+      console.log('setTheme', theme);
+      setTheme(theme as Theme);
+      SecureStorage.setItem('theme', theme as Theme);
+    } }}>
       {children}
     </ThemeContext.Provider>
   )

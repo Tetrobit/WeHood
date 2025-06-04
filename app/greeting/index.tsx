@@ -43,7 +43,7 @@ export const GreetingScreen = () => {
     if (theme === 'dark') {
       animationRef.current!.setState({ direction: 1 });
       animationRef.current?.play(60, 100);
-      await wait(800);
+      await wait(1000);
       animationRef.current?.pause();
     }
     else {
@@ -58,7 +58,6 @@ export const GreetingScreen = () => {
 
   React.useEffect(() => { 
     async function init() {
-      SecureStorage.setItem('theme', systemTheme === 'dark' ? 'dark' : 'light');
       setStatusBarBackgroundColor(systemTheme === 'dark' ? '#000000' : '#ffffff');
       setStatusBarStyle(systemTheme === 'dark' ? 'light' : 'dark');
 

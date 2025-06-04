@@ -22,8 +22,8 @@ const memIds = [
 
 export default function NotFoundScreen() {
   const [theme] = useTheme();
-  const styles = makeStyles(theme!);
   const [memId] = useState(Math.floor(Math.random() * memIds.length));
+  const styles = makeStyles(theme);
 
   return (
     <View style={styles.container}>

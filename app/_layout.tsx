@@ -35,13 +35,13 @@ function RootLayout() {
 
 export default function RootLayoutWrapper() {
   return (
-    <StorageProvider>
-      <ThemeProvider>
+    <ThemeProvider>
+      <StorageProvider>
         <PaperProvider>
           <RootLayout />
           <ToastManager />
         </PaperProvider>
-      </ThemeProvider>
-    </StorageProvider>
+      </StorageProvider>
+    </ThemeProvider>
   )
 }

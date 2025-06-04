@@ -9,7 +9,6 @@ export default function App() {
   const progressAnimation = React.useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    SecureStorage.deleteItemAsync('theme');
     if (!showNotice) {
       const token = SecureStorage.getItem('token');
       if (token) {
