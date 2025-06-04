@@ -6,6 +6,9 @@ import React from "react";
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import ToastManager from 'toastify-react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
+import { Image } from 'react-native';
+import { useQuery } from '@realm/react';
+import Profile from '@/core/models/profile';
 
 function RootLayout() {
   const themeName = useThemeName();
@@ -19,6 +22,15 @@ function RootLayout() {
     headerShown: false,
   };
 
+  const mockAvatars = [
+    'https://randomuser.me/api/portraits/men/32.jpg',
+    'https://randomuser.me/api/portraits/women/44.jpg',
+    'https://randomuser.me/api/portraits/men/65.jpg',
+  ];
+  const defaultAvatar = 'https://randomuser.me/api/portraits/lego/1.jpg';
+
+  const [profile] = useQuery(Profile);
+
   return (
     <Stack>
       <Stack.Screen name="index" options={{ headerShown: false, statusBarStyle: 'light' }} />
@@ -31,6 +43,8 @@ function RootLayout() {
       <Stack.Screen name="services" options={defaultConfig} />
       <Stack.Screen name="greeting/index" options={defaultConfig} />
       <Stack.Screen name="add-content" options={defaultConfig} />
+      <Stack.Screen name="news" options={{headerShown: false}} />
+      <Stack.Screen name="news/[id]" options={{headerShown: false}} />
     </Stack>
   );
 }
