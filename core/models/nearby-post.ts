@@ -24,6 +24,7 @@ export class NearbyPostModel extends Realm.Object {
   authorCreatedAt!: Date;
   authorUpdatedAt!: Date;
   address?: string;
+  deleted?: boolean;
 
   get author() {
     return {
@@ -63,6 +64,7 @@ export class NearbyPostModel extends Realm.Object {
       authorLastName: 'string',
       authorCreatedAt: 'date',
       authorUpdatedAt: 'date',
+      deleted: 'bool?',
     },
   };
 
@@ -71,8 +73,8 @@ export class NearbyPostModel extends Realm.Object {
       id: post.id,
       title: post.title,
       description: post.description,
-      latitude: post.latitude,
-      longitude: post.longitude,
+      latitude: parseFloat(post.latitude.toString()),
+      longitude: parseFloat(post.longitude.toString()),
       fileId: post.fileId,
       type: post.type,
       views: post.views,
@@ -89,6 +91,7 @@ export class NearbyPostModel extends Realm.Object {
       authorLastName: post.author.lastName,
       authorCreatedAt: post.author.createdAt,
       authorUpdatedAt: post.author.updatedAt,
+      deleted: post.deleted,
     };
   }
 
@@ -108,6 +111,7 @@ export class NearbyPostModel extends Realm.Object {
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       author: this.author,
+      deleted: this.deleted,
     };
   }
 }

@@ -191,8 +191,8 @@ export interface CommentResponse {
 export interface NearbyPost {
   title: string;
   description: string;
-  latitude: number;
-  longitude: number;
+  latitude: number|string;
+  longitude: number|string;
   fileId: string;
   address?: string;
   author: {
@@ -213,6 +213,7 @@ export interface NearbyPost {
   createdAt: Date;
   updatedAt: Date;
   comments?: Comment[];
+  deleted?: boolean;
 }
 
 export interface UploadNearbyPostResponse extends NearbyPost {};
@@ -561,6 +562,16 @@ export const useApi = () => {
     return comments;
   };
 
+  const deletePost = async (postId: number): Promise<void> => {
+    const post = await withAuth<NearbyPost>(`${API_URL}/api/nearby/posts/${postId}`, {
+      method: 'DELETE',
+    });
+    realm.write(() => {
+      console.log("Post: ", post);
+      realm.create(NearbyPostModel, NearbyPostModel.fromApi(post), Realm.UpdateMode.Modified);
+    });
+  };
+
   return {
     profile,
     sendVerificationCode,
@@ -583,6 +594,7 @@ export const useApi = () => {
     incerementViews,
     addComment,
     getComments,
+    deletePost,
   }
 }
 

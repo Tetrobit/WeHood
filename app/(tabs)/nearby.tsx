@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions, RefreshControl, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { DARK_THEME, LIGHT_THEME, useThemeName } from '@/core/hooks/useTheme';
 import useGeolocation from '@/core/hooks/useGeolocation';
@@ -53,11 +53,6 @@ export default function NearbyScreen() {
 
   React.useEffect(() => {
     fetchPosts();
-    // const interval = setInterval(() => {
-    //   fetchPosts();
-    // }, 1000 * 20);
-
-    // return () => clearInterval(interval);
   }, []);
 
   let filteredPosts: NearbyPost[] = [];
@@ -80,6 +75,32 @@ export default function NearbyScreen() {
       post.id === updatedPost.id ? updatedPost : post
     );
     setPosts(updatedPosts);
+  };
+
+  const handleDeletePost = async (postId: number) => {
+    Alert.alert(
+      'Удалить пост',
+      'Вы уверены, что хотите удалить этот пост?',
+      [
+        {
+          text: 'Отмена',
+          style: 'cancel'
+        },
+        {
+          text: 'Удалить',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await api.deletePost(postId);
+              setPosts(posts.filter(post => post.id !== postId));
+            } catch (error) {
+              console.error('Ошибка при удалении поста:', error);
+              Alert.alert('Ошибка', 'Не удалось удалить пост');
+            }
+          }
+        }
+      ]
+    );
   };
 
   return (
@@ -132,8 +153,20 @@ export default function NearbyScreen() {
               )}
 
               <View style={styles.distanceBadge}>
-                <Text style={styles.distanceText}>{calculateFormattedDistance(lastLocation.latitude, lastLocation.longitude, post.latitude, post.longitude)}</Text>
+                <Text style={styles.distanceText}>{calculateFormattedDistance(lastLocation.latitude, lastLocation.longitude, parseFloat(post.latitude.toString()), parseFloat(post.longitude.toString()))}</Text>
               </View>
+
+              {post.author?.id === api.profile?.id && (
+                <TouchableOpacity 
+                  style={styles.deleteButton}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    handleDeletePost(post.id);
+                  }}
+                >
+                  <MaterialIcons name="delete" size={20} color="#fff" />
+                </TouchableOpacity>
+              )}
             </TouchableOpacity>
           ))}
 
@@ -292,5 +325,16 @@ const makeStyles = (theme: string) => StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+  },
+  deleteButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(218, 55, 47, 0.8)',
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
