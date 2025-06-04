@@ -8,7 +8,7 @@ export class CommentModel extends Realm.Object {
   postId!: number;
   authorFirstName!: string;
   authorLastName!: string;
-  authorAvatar!: string;
+  authorAvatar?: string;
   createdAt!: Date;
   updatedAt!: Date;
 
@@ -35,7 +35,7 @@ export class CommentModel extends Realm.Object {
       text: 'string',
       authorFirstName: 'string',
       authorLastName: 'string',
-      authorAvatar: 'string',
+      authorAvatar: 'string?',
       authorId: 'string',
       postId: 'int',
       createdAt: 'date',

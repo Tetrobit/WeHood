@@ -9,7 +9,7 @@ interface CommentProps {
   author: {
     firstName: string;
     lastName: string;
-    avatar: string;
+    avatar?: string;
   };
   text: string;
   createdAt: string;

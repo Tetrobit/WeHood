@@ -198,7 +198,7 @@ export interface NearbyPost {
   author: {
     id: string;
     vkId: string;
-    avatar: string;
+    avatar?: string;
     email: string;
     firstName: string;
     lastName: string;
@@ -538,9 +538,9 @@ export const useApi = () => {
     });
 
     if (comment.ok) {
-      realm.write(() => {
-        realm.create(CommentModel, CommentModel.fromApi(comment), Realm.UpdateMode.Modified);
-      });
+        realm.write(() => {
+          realm.create(CommentModel, CommentModel.fromApi(comment), Realm.UpdateMode.Modified);
+        });
     }
 
     return comment;

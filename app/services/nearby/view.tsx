@@ -16,7 +16,7 @@ import { Comment } from '@/components/Comment';
 import { UserAvatar } from '@/components/UserAvatar';
 import LottieView from 'lottie-react-native';
 import { AnimatedText } from '@/app/components/AnimatedText';
-import { Toast } from 'toastify-react-native';
+import ToastManager, { Toast } from 'toastify-react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -143,6 +143,7 @@ export default function ViewPostScreen() {
       Toast.success('Комментарий успешно отправлен');
       setNewComment('');
     } catch (error) {
+      Toast.error("Что-то пошло не так");
       console.error('Ошибка при отправке комментария:', error);
     } finally {
       setIsSubmitting(false);
@@ -380,6 +381,7 @@ export default function ViewPostScreen() {
           </View>
         </View>
       </Modal>
+      <ToastManager />
     </GestureHandlerRootView>
   );
 }
