@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image, SafeAreaView, TouchableOpacity, LayoutAn
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather, Fontisto, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import WeatherRain from '@/components/weather-rain';
+import WeatherRain from '@/app/components/WeatherRain';
 import { DARK_THEME, LIGHT_THEME, ThemeName } from '@/core/hooks/useTheme';
 import { useSetTheme, useThemeName } from '@/core/hooks/useTheme';
 import { setStatusBarBackgroundColor } from 'expo-status-bar';

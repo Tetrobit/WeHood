@@ -226,3 +226,8 @@ top: 7,
     fontSize: 20,
   },
 })
+
+export default {
+  AppLogo,
+  CompanyLogo,
+};

@@ -5,15 +5,15 @@ import { Image } from 'expo-image';
 import { useThemeName, DARK_THEME } from '@/core/hooks/useTheme';
 import { NearbyPost } from '@/core/hooks/useApi';
 import { getFileUrl } from '@/core/utils/url';
-import { AutoVideoView } from '@/app/components/AutoVideoPlayer';
+import { AutoVideoPlayer } from '@/app/components/AutoVideoPlayer';
 import { GestureHandlerRootView, PanGestureHandler } from 'react-native-gesture-handler';
 import useApi from '@/core/hooks/useApi';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, Realm } from '@realm/react';
 import { NearbyPostModel } from '@/core/models/nearby-post';
 import { CommentModel } from '@/core/models/comment';
-import { Comment } from '@/components/Comment';
-import { UserAvatar } from '@/components/UserAvatar';
+import { Comment } from '@/app/components/Comment';
+import { UserAvatar } from '@/app/components/UserAvatar';
 import LottieView from 'lottie-react-native';
 import { AnimatedText } from '@/app/components/AnimatedText';
 import ToastManager, { Toast } from 'toastify-react-native';
@@ -184,7 +184,7 @@ export default function ViewPostScreen() {
                 contentFit="contain"
               />
             ) : (
-              <AutoVideoView 
+              <AutoVideoPlayer 
                 source={getFileUrl(currentPost.fileId)} 
                 style={styles.media}
               />

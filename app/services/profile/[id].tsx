@@ -6,7 +6,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@realm/react';
 import { NearbyPostModel } from '@/core/models/nearby-post';
 import { getFileUrl } from '@/core/utils/url';
-import { AutoVideoView } from '@/app/components/AutoVideoPlayer';
+import { AutoVideoPlayer } from '@/app/components/AutoVideoPlayer';
 
 const { width } = Dimensions.get('window');
 
@@ -84,7 +84,7 @@ export default function ProfileScreen() {
                   <Image source={{ uri: getFileUrl(post.fileId) }} style={styles.postImage} />
                 ) : (
                   <View style={styles.postImage}>
-                    <AutoVideoView source={getFileUrl(post.fileId)} style={styles.postImage} />
+                    <AutoVideoPlayer source={getFileUrl(post.fileId)} style={styles.postImage} />
                     <View style={styles.videoIndicator}>
                       <MaterialIcons name="play-circle-filled" size={24} color="#fff" />
                     </View>

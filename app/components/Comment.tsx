@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
-import { UserAvatar } from './UserAvatar';
+import { UserAvatar } from '@/app/components/UserAvatar';
 import { useThemeName } from '@/core/hooks/useTheme';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -91,4 +91,6 @@ const makeStyles = (theme: string) => StyleSheet.create({
   deleteButton: {
     padding: 8,
   },
-}); 
+});
+
+export default Comment;

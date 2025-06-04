@@ -462,8 +462,7 @@ export const useApi = () => {
 
   const getNearbyPosts = async (latitude: number, longitude: number): Promise<NearbyPost[]> => {
     const posts = await withAuth<NearbyPost[]>(`${API_URL}/api/nearby/posts?latitude=${latitude}&longitude=${longitude}&radius=100000`);
-    
-    console.log(posts);
+
     // Сохраняем посты в Realm
     realm.write(() => {
       posts.forEach(post => {
@@ -540,7 +539,7 @@ export const useApi = () => {
 
   const getComments = async (postId: number): Promise<CommentResponse[]> => {
     const comments = await withAuth<CommentResponse[]>(`${API_URL}/api/nearby/posts/${postId}/comments`);
-    console.log("Comments: ", comments);
+
     realm.write(() => {
       comments.forEach(comment => {
         realm.create(CommentModel, CommentModel.fromApi({

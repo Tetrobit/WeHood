@@ -8,9 +8,8 @@ import useApi, { NearbyPost } from '@/core/hooks/useApi';
 import { getFileUrl } from '@/core/utils/url';
 import { calculateFormattedDistance } from '@/core/utils/location';
 import { VideoPlayer } from 'expo-video';
-import { AutoVideoView } from '../components/AutoVideoPlayer';
+import { AutoVideoPlayer } from '../components/AutoVideoPlayer';
 import LottieView from 'lottie-react-native';
-import { FullScreenViewer } from '../components/FullScreenViewer';
 
 const { width } = Dimensions.get('window');
 
@@ -149,7 +148,7 @@ export default function NearbyScreen() {
               )}
 
               { post.type === 'video' && (
-                <AutoVideoView source={getFileUrl(post.fileId)} style={styles.image} />
+                <AutoVideoPlayer source={getFileUrl(post.fileId)} style={styles.image} />
               )}
 
               <View style={styles.distanceBadge}>
@@ -189,16 +188,6 @@ export default function NearbyScreen() {
       >
         <MaterialIcons name="add" size={30} color="#fff" />
       </TouchableOpacity>
-
-      {/* Полноэкранный просмотр */}
-      {selectedPostIndex !== null && (
-        <FullScreenViewer
-          posts={filteredPosts}
-          initialIndex={selectedPostIndex}
-          onClose={() => setSelectedPostIndex(null)}
-          onUpdatePost={handleUpdatePost}
-        />
-      )}
     </View>
   );
 }
