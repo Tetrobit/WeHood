@@ -16,6 +16,6 @@ export const AutoVideoView = ({ source, style }: { source: string, style: object
   });
 
   return (
-    <VideoView player={player} style={style} nativeControls={false} />
+    <VideoView contentFit="contain" player={player} style={style} nativeControls={false} />
   );
 };

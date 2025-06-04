@@ -22,7 +22,7 @@ const memIds = [
 
 export default function NotFoundScreen() {
   const theme = useThemeName();
-  const styles = makeStyles(theme);
+  const styles = makeStyles(theme!);
   const [memId] = useState(Math.floor(Math.random() * memIds.length));
 
   return (

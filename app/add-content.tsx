@@ -10,6 +10,7 @@ import ToastManager, { Toast } from 'toastify-react-native';
 import { UploadNearbyPostRequest, useApi } from '@/core/hooks/useApi';
 import LottieView from 'lottie-react-native';
 import { compressImage } from '@/core/utils/image';
+import { AnimatedText } from './components/AnimatedText';
 
 export default function AddContentScreen() {
   const { uploadNearbyPost, uploadFile } = useApi();
@@ -82,7 +83,6 @@ export default function AddContentScreen() {
 
   React.useLayoutEffect(() => {
     if (mediaUri && contentType === 'video') {
-      console.log(mediaUri, contentType);
       setTimeout(() => {
         player.play();
       }, 1000);
@@ -109,6 +109,7 @@ export default function AddContentScreen() {
         title: title,
         description: description,
         fileId: fileId,
+        address: [lastLocation.locality, lastLocation.district, lastLocation.street, lastLocation.house].filter(v => v && v.length).join(', '),
         type: contentType!,
       }
 
@@ -222,9 +223,10 @@ export default function AddContentScreen() {
           />
           <View style={styles.locationInfo}>
             <MaterialIcons name="location-on" size={16} color="#666" />
-            <Text style={styles.locationText}>
-              {[lastLocation.locality, lastLocation.district, lastLocation.street, lastLocation.house].filter(v => v && v.length).join(', ')}
-            </Text>
+            <AnimatedText
+              style={styles.locationText}
+              text={[lastLocation.locality, lastLocation.district, lastLocation.street, lastLocation.house].filter(v => v && v.length).join(', ')}
+            />
           </View>
           <View style={styles.buttonsContainer}>
             <TouchableOpacity 
@@ -362,11 +364,13 @@ const makeStyles = (theme: string) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
+    overflow: 'hidden',
   },
   locationText: {
     marginLeft: 5,
     color: '#666',
     fontSize: 14,
+    flex: 1,
   },
   buttonsContainer: {
     flexDirection: 'row',
