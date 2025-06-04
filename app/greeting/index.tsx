@@ -60,11 +60,16 @@ export const GreetingScreen = () => {
     setIsThemeSwitched(true);
   };
 
-  React.useEffect(() => {
+  React.useEffect(() => { 
     async function init() {
       if (realmTheme) {
         realm.write(() => {
           realmTheme.name = systemTheme === 'dark' ? 'dark' : 'light';
+        });
+      }
+      else {
+        realm.write(() => {
+          realm.create(Theme, Theme.generate(systemTheme === 'dark' ? 'dark' : 'light'));
         });
       }
 
