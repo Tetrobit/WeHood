@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Modal, Animated as RNAnimated, RefreshControl, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Modal, Animated as RNAnimated, RefreshControl, ScrollView, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useThemeName, DARK_THEME } from '@/core/hooks/useTheme';
@@ -16,6 +16,7 @@ import { Comment } from '@/components/Comment';
 import { UserAvatar } from '@/components/UserAvatar';
 import LottieView from 'lottie-react-native';
 import { AnimatedText } from '@/app/components/AnimatedText';
+import { Toast } from 'toastify-react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -37,7 +38,7 @@ export default function ViewPostScreen() {
   const [censorshipError, setCensorshipError] = useState<{ reason?: string; toxicity_score?: number }>({});
   
   const post = useQuery(NearbyPostModel).filtered('id = $0', parseInt(id))[0];
-  const comments = useQuery(CommentModel).filtered('postId = $0', parseInt(id));
+  const comments = useQuery(CommentModel).filtered('postId = $0', parseInt(id)).sorted('createdAt', true);
   const [currentPost, setCurrentPost] = useState<NearbyPostModel>(post);
 
   const incrementViews = async () => {
@@ -139,6 +140,7 @@ export default function ViewPostScreen() {
         setShowCensorshipError(true);
         return;
       }
+      Toast.success('Комментарий успешно отправлен');
       setNewComment('');
     } catch (error) {
       console.error('Ошибка при отправке комментария:', error);
@@ -334,12 +336,16 @@ export default function ViewPostScreen() {
                     onPress={handleSubmitComment}
                     disabled={!newComment.trim() || isSubmitting}
                   >
-                    <MaterialIcons 
-                      name="send" 
-                      size={24} 
-                      color={theme === 'dark' ? "#fff" : "#000"}
-                      style={{ opacity: newComment.trim() ? 1 : 0.5 }}
-                    />
+                    {isSubmitting ? (
+                      <ActivityIndicator size="small" color={theme === 'dark' ? "#fff" : "#000"} />
+                    ) : (
+                      <MaterialIcons 
+                        name="send" 
+                        size={24} 
+                        color={theme === 'dark' ? "#fff" : "#000"}
+                        style={{ opacity: newComment.trim() ? 1 : 0.5 }}
+                      />
+                    )}
                   </TouchableOpacity>
                 </KeyboardAvoidingView>
               </RNAnimated.View>
