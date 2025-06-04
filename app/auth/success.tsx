@@ -1,4 +1,4 @@
-import User from "@/core/models/user";
+import UserModel from "@/core/models/UserModel";
 import { wait } from "@/core/utils/time";
 import { useQuery } from "@realm/react";
 import LottieView from "lottie-react-native";
@@ -8,7 +8,7 @@ import Animated, { useAnimatedStyle, withTiming, Easing } from "react-native-rea
 import { useSharedValue } from "react-native-reanimated";
 
 export default function Success() {
-  const [profile] = useQuery(User);
+  const [profile] = useQuery(UserModel);
   const opacity = useSharedValue(0);
   const shift = useSharedValue(0);
 

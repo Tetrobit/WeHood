@@ -1,6 +1,6 @@
 import { Realm } from '@realm/react';
 
-export class WeatherForecast extends Realm.Object<WeatherForecast, "response" | "timestamp"> {
+export class WeatherForecastModel extends Realm.Object<WeatherForecastModel, "response" | "timestamp"> {
   _id = new Realm.BSON.ObjectId();
   response!: string;
   timestamp!: Date;
@@ -29,4 +29,4 @@ export class WeatherForecast extends Realm.Object<WeatherForecast, "response" | 
   };
 }
 
-export default WeatherForecast;
+export default WeatherForecastModel;

@@ -4,7 +4,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router } from 'expo-router';
 import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
 import { useQuery } from '@realm/react';
-import User from '@/core/models/user';
+import UserModel from '@/core/models/UserModel';
 import Carousel from 'react-native-reanimated-carousel';
 import * as Network from 'expo-network';
 import * as Location from 'expo-location';
@@ -82,7 +82,7 @@ const serviceImages: Record<string, string> = {
 };
 
 export default function HomeScreen() {
-  const [profile] = useQuery(User);
+  const [profile] = useQuery(UserModel);
   const [avatarUri, setAvatarUri] = useState(profile?.avatar);
   const theme = useThemeName();
   const styles = makeStyles(theme!);

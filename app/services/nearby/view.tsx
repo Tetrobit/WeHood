@@ -10,8 +10,8 @@ import { GestureHandlerRootView, PanGestureHandler } from 'react-native-gesture-
 import useApi from '@/core/hooks/useApi';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, Realm } from '@realm/react';
-import { NearbyPostModel } from '@/core/models/nearby-post';
-import { CommentModel } from '@/core/models/comment';
+import { NearbyPostModel } from '@/core/models/NearbyPostModel';
+import { CommentModel } from '@/core/models/CommentModel';
 import { Comment } from '@/app/components/Comment';
 import { UserAvatar } from '@/app/components/UserAvatar';
 import LottieView from 'lottie-react-native';

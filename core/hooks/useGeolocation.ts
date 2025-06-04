@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import * as Location from 'expo-location';
 import { useQuery, useRealm } from '@realm/react';
-import Geolocation from '@/core/models/geolocation';
+import GeolocationModel from '@/core/models/GeolocationModel';
 import { useApi } from '@/core/hooks/useApi';
 
 let lastAttemptTimestamp = 0;
@@ -11,8 +11,8 @@ export const useGeolocation = () => {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const api = useApi();
-  const [lastLocation] = useQuery<Geolocation>({
-    type: Geolocation,
+  const [lastLocation] = useQuery<GeolocationModel>({
+    type: GeolocationModel,
     query: (realm) => realm.sorted('timestamp', true),
   });
 
@@ -41,7 +41,7 @@ export const useGeolocation = () => {
       
       setLocation(location);
       realm.write(() => {
-        realm.create(Geolocation, Geolocation.generate(location.coords.latitude, location.coords.longitude, new Date(), geocoder.attributes));
+        realm.create(GeolocationModel, GeolocationModel.generate(location.coords.latitude, location.coords.longitude, new Date(), geocoder.attributes));
       });
 
       lastAttemptTimestamp = Date.now();

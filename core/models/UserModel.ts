@@ -1,7 +1,7 @@
 import { Realm } from '@realm/react';
 import { LoginResponse, LoginWithVKResponse, RegisterResponse } from '@/core/hooks/useApi';
 
-class User extends Realm.Object<User, "id" | "firstName" | "lastName"> {
+class UserModel extends Realm.Object<UserModel, "id" | "firstName" | "lastName"> {
   id!: string;
   email?: string;
   firstName?: string;
@@ -60,4 +60,4 @@ class User extends Realm.Object<User, "id" | "firstName" | "lastName"> {
   };
 }
 
-export default User;
+export default UserModel;

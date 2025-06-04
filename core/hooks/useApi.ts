@@ -2,10 +2,10 @@ import { API_URL, MEDIA_URL } from "@/core/constants/environment";
 import * as Device from 'expo-device';
 import { useSharedValue } from "react-native-reanimated";
 import { useQuery, useRealm } from "@realm/react";
-import User from "../models/user";
-import { NearbyPostModel } from "../models/nearby-post";
+import UserModel from "../models/UserModel";
+import { NearbyPostModel } from "../models/NearbyPostModel";
 import Realm from "realm";
-import { CommentModel } from "../models/comment";
+import { CommentModel } from "../models/CommentModel";
 import * as SecureStorage from 'expo-secure-store';
 
 export interface VKParameters {
@@ -227,7 +227,7 @@ export interface UploadFileResponse {
 
 export const useApi = () => {
   const realm = useRealm();
-  const [profile] = useQuery(User);
+  const [profile] = useQuery(UserModel);
   const codeVerifier = useSharedValue<string | null>(null);
 
   const getVKParameters = async (): Promise<VKParameters> => {
@@ -270,7 +270,7 @@ export const useApi = () => {
     const data = await response.json();
 
     realm.write(() => {
-      realm.create(User, User.fromLoginWithVK(data));
+      realm.create(UserModel, UserModel.fromLoginWithVK(data));
     });
 
     SecureStorage.setItem('token', data.token);

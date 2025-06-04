@@ -4,7 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useThemeName, DARK_THEME } from '@/core/hooks/useTheme';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@realm/react';
-import { NearbyPostModel } from '@/core/models/nearby-post';
+import { NearbyPostModel } from '@/core/models/NearbyPostModel';
 import { getFileUrl } from '@/core/utils/url';
 import { AutoVideoPlayer } from '@/app/components/AutoVideoPlayer';
 
