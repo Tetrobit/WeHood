@@ -33,6 +33,8 @@ export default function ViewPostScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const likeScale = React.useRef(new RNAnimated.Value(1)).current;
   const [isLiked, setIsLiked] = useState(false);
+  const [showCensorshipError, setShowCensorshipError] = useState(false);
+  const [censorshipError, setCensorshipError] = useState<{ reason?: string; toxicity_score?: number }>({});
   
   const post = useQuery(NearbyPostModel).filtered('id = $0', parseInt(id))[0];
   const comments = useQuery(CommentModel).filtered('postId = $0', parseInt(id));
@@ -129,6 +131,14 @@ export default function ViewPostScreen() {
     try {
       setIsSubmitting(true);
       const response = await api.addComment(currentPost.id, newComment.trim());
+      if (!response?.ok) {
+        setCensorshipError({
+          reason: response?.reason,
+          toxicity_score: response?.toxicity_score
+        });
+        setShowCensorshipError(true);
+        return;
+      }
       setNewComment('');
     } catch (error) {
       console.error('Ошибка при отправке комментария:', error);
@@ -337,6 +347,33 @@ export default function ViewPostScreen() {
           </Modal>
         </View>
       </View>
+
+      <Modal
+        visible={showCensorshipError}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowCensorshipError(false)}
+      >
+        <View style={[styles.modalOverlay, styles.centeredModal]}>
+          <View style={styles.censorshipErrorContainer}>
+            <Text style={styles.censorshipErrorTitle}>Комментарий не прошёл проверку</Text>
+            {censorshipError.reason && (
+              <Text style={styles.censorshipErrorReason}>{censorshipError.reason}</Text>
+            )}
+            {censorshipError.toxicity_score !== undefined && (
+              <Text style={styles.censorshipErrorScore}>
+                Уровень токсичности: {(censorshipError.toxicity_score * 100).toFixed(1)}%
+              </Text>
+            )}
+            <TouchableOpacity 
+              style={styles.censorshipErrorButton}
+              onPress={() => setShowCensorshipError(false)}
+            >
+              <Text style={styles.censorshipErrorButtonText}>Понятно</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </GestureHandlerRootView>
   );
 }
@@ -435,6 +472,10 @@ const makeStyles = (theme: string) => StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
+  },
+  centeredModal: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalContent: {
     backgroundColor: theme === 'dark' ? 'rgba(0,0,0,1)' : 'rgba(255,255,255,1)',
@@ -548,5 +589,43 @@ const makeStyles = (theme: string) => StyleSheet.create({
     width: '100%',
     height: '100%',
     flexDirection: 'row',
+  },
+  censorshipErrorContainer: {
+    backgroundColor: theme === 'dark' ? '#1a1a1a' : '#fff',
+    borderRadius: 12,
+    padding: 20,
+    width: '80%',
+    maxWidth: 400,
+    alignItems: 'center',
+  },
+  censorshipErrorTitle: {
+    color: theme === 'dark' ? '#fff' : '#000',
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  censorshipErrorReason: {
+    color: theme === 'dark' ? '#ccc' : '#666',
+    fontSize: 14,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  censorshipErrorScore: {
+    color: '#FF4081',
+    fontSize: 14,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  censorshipErrorButton: {
+    backgroundColor: '#FF4081',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  censorshipErrorButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
   },
 });

@@ -536,11 +536,11 @@ export const useApi = () => {
       body: JSON.stringify({ text }),
     });
 
-    realm.write(() => {
-      realm.create(CommentModel, CommentModel.fromApi(comment), Realm.UpdateMode.Modified);
-    });
-
-    console.log("Comment: ", comment);
+    if (comment.ok) {
+      realm.write(() => {
+        realm.create(CommentModel, CommentModel.fromApi(comment), Realm.UpdateMode.Modified);
+      });
+    }
 
     return comment;
   };
