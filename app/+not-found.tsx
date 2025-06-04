@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
+import { Theme, useTheme } from '@/core/hooks/useTheme';
 import { router } from 'expo-router';
 import { useState } from 'react';
 
@@ -21,7 +21,7 @@ const memIds = [
 ];
 
 export default function NotFoundScreen() {
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme!);
   const [memId] = useState(Math.floor(Math.random() * memIds.length));
 
@@ -41,10 +41,10 @@ export default function NotFoundScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#000' : '#fff',
+    backgroundColor: theme === 'dark' ? '#000' : '#fff',
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -55,16 +55,16 @@ const makeStyles = (theme: string) => StyleSheet.create({
   header: {
     fontSize: 20,
     marginBottom: 50,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   button: {
     paddingHorizontal: 50,
     paddingVertical: 20,
     textAlign: 'center',
-    backgroundColor: theme === DARK_THEME ? '#fff' : '#000',
+    backgroundColor: theme === 'dark' ? '#fff' : '#000',
   },
   buttonContent: {
     fontSize: 20,
-    color: theme === DARK_THEME ? '#000' : '#fff'
+    color: theme === 'dark' ? '#000' : '#fff'
   }
 });

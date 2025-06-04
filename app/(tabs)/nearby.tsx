@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions, RefreshControl, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { DARK_THEME, LIGHT_THEME, useThemeName } from '@/core/hooks/useTheme';
+import { LIGHT_THEME, useTheme } from '@/core/hooks/useTheme';
 import useGeolocation from '@/core/hooks/useGeolocation';
 import { useRouter } from 'expo-router';
 import useApi, { NearbyPost } from '@/core/hooks/useApi';
@@ -22,7 +22,7 @@ const TABS = [
 export default function NearbyScreen() {
   const [activeTab, setActiveTab] = useState('images');
   const [selectedPostIndex, setSelectedPostIndex] = useState<number | null>(null);
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme!);
   const { lastLocation } = useGeolocation();
   const router = useRouter();
@@ -114,7 +114,7 @@ export default function NearbyScreen() {
           <MaterialIcons 
             name="tune" 
             size={24} 
-            color={theme === DARK_THEME ? '#fff' : '#222'} 
+            color={theme === 'dark' ? '#fff' : '#222'} 
           />
         </TouchableOpacity>
       </View>
@@ -192,10 +192,10 @@ export default function NearbyScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#000' : '#fff',
+    backgroundColor: theme === 'dark' ? '#000' : '#fff',
   },
   header: {
     flexDirection: 'row',
@@ -204,22 +204,22 @@ const makeStyles = (theme: string) => StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 18,
     paddingBottom: 8,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   district: {
     fontSize: 18,
     fontWeight: '600',
-    color: theme === DARK_THEME ? '#fff' : '#222',
+    color: theme === 'dark' ? '#fff' : '#222',
   },
   city: {
     fontSize: 14,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
     marginTop: 2,
   },
   filterBtn: {
     padding: 6,
     borderRadius: 8,
-    backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#333' : '#f5f5f5',
   },
   tabsContainer: {
     flexDirection: 'row',
@@ -227,8 +227,8 @@ const makeStyles = (theme: string) => StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 8,
     paddingBottom: 8,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
-    borderBottomColor: theme === DARK_THEME ? '#333' : '#eee',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
+    borderBottomColor: theme === 'dark' ? '#333' : '#eee',
     borderBottomWidth: 1,
   },
   tab: {
@@ -236,14 +236,14 @@ const makeStyles = (theme: string) => StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 16,
     marginRight: 8,
-    backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#333' : '#f5f5f5',
   },
   tabActive: {
-    backgroundColor: theme === DARK_THEME ? '#555' : '#222',
+    backgroundColor: theme === 'dark' ? '#555' : '#222',
   },
   tabText: {
     fontSize: 15,
-    color: theme === DARK_THEME ? '#fff' : '#222',
+    color: theme === 'dark' ? '#fff' : '#222',
     fontWeight: '500',
   },
   tabTextActive: {
@@ -265,7 +265,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     marginBottom: 16,
-    backgroundColor: theme === DARK_THEME ? '#333' : '#eee',
+    backgroundColor: theme === 'dark' ? '#333' : '#eee',
     position: 'relative',
   },
   image: {

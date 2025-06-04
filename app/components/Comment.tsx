@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
 import { UserAvatar } from '@/app/components/UserAvatar';
-import { useThemeName } from '@/core/hooks/useTheme';
+import { useTheme } from '@/core/hooks/useTheme';
 import { MaterialIcons } from '@expo/vector-icons';
 
 interface CommentProps {
@@ -19,7 +19,7 @@ interface CommentProps {
 }
 
 export const Comment: React.FC<CommentProps> = ({ author, text, createdAt, isAuthor, onDelete }) => {
-  const theme = useThemeName() || 'light';
+  const [theme] = useTheme();
   const styles = makeStyles(theme);
   const formattedDate = format(new Date(createdAt), 'd MMMM yyyy, HH:mm', { locale: ru });
 
@@ -49,7 +49,7 @@ export const Comment: React.FC<CommentProps> = ({ author, text, createdAt, isAut
   );
 };
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     padding: 12,
     backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : '#fff',

@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Divider } from 'react-native-paper';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
+import { useTheme } from '@/core/hooks/useTheme';
 
 type Notification = {
   id: string;
@@ -55,7 +55,7 @@ const notificationIcons = {
 };
 
 export default function NotificationsScreen() {
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme);
 
   const markAsRead = (id: string) => {
@@ -80,7 +80,7 @@ export default function NotificationsScreen() {
                 styles.notificationCard,
                 !notification.isRead && styles.unreadNotification
               ]}
-              activeOpacity={theme === DARK_THEME ? 0.8 : 0.7}
+              activeOpacity={theme === 'dark' ? 0.8 : 0.7}
               onPress={() => markAsRead(notification.id)}
             >
               <View style={[
@@ -101,7 +101,7 @@ export default function NotificationsScreen() {
                 <Text style={styles.notificationMessage}>{notification.message}</Text>
               </View>
             </TouchableOpacity>
-            {index < notifications.length - 1 && <Divider style={{ backgroundColor: theme === DARK_THEME ? '#555' : '#eee' }} />}
+            {index < notifications.length - 1 && <Divider style={{ backgroundColor: theme === 'dark' ? '#555' : '#eee' }} />}
           </View>
         ))}
         <View style={styles.bottomSpacer} />
@@ -110,27 +110,27 @@ export default function NotificationsScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#000' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#000' : '#f5f5f5',
   },
   header: {
     padding: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
     elevation: 2,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 8,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   markAllButton: {
     alignSelf: 'flex-end',
   },
   markAllText: {
-    color: theme === DARK_THEME ? '#aaa' : '#007AFF',
+    color: theme === 'dark' ? '#aaa' : '#007AFF',
     fontSize: 14,
   },
   notificationsContainer: {
@@ -139,10 +139,10 @@ const makeStyles = (theme: string) => StyleSheet.create({
   notificationCard: {
     flexDirection: 'row',
     padding: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   unreadNotification: {
-    backgroundColor: theme === DARK_THEME ? '#222' : '#f8f9fa',
+    backgroundColor: theme === 'dark' ? '#222' : '#f8f9fa',
   },
   iconContainer: {
     width: 48,
@@ -164,15 +164,15 @@ const makeStyles = (theme: string) => StyleSheet.create({
   notificationTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   notificationTime: {
     fontSize: 12,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
   },
   notificationMessage: {
     fontSize: 14,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
     lineHeight: 20,
   },
   bottomSpacer: {

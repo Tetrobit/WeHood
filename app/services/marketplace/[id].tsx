@@ -1,13 +1,12 @@
 import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
 import { Button } from 'react-native-paper';
-import { DARK_THEME } from '@/core/hooks/useTheme';
-import { useThemeName } from '@/core/hooks/useTheme';
+import { useTheme, Theme } from '@/core/hooks/useTheme';
 import { useLocalSearchParams, router } from 'expo-router';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 export default function ListingDetailsScreen() {
   const { id } = useLocalSearchParams();
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme);
 
   // TODO: Replace with API call to get listing details
@@ -42,12 +41,12 @@ export default function ListingDetailsScreen() {
           <Text style={styles.price}>{listing.price} ₽</Text>
           
           <View style={styles.categoryContainer}>
-            <MaterialCommunityIcons name="tag" size={20} color={theme === DARK_THEME ? '#aaa' : '#666'} />
+            <MaterialCommunityIcons name="tag" size={20} color={theme === 'dark' ? '#aaa' : '#666'} />
             <Text style={styles.category}>{listing.category}</Text>
           </View>
 
           <View style={styles.authorContainer}>
-            <MaterialCommunityIcons name="account" size={20} color={theme === DARK_THEME ? '#aaa' : '#666'} />
+            <MaterialCommunityIcons name="account" size={20} color={theme === 'dark' ? '#aaa' : '#666'} />
             <Text style={styles.authorName}>{listing.author.name}</Text>
             <View style={styles.ratingContainer}>
               <MaterialCommunityIcons name="star" size={16} color="#FFD700" />
@@ -81,10 +80,10 @@ export default function ListingDetailsScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#000' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#000' : '#f5f5f5',
   },
   image: {
     width: '100%',
@@ -92,18 +91,18 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   content: {
     padding: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     marginBottom: 8,
   },
   price: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     marginBottom: 16,
   },
   categoryContainer: {
@@ -114,7 +113,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   category: {
     marginLeft: 8,
     fontSize: 16,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
   },
   authorContainer: {
     flexDirection: 'row',
@@ -122,12 +121,12 @@ const makeStyles = (theme: string) => StyleSheet.create({
     marginBottom: 24,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: theme === DARK_THEME ? '#333' : '#eee',
+    borderBottomColor: theme === 'dark' ? '#333' : '#eee',
   },
   authorName: {
     marginLeft: 8,
     fontSize: 16,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -137,7 +136,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   ratingText: {
     marginLeft: 4,
     fontSize: 14,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
   },
   section: {
     marginBottom: 24,
@@ -146,22 +145,22 @@ const makeStyles = (theme: string) => StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 8,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   description: {
     fontSize: 16,
     lineHeight: 24,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
   },
   date: {
     fontSize: 16,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
   },
   footer: {
     padding: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
     borderTopWidth: 1,
-    borderTopColor: theme === DARK_THEME ? '#333' : '#eee',
+    borderTopColor: theme === 'dark' ? '#333' : '#eee',
   },
   button: {
     backgroundColor: '#007AFF',

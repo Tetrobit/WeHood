@@ -2,25 +2,25 @@ import { Stack } from "expo-router";
 import { Tabs } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { BellRing, Blocks, MapPin, House, User } from 'lucide-react-native';
-import { DARK_THEME, useThemeName } from "@/core/hooks/useTheme";
+import { useTheme } from "@/core/hooks/useTheme";
 
 export default function TabsLayout() {
-  const theme = useThemeName();
+  const [theme] = useTheme();
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: theme === DARK_THEME ? '#fff' : '#007AFF',
-        tabBarInactiveTintColor: theme === DARK_THEME ? '#aaa' : '#8E8E93',
+        tabBarActiveTintColor: theme === 'dark' ? '#fff' : '#007AFF',
+        tabBarInactiveTintColor: theme === 'dark' ? '#aaa' : '#8E8E93',
         tabBarStyle: {
-          backgroundColor: theme === DARK_THEME ? '#222' : '#FFFFFF',
+          backgroundColor: theme === 'dark' ? '#222' : '#FFFFFF',
           borderTopWidth: 1,
-          borderColor: theme === DARK_THEME ? '#333' : '#E5E5EA',
+          borderColor: theme === 'dark' ? '#333' : '#E5E5EA',
         },
         headerStyle: {
-          backgroundColor: theme === DARK_THEME ? '#333' : '#FFFFFF',
+          backgroundColor: theme === 'dark' ? '#333' : '#FFFFFF',
         },
         headerTitleStyle: {
-          color: theme === DARK_THEME ? '#fff' : '#000000',
+          color: theme === 'dark' ? '#fff' : '#000000',
         },
         tabBarHideOnKeyboard: true,
       }}

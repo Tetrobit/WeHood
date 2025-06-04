@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
+import { useTheme, Theme } from '@/core/hooks/useTheme';
 import FlatCard from '@/app/components/FlatCard';
 import { IFlat } from '@/app/types/flat';
 
@@ -55,7 +55,7 @@ const mockFavoriteFlats: IFlat[] = [
 ];
 
 export default function FavoritesScreen() {
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme);
 
   return (
@@ -65,7 +65,7 @@ export default function FavoritesScreen() {
           <MaterialCommunityIcons 
             name="arrow-left" 
             size={24} 
-            color={theme === DARK_THEME ? '#fff' : '#000'} 
+            color={theme === 'dark' ? '#fff' : '#000'} 
           />
         </TouchableOpacity>
         <Text style={styles.title}>Избранное</Text>
@@ -87,7 +87,7 @@ export default function FavoritesScreen() {
           <MaterialCommunityIcons 
             name="heart-outline" 
             size={64} 
-            color={theme === DARK_THEME ? '#666' : '#999'} 
+            color={theme === 'dark' ? '#666' : '#999'} 
           />
           <Text style={styles.emptyStateText}>
             У вас пока нет избранных квартир
@@ -98,10 +98,10 @@ export default function FavoritesScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#111' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#111' : '#f5f5f5',
   },
   header: {
     flexDirection: 'row',
@@ -114,7 +114,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   content: {
     flex: 1,
@@ -132,6 +132,6 @@ const makeStyles = (theme: string) => StyleSheet.create({
     marginTop: 16,
     fontSize: 16,
     textAlign: 'center',
-    color: theme === DARK_THEME ? '#666' : '#999',
+    color: theme === 'dark' ? '#666' : '#999',
   },
 }); 

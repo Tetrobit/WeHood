@@ -1,17 +1,17 @@
 import { Stack } from "expo-router";
-import { useThemeName } from "@/core/hooks/useTheme";
-import { DARK_THEME } from "@/core/hooks/useTheme";
 import StorageProvider from "@/core/models";
 import React from "react";
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import ToastManager from 'toastify-react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
+import { useTheme } from "@/core/hooks/useTheme";
+import { ThemeProvider } from "@/core/hooks/useTheme";
 
 function RootLayout() {
-  const themeName = useThemeName();
+  const [theme] = useTheme();
 
-  const themedStatusBarStyle = themeName === DARK_THEME ? 'light' : 'dark';
-  const themedStatusBarBackgroundColor = themeName === DARK_THEME ? '#000000' : '#ffffff';
+  const themedStatusBarStyle = theme === 'dark' ? 'light' : 'dark';
+  const themedStatusBarBackgroundColor = theme === 'dark' ? '#000000' : '#ffffff';
 
   const defaultConfig: NativeStackNavigationOptions = {
     statusBarStyle: themedStatusBarStyle,
@@ -36,10 +36,12 @@ function RootLayout() {
 export default function RootLayoutWrapper() {
   return (
     <StorageProvider>
-      <PaperProvider>
-        <RootLayout />
-        <ToastManager />
-      </PaperProvider>
+      <ThemeProvider>
+        <PaperProvider>
+          <RootLayout />
+          <ToastManager />
+        </PaperProvider>
+      </ThemeProvider>
     </StorageProvider>
   )
 }

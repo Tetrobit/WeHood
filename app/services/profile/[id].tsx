@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useThemeName, DARK_THEME } from '@/core/hooks/useTheme';
+import { useTheme } from '@/core/hooks/useTheme';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@realm/react';
 import { NearbyPostModel } from '@/core/models/NearbyPostModel';
@@ -13,7 +13,7 @@ const { width } = Dimensions.get('window');
 export default function ProfileScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme!);
 
   const userPosts = useQuery(NearbyPostModel).filtered('authorId = $0', id);
@@ -95,7 +95,7 @@ export default function ProfileScreen() {
                     <MaterialIcons 
                       name="visibility" 
                       size={16} 
-                      color={theme === DARK_THEME ? '#fff' : '#000'} 
+                      color={theme === 'dark' ? '#fff' : '#000'} 
                     />
                     <Text style={styles.postStatText}>{post.views || 0}</Text>
                   </View>
@@ -103,7 +103,7 @@ export default function ProfileScreen() {
                     <MaterialIcons 
                       name="thumb-up" 
                       size={16} 
-                      color={theme === DARK_THEME ? '#fff' : '#000'} 
+                      color={theme === 'dark' ? '#fff' : '#000'} 
                     />
                     <Text style={styles.postStatText}>{post.likes || 0}</Text>
                   </View>
@@ -117,17 +117,17 @@ export default function ProfileScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#000' : '#fff',
+    backgroundColor: theme === 'dark' ? '#000' : '#fff',
   },
   centerContent: {
     justifyContent: 'center',
     alignItems: 'center',
   },
   errorText: {
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     fontSize: 16,
   },
   header: {
@@ -167,12 +167,12 @@ const makeStyles = (theme: string) => StyleSheet.create({
   name: {
     fontSize: 24,
     fontWeight: '600',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     marginBottom: 5,
   },
   joinDate: {
     fontSize: 14,
-    color: theme === DARK_THEME ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+    color: theme === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
   },
   statsContainer: {
     flexDirection: 'row',
@@ -180,7 +180,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     padding: 20,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: theme === DARK_THEME ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+    borderColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
   },
   statItem: {
     alignItems: 'center',
@@ -188,11 +188,11 @@ const makeStyles = (theme: string) => StyleSheet.create({
   statValue: {
     fontSize: 20,
     fontWeight: '600',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   statLabel: {
     fontSize: 12,
-    color: theme === DARK_THEME ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+    color: theme === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
     marginTop: 5,
   },
   postsContainer: {
@@ -201,7 +201,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     marginBottom: 15,
   },
   postsGrid: {
@@ -214,12 +214,12 @@ const makeStyles = (theme: string) => StyleSheet.create({
     margin: 5,
     borderRadius: 10,
     overflow: 'hidden',
-    backgroundColor: theme === DARK_THEME ? '#222' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#222' : '#f5f5f5',
   },
   postImage: {
     width: '100%',
     height: (width - 50) / 2,
-    backgroundColor: theme === DARK_THEME ? '#333' : '#eee',
+    backgroundColor: theme === 'dark' ? '#333' : '#eee',
   },
   videoIndicator: {
     position: 'absolute',
@@ -238,7 +238,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     alignItems: 'center',
   },
   postStatText: {
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     marginLeft: 4,
     fontSize: 12,
   },

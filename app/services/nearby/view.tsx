@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Modal, Animated as RNAnimated, RefreshControl, ScrollView, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { useThemeName, DARK_THEME } from '@/core/hooks/useTheme';
+import { useTheme, Theme } from '@/core/hooks/useTheme';
 import { NearbyPost } from '@/core/hooks/useApi';
 import { getFileUrl } from '@/core/utils/url';
 import { AutoVideoPlayer } from '@/app/components/AutoVideoPlayer';
@@ -23,7 +23,7 @@ const { width, height } = Dimensions.get('window');
 export default function ViewPostScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme!);
   const api = useApi();
   const [showComments, setShowComments] = useState(false);
@@ -402,7 +402,7 @@ export default function ViewPostScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme === 'dark' ? '#000' : '#fff',

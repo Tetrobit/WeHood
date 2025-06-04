@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, ScrollView, Linking } from 'react-native';
-import { Card, Button } from 'react-native-paper';
-import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
+import { Card } from 'react-native-paper';
+import { useTheme, Theme } from '@/core/hooks/useTheme';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 type ContactMethod = {
@@ -12,7 +12,7 @@ type ContactMethod = {
 };
 
 export default function ContactScreen() {
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme);
 
   const contactMethods: ContactMethod[] = [
@@ -107,31 +107,31 @@ export default function ContactScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#000' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#000' : '#f5f5f5',
   },
   header: {
     padding: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 8,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   subtitle: {
     fontSize: 16,
-    color: theme === DARK_THEME ? '#ccc' : '#666',
+    color: theme === 'dark' ? '#ccc' : '#666',
   },
   methodsContainer: {
     padding: 16,
   },
   methodCard: {
     marginBottom: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   methodContent: {
     flexDirection: 'row',
@@ -142,7 +142,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: theme === DARK_THEME ? '#333' : '#f0f0f0',
+    backgroundColor: theme === 'dark' ? '#333' : '#f0f0f0',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -153,11 +153,11 @@ const makeStyles = (theme: string) => StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 4,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   methodDescription: {
     fontSize: 14,
-    color: theme === DARK_THEME ? '#ccc' : '#666',
+    color: theme === 'dark' ? '#ccc' : '#666',
   },
   workingHoursCard: {
     marginTop: 24,
@@ -166,7 +166,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 16,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   workingHoursContent: {
     gap: 12,
@@ -177,11 +177,11 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   dayText: {
     fontSize: 16,
-    color: theme === DARK_THEME ? '#ccc' : '#666',
+    color: theme === 'dark' ? '#ccc' : '#666',
   },
   hoursText: {
     fontSize: 16,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     fontWeight: '500',
   },
 }); 

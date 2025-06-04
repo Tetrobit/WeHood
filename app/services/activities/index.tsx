@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Card, Searchbar, Chip } from 'react-native-paper';
 import { useState } from 'react';
-import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
+import { useTheme, Theme } from '@/core/hooks/useTheme';
 import { router } from 'expo-router';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
@@ -54,7 +54,7 @@ const categories = ['Все', 'Спорт', 'Танцы', 'Музыка', 'Ис�
 export default function ActivitiesScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Все');
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme);
 
   const filteredActivities = mockActivities.filter(activity => {
@@ -72,8 +72,8 @@ export default function ActivitiesScreen() {
           onChangeText={setSearchQuery}
           value={searchQuery}
           style={styles.searchBar}
-          iconColor={theme === DARK_THEME ? '#fff' : '#000'}
-          inputStyle={{ color: theme === DARK_THEME ? '#fff' : '#000' }}
+          iconColor={theme === 'dark' ? '#fff' : '#000'}
+          inputStyle={{ color: theme === 'dark' ? '#fff' : '#000' }}
         />
       </View>
 
@@ -138,38 +138,38 @@ export default function ActivitiesScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#000' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#000' : '#f5f5f5',
   },
   header: {
     padding: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   searchBar: {
     elevation: 0,
-    backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#333' : '#f5f5f5',
   },
   categoriesContainer: {
     padding: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   categoryChip: {
     marginRight: 8,
-    backgroundColor: theme === DARK_THEME ? '#333' : '#f0f0f0',
+    backgroundColor: theme === 'dark' ? '#333' : '#f0f0f0',
   },
   selectedCategoryChip: {
     backgroundColor: '#007AFF',
   },
   categoryChipText: {
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   selectedCategoryChipText: {
     color: '#fff',
@@ -180,7 +180,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   activityCard: {
     marginBottom: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   activityHeader: {
     marginBottom: 12,
@@ -193,20 +193,20 @@ const makeStyles = (theme: string) => StyleSheet.create({
   activityTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     flex: 1,
   },
   ratingContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#333' : '#f5f5f5',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
   },
   ratingText: {
     marginLeft: 4,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     fontWeight: '600',
   },
   activityDetails: {
@@ -218,7 +218,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     gap: 8,
   },
   detailText: {
-    color: theme === DARK_THEME ? '#ccc' : '#666',
+    color: theme === 'dark' ? '#ccc' : '#666',
     flex: 1,
   },
 }); 

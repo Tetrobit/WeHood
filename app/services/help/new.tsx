@@ -1,8 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { useState } from 'react';
-import { DARK_THEME } from '@/core/hooks/useTheme';
-import { useThemeName } from '@/core/hooks/useTheme';
+import { useTheme, Theme } from '@/core/hooks/useTheme';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import Modal from 'react-native-modal';
@@ -17,7 +16,7 @@ export default function NewHelpScreen() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme);
   const insets = useSafeAreaInsets();
 
@@ -52,7 +51,7 @@ export default function NewHelpScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.replace('/services/help/events')} style={styles.backButton}>
-          <MaterialCommunityIcons name="arrow-left" size={24} color={theme === DARK_THEME ? '#fff' : '#000'} />
+          <MaterialCommunityIcons name="arrow-left" size={24} color={theme === 'dark' ? '#fff' : '#000'} />
         </TouchableOpacity>
         <Text style={styles.title}>Создать запрос на помощь</Text>
       </View>
@@ -79,9 +78,9 @@ export default function NewHelpScreen() {
           theme={{
             colors: {
               primary: '#FF6B6B',
-              text: theme === DARK_THEME ? '#fff' : '#000',
-              placeholder: theme === DARK_THEME ? '#aaa' : '#666',
-              background: theme === DARK_THEME ? '#222' : '#fff',
+              text: theme === 'dark' ? '#fff' : '#000',
+              placeholder: theme === 'dark' ? '#aaa' : '#666',
+              background: theme === 'dark' ? '#222' : '#fff',
             },
           }}
         />
@@ -97,9 +96,9 @@ export default function NewHelpScreen() {
           theme={{
             colors: {
               primary: '#FF6B6B',
-              text: theme === DARK_THEME ? '#fff' : '#000',
-              placeholder: theme === DARK_THEME ? '#aaa' : '#666',
-              background: theme === DARK_THEME ? '#222' : '#fff',
+              text: theme === 'dark' ? '#fff' : '#000',
+              placeholder: theme === 'dark' ? '#aaa' : '#666',
+              background: theme === 'dark' ? '#222' : '#fff',
             },
           }}
         />
@@ -113,9 +112,9 @@ export default function NewHelpScreen() {
           theme={{
             colors: {
               primary: '#FF6B6B',
-              text: theme === DARK_THEME ? '#fff' : '#000',
-              placeholder: theme === DARK_THEME ? '#aaa' : '#666',
-              background: theme === DARK_THEME ? '#222' : '#fff',
+              text: theme === 'dark' ? '#fff' : '#000',
+              placeholder: theme === 'dark' ? '#aaa' : '#666',
+              background: theme === 'dark' ? '#222' : '#fff',
             },
           }}
         />
@@ -129,9 +128,9 @@ export default function NewHelpScreen() {
           theme={{
             colors: {
               primary: '#FF6B6B',
-              text: theme === DARK_THEME ? '#fff' : '#000',
-              placeholder: theme === DARK_THEME ? '#aaa' : '#666',
-              background: theme === DARK_THEME ? '#222' : '#fff',
+              text: theme === 'dark' ? '#fff' : '#000',
+              placeholder: theme === 'dark' ? '#aaa' : '#666',
+              background: theme === 'dark' ? '#222' : '#fff',
             },
           }}
         />
@@ -146,9 +145,9 @@ export default function NewHelpScreen() {
           theme={{
             colors: {
               primary: '#FF6B6B',
-              text: theme === DARK_THEME ? '#fff' : '#000',
-              placeholder: theme === DARK_THEME ? '#aaa' : '#666',
-              background: theme === DARK_THEME ? '#222' : '#fff',
+              text: theme === 'dark' ? '#fff' : '#000',
+              placeholder: theme === 'dark' ? '#aaa' : '#666',
+              background: theme === 'dark' ? '#222' : '#fff',
             },
           }}
         />
@@ -170,9 +169,9 @@ export default function NewHelpScreen() {
         backdropTransitionOutTiming={400}
         style={{ justifyContent: 'center', alignItems: 'center', margin: 0 }}
       >
-        <View style={{ backgroundColor: theme === DARK_THEME ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 340, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
-          <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Ваш запрос на помощь отправлен на публикацию</Text>
-          <Text style={{ color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 16, marginBottom: 18, textAlign: 'center' }}>Вам обязательно помогут!</Text>
+        <View style={{ backgroundColor: theme === 'dark' ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 340, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === 'dark' ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Ваш запрос на помощь отправлен на публикацию</Text>
+          <Text style={{ color: theme === 'dark' ? '#fff' : '#222', fontSize: 16, marginBottom: 18, textAlign: 'center' }}>Вам обязательно помогут!</Text>
           <TouchableOpacity style={styles.returnButton} onPress={() => { setModalVisible(false); router.replace('/services/help/events'); }}>
             <Text style={styles.returnButtonText}>Вернуться к списку</Text>
           </TouchableOpacity>
@@ -182,24 +181,24 @@ export default function NewHelpScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#000' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#000' : '#f5f5f5',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
     elevation: 2,
     marginBottom: 8,
   },
   backButton: {
     padding: 8,
     marginRight: 8,
-    backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#333' : '#f5f5f5',
     borderRadius: 16,
     elevation: 2,
   },
@@ -207,7 +206,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     flex: 1,
     fontSize: 24,
     fontWeight: 'bold',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     textAlign: 'center',
   },
   form: {
@@ -215,7 +214,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    color: theme === DARK_THEME ? '#fff' : '#222',
+    color: theme === 'dark' ? '#fff' : '#222',
     marginBottom: 6,
     marginLeft: 2,
   },
@@ -225,9 +224,9 @@ const makeStyles = (theme: string) => StyleSheet.create({
     marginBottom: 10,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: theme === DARK_THEME ? '#444' : '#ccc',
-    backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5',
-    color: theme === DARK_THEME ? '#fff' : '#222',
+    borderColor: theme === 'dark' ? '#444' : '#ccc',
+    backgroundColor: theme === 'dark' ? '#333' : '#f5f5f5',
+    color: theme === 'dark' ? '#fff' : '#222',
   },
   photoButtonOutline: {
     flex: 1,
