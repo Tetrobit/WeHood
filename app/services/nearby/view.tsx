@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image, TextInput, KeyboardAvoidingView, Platform, Modal, Animated as RNAnimated, RefreshControl, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Modal, Animated as RNAnimated, RefreshControl, ScrollView } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useThemeName, DARK_THEME } from '@/core/hooks/useTheme';
 import { NearbyPost } from '@/core/hooks/useApi';
 import { getFileUrl } from '@/core/utils/url';
@@ -14,6 +15,7 @@ import { CommentModel } from '@/core/models/comment';
 import { Comment } from '@/components/Comment';
 import { UserAvatar } from '@/components/UserAvatar';
 import LottieView from 'lottie-react-native';
+import { AnimatedText } from '@/app/components/AnimatedText';
 
 const { width, height } = Dimensions.get('window');
 
@@ -44,7 +46,6 @@ export default function ViewPostScreen() {
       liked: response.liked,
       likes: response.likes
     } as NearbyPostModel);
-    console.log("CurrentPost: ", currentPost);
   };
 
   React.useEffect(() => {
@@ -144,53 +145,72 @@ export default function ViewPostScreen() {
     );
   }
 
-  console.log("CurrentPost: ", currentPost);
-
   return (
     <GestureHandlerRootView style={styles.container}>
       <View style={styles.content}>
-        {currentPost.type === 'image' ? (
-          <Image 
-            source={{ uri: getFileUrl(currentPost.fileId) }} 
-            style={styles.media}
-            resizeMode="contain"
-          />
-        ) : (
-          <AutoVideoView 
-            source={getFileUrl(currentPost.fileId)} 
-            style={styles.media}
-          />
-        )}
+        <View style={styles.mediaContainer}>
+          <View style={styles.mediaWrapper}>
+            {currentPost.type === 'image' ? (
+              <Image
+                source={{ uri: getFileUrl(currentPost.fileId) }} 
+                style={styles.media}
+                contentFit="contain"
+              />
+            ) : (
+              <AutoVideoView 
+                source={getFileUrl(currentPost.fileId)} 
+                style={styles.media}
+              />
+            )}
+          </View>
+        </View>
 
         <View style={styles.overlay}>
           <View style={styles.topBar}>
-            <TouchableOpacity 
-              style={styles.authorContainer}
-              onPress={() => {
-                router.push({
-                  pathname: "/services/profile/[id]",
-                  params: { id: currentPost.authorId }
-                });
-              }}
-            >
-              <UserAvatar
-                firstName={currentPost.authorFirstName}
-                lastName={currentPost.authorLastName}
-                avatar={currentPost.authorAvatar}
-                size={40}
-              />
-              <View style={styles.authorInfo}>
-                <Text style={styles.authorName}>
-                  {`${currentPost.authorFirstName} ${currentPost.authorLastName}`}
-                </Text>
-                <Text style={styles.postDate}>
-                  {new Date(currentPost.createdAt).toLocaleDateString('ru-RU')}
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
-              <MaterialIcons name="close" size={28} color={theme === 'dark' ? '#fff' : '#000'} />
-            </TouchableOpacity>
+            <View style={styles.topBarUp}>
+              <TouchableOpacity 
+                style={styles.authorContainer}
+                onPress={() => {
+                  router.push({
+                    pathname: "/services/profile/[id]",
+                    params: { id: currentPost.authorId }
+                  });
+                }}
+              >
+                <UserAvatar
+                  firstName={currentPost.authorFirstName}
+                  lastName={currentPost.authorLastName}
+                  avatar={currentPost.authorAvatar}
+                  size={40}
+                />
+                <View style={styles.authorInfo}>
+                  <Text style={styles.authorName}>
+                    {`${currentPost.authorFirstName} ${currentPost.authorLastName}`}
+                  </Text>
+                  <Text style={styles.postDate}>
+                    {new Date(currentPost.createdAt).toLocaleDateString('ru-RU')}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
+                <MaterialIcons name="close" size={28} color={theme === 'dark' ? '#fff' : '#000'} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.topBarDown}>
+              {
+                currentPost.address && (
+                  <View style={styles.addressContainer}>
+                    <MaterialIcons name="location-on" size={16} color={theme === 'dark' ? '#ccc' : '#555'} />
+                    <View style={styles.addressTextContainer}>
+                      <AnimatedText
+                        style={styles.address}
+                        text={currentPost.address}
+                      />
+                    </View>
+                  </View>
+                )
+              }
+            </View>
           </View>
 
           <View style={styles.sideStatsContainer}>
@@ -218,11 +238,6 @@ export default function ViewPostScreen() {
 
           <View style={styles.descriptionContainer}>
             <Text style={styles.title}>{currentPost.title || 'Без названия'}</Text>
-            {currentPost.address && (
-              <Text style={styles.address}>
-                <MaterialIcons name="location-on" size={16} color={theme === 'dark' ? '#fff' : '#000'} /> {currentPost.address}
-              </Text>
-            )}
             <Text style={styles.description}>{currentPost.description || 'Нет описания'}</Text>
           </View>
 
@@ -342,22 +357,33 @@ const makeStyles = (theme: string) => StyleSheet.create({
   content: {
     flex: 1,
   },
-  media: {
-    width: width,
-    height: height,
-  },
   overlay: {
     ...StyleSheet.absoluteFillObject,
   },
   topBar: {
     position: 'absolute',
-    top: 40,
-    left: 20,
-    right: 20,
+    top: 0,
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+    paddingTop: 10,
+    backgroundColor: theme === 'dark' ? '#000' : '#fff',
+    zIndex: 1,
+    flexDirection: 'column',
+  },
+  topBarUp: {
+    flex: 1,
+    width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    zIndex: 1,
+  },
+  topBarDown: {
+    flex: 1,
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   authorContainer: {
     flexDirection: 'row',
@@ -469,7 +495,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     left: 0,
     right: 0,
     padding: 20,
-    backgroundColor: theme === 'dark' ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.5)',
+    backgroundColor: theme === 'dark' ? 'rgba(0,0,0,1)' : 'rgba(255,255,255,1)',
   },
   title: {
     color: theme === 'dark' ? '#fff' : '#000',
@@ -477,13 +503,23 @@ const makeStyles = (theme: string) => StyleSheet.create({
     fontWeight: '600',
     marginBottom: 8,
   },
-  address: {
-    color: theme === 'dark' ? '#fff' : '#000',
-    fontSize: 14,
-    opacity: 0.9,
-    marginBottom: 8,
+  addressContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 0,
+    marginTop: 10,
+  },
+  addressTextContainer: {
+    flex: 1,
+    marginLeft: 4,
+    height: 20,
+    overflow: 'hidden',
+  },
+  address: {
+    color: theme === 'dark' ? '#ccc' : '#555',
+    fontSize: 14,
+    opacity: 0.9,
+    flex: 1,
   },
   description: {
     color: theme === 'dark' ? '#fff' : '#000',
@@ -498,4 +534,19 @@ const makeStyles = (theme: string) => StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-}); 
+  media: {
+    width: width,
+    height: height,
+    resizeMode: 'contain',
+  },
+  mediaContainer: {
+    height: '100%',
+    width: '100%',
+  },
+  mediaWrapper: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    flexDirection: 'row',
+  },
+});

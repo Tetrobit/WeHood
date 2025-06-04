@@ -151,6 +151,9 @@ export interface UploadNearbyPostRequest {
 }
 
 export interface CommentResponse {
+  ok?: boolean;
+  reason?: string;
+  toxicity_score?: number;
   author: {
     avatar: string;
     createdAt: string;
