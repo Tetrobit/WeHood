@@ -11,6 +11,7 @@ export class CommentModel extends Realm.Object {
   authorAvatar?: string;
   createdAt!: Date;
   updatedAt!: Date;
+  deleted!: boolean;
 
   static fromApi(comment: CommentResponse): CommentModel {
     return {
@@ -22,7 +23,8 @@ export class CommentModel extends Realm.Object {
       authorId: comment.author.id,
       postId: comment.post.id,
       createdAt: new Date(comment.createdAt),
-      updatedAt: new Date(comment.updatedAt)
+      updatedAt: new Date(comment.updatedAt),
+      deleted: comment.deleted || false
     } as CommentModel;
   }
 
@@ -38,7 +40,8 @@ export class CommentModel extends Realm.Object {
       authorId: 'string',
       postId: 'int',
       createdAt: 'date',
-      updatedAt: 'date'
+      updatedAt: 'date',
+      deleted: 'bool'
     }
   };
 } 
