@@ -1,11 +1,11 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Alert, Platform, Animated, TextInput, BackHandler, Linking } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Alert, Platform, Animated, TextInput, BackHandler, Linking, RefreshControl, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/core/hooks/useTheme';
 import { useQuery } from '@realm/react';
 import UserModel from '@/core/models/UserModel';
 import { router } from 'expo-router';
 import useApi from '@/core/hooks/useApi';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import * as Notifications from 'expo-notifications';
 import Modal from 'react-native-modal';
@@ -14,6 +14,12 @@ import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ArrowLeftIcon } from 'lucide-react-native';
+import * as SecureStorage from 'expo-secure-store';
+import { Theme } from '@/core/hooks/useTheme';
+import { MEDIA_URL } from '@/core/constants/environment';
+import UserAvatar from '../components/UserAvatar';
+import { useUser } from '@/core/hooks/models/useUser';
+import LottieView from 'lottie-react-native';
 
 const HOBBIES = [
   'Спорт',
@@ -29,13 +35,14 @@ const HOBBIES = [
 ];
 
 export default function ProfileScreen() {
-  const [profile] = useQuery(UserModel);
+  const profile = useUser(SecureStorage.getItem('user_id')!);
   const api = useApi();
   const [theme, setTheme] = useTheme();
   const styles = makeStyles(theme!);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loadingModalVisible, setLoadingModalVisible] = useState(false);
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [avatarUri, setAvatarUri] = useState(profile?.avatar);
 
   // --- уведомления ---
   const [notifModalVisible, setNotifModalVisible] = useState(false);
@@ -58,29 +65,40 @@ export default function ProfileScreen() {
   const [editData, setEditData] = useState({
     firstName: '',
     lastName: '',
-    age: '',
     hobbies: [] as string[],
-  });
-  const [displayName, setDisplayName] = useState({
-    firstName: profile?.firstName || '',
-    lastName: profile?.lastName || '',
   });
 
   // Загрузка данных из AsyncStorage при открытии формы
   useEffect(() => {
     if (editTab) {
-      (async () => {
-        const saved = await AsyncStorage.getItem('profileEditData');
-        if (saved) setEditData(JSON.parse(saved));
-        else setEditData({
-          firstName: profile?.firstName || '',
-          lastName: profile?.lastName || '',
-          age: '',
-          hobbies: [],
-        });
-      })();
+      setEditData({
+        firstName: profile?.firstName || '',
+        lastName: profile?.lastName || '',
+        hobbies: [],
+      });
     }
   }, [editTab]);
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (modalVisible) {
+        setModalVisible(false);
+        return true;
+      } else if (passwordModalVisible) {
+        setPasswordModalVisible(false);
+        return true;
+      } else if (notifModalVisible) {
+        setNotifModalVisible(false);
+        return true;
+      } else if (editTab) {
+        setEditTab(false);
+        return true;
+      }
+      return false;
+    });
+
+    return () => backHandler.remove();
+  }, [modalVisible, passwordModalVisible, notifModalVisible, editTab]);
 
   const handleEditChange = (field: string, value: string) => {
     setEditData(prev => ({ ...prev, [field]: value }));
@@ -93,9 +111,9 @@ export default function ProfileScreen() {
         : [...prev.hobbies, hobby],
     }));
   };
+
   const handleSaveEdit = async () => {
-    await AsyncStorage.setItem('profileEditData', JSON.stringify(editData));
-    setDisplayName({ firstName: editData.firstName, lastName: editData.lastName });
+    await api.updateProfile({ firstName: editData.firstName, lastName: editData.lastName });
     setEditTab(false);
   };
 
@@ -119,14 +137,27 @@ export default function ProfileScreen() {
 
   const pickImage = async () => {
     setModalVisible(false);
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
-    if (!result.canceled && result.assets && result.assets[0]?.uri) {
-      setAvatarUri(result.assets[0].uri);
+    try {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.15,
+        allowsMultipleSelection: false,
+        selectionLimit: 1
+      });
+
+      if (result.canceled || !result.assets || !result.assets[0]?.uri) {
+        throw new Error('No image selected');
+      }
+
+      const file = await api.uploadFile(result.assets[0].uri, result.assets[0].mimeType || null);
+      if (file.fileId) {
+        await api.updateProfile({ avatar: `${MEDIA_URL}/files/${file.fileId}` });
+      }
+    } catch (error) {
+      console.log(error);
+      showToast('Ошибка при загрузке фото');
     }
   };
 
@@ -214,6 +245,34 @@ export default function ProfileScreen() {
     }
   };
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      const userId = await SecureStorage.getItem('user_id');
+      if (userId) {
+        await api.getUserById(userId);
+      }
+    } catch (error) {
+      console.error('Ошибка при обновлении профиля:', error);
+      setRefreshing(false);
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
+
+  const generateAvatar = async () => {
+    setModalVisible(false);
+    try {
+      setLoadingModalVisible(true);
+      const response = await api.generateAvatar();
+      await api.updateProfile({ avatar: response.avatar });
+    } catch (error) {
+      showToast('Ошибка при генерации аватара');
+    } finally {
+      setLoadingModalVisible(false);
+    }
+  }
+
   if (editTab) {
     return (
       <View style={[styles.container, { padding: 20 }]}> 
@@ -258,24 +317,6 @@ export default function ProfileScreen() {
           placeholderTextColor={theme === 'dark' ? '#888' : '#aaa'}
           value={editData.lastName}
           onChangeText={v => handleEditChange('lastName', v)}
-        />
-        <Text style={{ color: theme === 'dark' ? '#aaa' : '#666', fontSize: 15, marginBottom: 2, marginTop: 8, marginLeft: 4 }}>Возраст</Text>
-        <TextInput
-          style={[
-            styles.input,
-            {
-              color: theme === 'dark' ? '#fff' : '#222',
-              backgroundColor: theme === 'dark' ? '#333' : '#f5f5f5',
-              borderWidth: 1,
-              borderColor: theme === 'dark' ? '#444' : '#ccc',
-              borderRadius: 10,
-            },
-          ]}
-          placeholder="Возраст"
-          placeholderTextColor={theme === 'dark' ? '#888' : '#aaa'}
-          value={editData.age}
-          onChangeText={v => handleEditChange('age', v.replace(/[^0-9]/g, ''))}
-          keyboardType="numeric"
         />
         <Text style={{ color: theme === 'dark' ? '#fff' : '#222', fontSize: 16, marginTop: 18, marginBottom: 8 }}>Увлечения:</Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
@@ -344,18 +385,25 @@ export default function ProfileScreen() {
           </View>
         </Animated.View>
       )}
-      <ScrollView style={styles.container}>
+      <ScrollView 
+        style={styles.container}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#007AFF']}
+            tintColor={theme === 'dark' ? '#fff' : '#007AFF'}
+          />
+        }
+      >
         <View style={styles.header}>
           <View style={styles.avatarContainer}>
-            <Image
-              source={{ uri: avatarUri }}
-              style={styles.avatar}
-            />
+            <UserAvatar firstName={profile?.firstName || ''} lastName={profile?.lastName || ''} avatar={profile?.avatar || ''} size={100} />
             <TouchableOpacity style={styles.editAvatarButton} onPress={() => setModalVisible(true)}>
               <Ionicons name="camera" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
-          <Text style={styles.name}>{displayName.firstName} {displayName.lastName}</Text>
+          <Text style={styles.name}>{profile?.firstName} {profile?.lastName}</Text>
           <Text style={styles.email}>{profile?.email}</Text>
         </View>
 
@@ -429,11 +477,10 @@ export default function ProfileScreen() {
               <Text style={{ color: '#fff', fontSize: 17, fontWeight: '600' }}>Выбрать из галереи</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={{ backgroundColor: theme === 'dark' ? '#444' : '#eee', borderRadius: 12, padding: 16, marginBottom: 16, alignItems: 'center' }}
-              onPress={() => {}}
-              disabled
+              style={{ backgroundColor: '#007AFF', borderRadius: 12, padding: 16, marginBottom: 16, alignItems: 'center' }}
+              onPress={() => generateAvatar()}
             >
-              <Text style={{ color: theme === 'dark' ? '#aaa' : '#888', fontSize: 17, fontWeight: '600' }}>Сгенерировать (скоро)</Text>
+              <Text style={{ color: '#fff', fontSize: 17, fontWeight: '600' }}>Сгенерировать</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={{ alignItems: 'center', marginTop: 4 }}
@@ -552,6 +599,27 @@ export default function ProfileScreen() {
             <TouchableOpacity style={{ alignItems: 'center', marginTop: 8 }} onPress={() => setPasswordModalVisible(false)}>
               <Text style={{ color: '#007AFF', fontSize: 16 }}>Отмена</Text>
             </TouchableOpacity>
+          </View>
+        </Modal>
+
+        {/* Модальное окно загрузки */}
+        <Modal
+          isVisible={loadingModalVisible}
+          backdropOpacity={0.35}
+          animationIn="fadeIn"
+          animationOut="fadeOut"
+          style={{ justifyContent: 'center', alignItems: 'center', margin: 0 }}
+        >
+          <View style={{ backgroundColor: theme === 'dark' ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 300, alignItems: 'center' }}>
+            <Text style={{ fontSize: 18, fontWeight: '600', color: theme === 'dark' ? '#fff' : '#222', marginBottom: 16, textAlign: 'center' }}>
+              Генерируем для вас изображение...
+            </Text>
+            <LottieView
+              source={require('@/assets/lottie/drawing.json')}
+              autoPlay
+              loop
+              style={{ width: 200, height: 200 }}
+            />
           </View>
         </Modal>
 

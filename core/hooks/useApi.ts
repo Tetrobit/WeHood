@@ -7,6 +7,7 @@ import { NearbyPostModel } from "../models/NearbyPostModel";
 import Realm from "realm";
 import { CommentModel } from "../models/CommentModel";
 import * as SecureStorage from 'expo-secure-store';
+import axios, { AxiosRequestConfig } from "axios";
 
 export interface VKParameters {
   vkAppId: string;
@@ -225,9 +226,22 @@ export interface UploadFileResponse {
   size: number;
 }
 
+export interface UserUpdateResponse {
+  id: string;
+  firstName: string;
+  lastName: string;
+  avatar: string;
+  email: string;
+  vkId: string;
+}
+
+export interface GenerateAvatarResponse {
+  id: string;
+  avatar: string;
+}
+
 export const useApi = () => {
   const realm = useRealm();
-  const [profile] = useQuery(UserModel);
   const codeVerifier = useSharedValue<string | null>(null);
 
   const getVKParameters = async (): Promise<VKParameters> => {
@@ -269,10 +283,6 @@ export const useApi = () => {
 
     const data = await response.json();
 
-    realm.write(() => {
-      realm.create(UserModel, UserModel.fromLoginWithVK(data));
-    });
-
     SecureStorage.setItem('token', data.token);
     SecureStorage.setItem('user_id', data.user.id);
     SecureStorage.setItem('device_id', data.device.id);
@@ -280,15 +290,16 @@ export const useApi = () => {
     return data;
   }
 
-  const withAuth = async <T>(url: string, options: RequestInit = {}): Promise<T> => {
-    const response = await fetch(url, {
+  const withAuth = async <T>(url: string, options: AxiosRequestConfig = {}): Promise<T> => {
+    const response = await axios.request({
+      url,
       ...options,
       headers: {
         ...options.headers,
         'Authorization': `Bearer ${SecureStorage.getItem('token')}`,
       },
     });
-    return response.json();
+    return response.data;
   }
 
   const logout = async () => {
@@ -411,12 +422,76 @@ export const useApi = () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
+      data: {
         oldPassword,
         newPassword,
-      }),
+      },
     });
   };
+
+  const getUserById = async (id: string): Promise<UserModel> => {
+    const response = await withAuth<UserModel>(`${API_URL}/api/auth/profile/${id}`);
+
+    try {
+      realm.write(() => {
+        realm.create(UserModel, {
+          id: response.id,
+          firstName: response.firstName,
+          lastName: response.lastName,
+          avatar: response.avatar,
+          email: response.email,
+          vkId: response.vkId,
+        }, Realm.UpdateMode.Modified);
+      });
+    } catch(error) {
+      console.error('Не удалось сохранить пользователя в Realm', error);
+    }
+    return response;
+  }
+
+  const generateAvatar = async (): Promise<GenerateAvatarResponse> => {
+    const response = await withAuth<GenerateAvatarResponse>(`${API_URL}/api/auth/generate-avatar`, {
+      method: 'POST',
+      timeout: 60000,
+      timeoutErrorMessage: 'Время ожидания истекло',
+    });
+
+    try {
+      realm.write(() => {
+        realm.create(UserModel, {
+          id: response.id,
+          avatar: response.avatar,
+        } as UserModel, Realm.UpdateMode.Modified);
+      });
+    } catch(error) {
+      console.error('Не удалось сохранить аватар в Realm', error);
+    }
+
+    return response;
+  }
+
+  const updateProfile = async (data: { firstName?: string, lastName?: string, avatar?: string }): Promise<UserUpdateResponse> => {
+    const response = await withAuth<UserUpdateResponse>(`${API_URL}/api/auth/update-profile`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: data,
+    });
+
+    realm.write(() => {
+      realm.create(UserModel, {
+        id: response.id,
+        firstName: response.firstName,
+        lastName: response.lastName,
+        avatar: response.avatar,
+        email: response.email,
+        vkId: response.vkId,
+      } as UserModel, Realm.UpdateMode.Modified);
+    });
+
+    return response;
+  }
 
   const uploadFile = async (uri: string, mimeType: string | null): Promise<UploadFileResponse> => {
     const formData = new FormData();
@@ -456,7 +531,7 @@ export const useApi = () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      data: data,
     });
   }
 
@@ -525,7 +600,7 @@ export const useApi = () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ text }),
+      data: { text },
     });
 
     if (comment.ok) {
@@ -574,7 +649,6 @@ export const useApi = () => {
   };
 
   return {
-    profile,
     sendVerificationCode,
     verifyVerificationCode,
     checkEmailExists,
@@ -597,6 +671,9 @@ export const useApi = () => {
     getComments,
     deletePost,
     deleteComment,
+    updateProfile,
+    getUserById,
+    generateAvatar,
   }
 }
 
