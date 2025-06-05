@@ -101,14 +101,17 @@ export default function HomeScreen() {
   const { lastWeatherForecast } = useWeather();
   const [newsList, setNewsList] = useState<NewsItem[]>(mockNews);
 
-  const renderCarouselItem = ({ item }: { item: typeof carouselData[0] }) => (
-    <View style={styles.carouselItem}>
+  const renderCarouselItem = ({ item, index }: { item: typeof carouselData[0], index: number }) => (
+    <TouchableOpacity 
+      style={styles.carouselItem}
+      onPress={() => router.push({ pathname: '/stories', params: { initialIndex: index.toString() } })}
+    >
       <Image source={{ uri: item.image }} style={styles.carouselImage} />
       <View style={styles.carouselTextContainer}>
         <Text style={styles.carouselTitle}>{item.title}</Text>
         <Text style={styles.carouselDescription}>{item.description}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   let weatherColor = '#ebb010';
