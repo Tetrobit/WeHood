@@ -63,27 +63,17 @@ export default function ProfileScreen() {
   const [editData, setEditData] = useState({
     firstName: '',
     lastName: '',
-    age: '',
     hobbies: [] as string[],
-  });
-  const [displayName, setDisplayName] = useState({
-    firstName: profile?.firstName || '',
-    lastName: profile?.lastName || '',
   });
 
   // Загрузка данных из AsyncStorage при открытии формы
   useEffect(() => {
     if (editTab) {
-      (async () => {
-        const saved = await AsyncStorage.getItem('profileEditData');
-        if (saved) setEditData(JSON.parse(saved));
-        else setEditData({
-          firstName: profile?.firstName || '',
-          lastName: profile?.lastName || '',
-          age: '',
-          hobbies: [],
-        });
-      })();
+      setEditData({
+        firstName: profile?.firstName || '',
+        lastName: profile?.lastName || '',
+        hobbies: [],
+      });
     }
   }, [editTab]);
 
@@ -121,8 +111,7 @@ export default function ProfileScreen() {
   };
 
   const handleSaveEdit = async () => {
-    await AsyncStorage.setItem('profileEditData', JSON.stringify(editData));
-    setDisplayName({ firstName: editData.firstName, lastName: editData.lastName });
+    await api.updateProfile({ firstName: editData.firstName, lastName: editData.lastName });
     setEditTab(false);
   };
 
@@ -314,24 +303,6 @@ export default function ProfileScreen() {
           placeholderTextColor={theme === 'dark' ? '#888' : '#aaa'}
           value={editData.lastName}
           onChangeText={v => handleEditChange('lastName', v)}
-        />
-        <Text style={{ color: theme === 'dark' ? '#aaa' : '#666', fontSize: 15, marginBottom: 2, marginTop: 8, marginLeft: 4 }}>Возраст</Text>
-        <TextInput
-          style={[
-            styles.input,
-            {
-              color: theme === 'dark' ? '#fff' : '#222',
-              backgroundColor: theme === 'dark' ? '#333' : '#f5f5f5',
-              borderWidth: 1,
-              borderColor: theme === 'dark' ? '#444' : '#ccc',
-              borderRadius: 10,
-            },
-          ]}
-          placeholder="Возраст"
-          placeholderTextColor={theme === 'dark' ? '#888' : '#aaa'}
-          value={editData.age}
-          onChangeText={v => handleEditChange('age', v.replace(/[^0-9]/g, ''))}
-          keyboardType="numeric"
         />
         <Text style={{ color: theme === 'dark' ? '#fff' : '#222', fontSize: 16, marginTop: 18, marginBottom: 8 }}>Увлечения:</Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
