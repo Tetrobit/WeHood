@@ -225,9 +225,17 @@ export interface UploadFileResponse {
   size: number;
 }
 
+export interface UserUpdateResponse {
+  id: string;
+  firstName: string;
+  lastName: string;
+  avatar: string;
+  email: string;
+  vkId: string;
+}
+
 export const useApi = () => {
   const realm = useRealm();
-  const [profile] = useQuery(UserModel);
   const codeVerifier = useSharedValue<string | null>(null);
 
   const getVKParameters = async (): Promise<VKParameters> => {
@@ -268,10 +276,6 @@ export const useApi = () => {
     });
 
     const data = await response.json();
-
-    realm.write(() => {
-      realm.create(UserModel, UserModel.fromLoginWithVK(data));
-    });
 
     SecureStorage.setItem('token', data.token);
     SecureStorage.setItem('user_id', data.user.id);
@@ -417,6 +421,41 @@ export const useApi = () => {
       }),
     });
   };
+
+  const getUserById = async (id: string): Promise<UserModel> => {
+    const response = await withAuth<UserModel>(`${API_URL}/api/auth/user/${id}`);
+    try {
+      realm.write(() => {
+        realm.create(UserModel, response, Realm.UpdateMode.Modified);
+      });
+    } catch(error) {
+      console.error('Не удалось сохранить пользователя в Realm', error);
+    }
+    return response;
+  }
+
+  const updateProfile = async (data: { firstName?: string, lastName?: string, avatar?: string }): Promise<UserUpdateResponse> => {
+    const response = await withAuth<UserUpdateResponse>(`${API_URL}/api/auth/update-profile`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    realm.write(() => {
+      realm.create(UserModel, {
+        id: response.id,
+        firstName: response.firstName,
+        lastName: response.lastName,
+        avatar: response.avatar,
+        email: response.email,
+        vkId: response.vkId,
+      } as UserModel, Realm.UpdateMode.Modified);
+    });
+
+    return response;
+  }
 
   const uploadFile = async (uri: string, mimeType: string | null): Promise<UploadFileResponse> => {
     const formData = new FormData();
@@ -574,7 +613,6 @@ export const useApi = () => {
   };
 
   return {
-    profile,
     sendVerificationCode,
     verifyVerificationCode,
     checkEmailExists,
@@ -597,6 +635,8 @@ export const useApi = () => {
     getComments,
     deletePost,
     deleteComment,
+    updateProfile,
+    getUserById,
   }
 }
 

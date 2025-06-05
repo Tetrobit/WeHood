@@ -16,6 +16,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ArrowLeftIcon } from 'lucide-react-native';
 import * as SecureStorage from 'expo-secure-store';
 import { Theme } from '@/core/hooks/useTheme';
+import { MEDIA_URL } from '@/core/constants/environment';
+import UserAvatar from '../components/UserAvatar';
+import { useUser } from '@/core/hooks/models/useUser';
 
 const HOBBIES = [
   'Спорт',
@@ -31,13 +34,12 @@ const HOBBIES = [
 ];
 
 export default function ProfileScreen() {
-  const [profile] = useQuery(UserModel).filtered(`id = "${SecureStorage.getItem('user_id')}"`);
+  const profile = useUser(SecureStorage.getItem('user_id')!);
   const api = useApi();
   const [theme, setTheme] = useTheme();
   const styles = makeStyles(theme!);
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [avatarUri, setAvatarUri] = useState(profile?.avatar);
 
   // --- уведомления ---
   const [notifModalVisible, setNotifModalVisible] = useState(false);
@@ -143,14 +145,28 @@ export default function ProfileScreen() {
 
   const pickImage = async () => {
     setModalVisible(false);
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
-    if (!result.canceled && result.assets && result.assets[0]?.uri) {
-      setAvatarUri(result.assets[0].uri);
+    try {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.15,
+        allowsMultipleSelection: false,
+        selectionLimit: 1
+      });
+
+      if (result.canceled || !result.assets || !result.assets[0]?.uri) {
+        throw new Error('No image selected');
+      }
+
+      const file = await api.uploadFile(result.assets[0].uri, result.assets[0].mimeType || null);
+      if (file.fileId) {
+        console.log(`${MEDIA_URL}/files/${file.fileId}`)
+        await api.updateProfile({ avatar: `${MEDIA_URL}/files/${file.fileId}` });
+      }
+    } catch (error) {
+      console.log(error);
+      showToast('Ошибка при загрузке фото');
     }
   };
 
@@ -371,10 +387,7 @@ export default function ProfileScreen() {
       <ScrollView style={styles.container}>
         <View style={styles.header}>
           <View style={styles.avatarContainer}>
-            <Image
-              source={{ uri: avatarUri }}
-              style={styles.avatar}
-            />
+            <UserAvatar firstName={profile?.firstName || ''} lastName={profile?.lastName || ''} avatar={profile?.avatar || ''} size={100} />
             <TouchableOpacity style={styles.editAvatarButton} onPress={() => setModalVisible(true)}>
               <Ionicons name="camera" size={20} color="#fff" />
             </TouchableOpacity>
