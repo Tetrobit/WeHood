@@ -187,6 +187,12 @@ export interface CommentResponse {
   },
   text: string;
   updatedAt: string;
+  deleted?: boolean;
+}
+
+export interface SummarizeCommentsResponse {
+  ok: boolean;
+  summary?: string;
 }
 
 export interface NearbyPost {
@@ -601,6 +607,7 @@ export const useApi = () => {
         'Content-Type': 'application/json',
       },
       data: { text },
+      validateStatus: (status) => status < 500,
     });
 
     if (comment.ok) {
@@ -642,10 +649,15 @@ export const useApi = () => {
     const comment = await withAuth<CommentResponse>(`${API_URL}/api/nearby/comments/${commentId}`, {
       method: 'DELETE',
     });
+    console.log(comment);
     realm.write(() => {
       realm.create(CommentModel, CommentModel.fromApi(comment), Realm.UpdateMode.Modified);
     });
     return comment;
+  };
+
+  const summarizeComments = async (postId: number): Promise<SummarizeCommentsResponse> => {
+    return await withAuth<SummarizeCommentsResponse>(`${API_URL}/api/nearby/posts/${postId}/comments/summarize`);
   };
 
   return {
@@ -674,6 +686,7 @@ export const useApi = () => {
     updateProfile,
     getUserById,
     generateAvatar,
+    summarizeComments,
   }
 }
 

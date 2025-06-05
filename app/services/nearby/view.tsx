@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Modal, Animated as RNAnimated, RefreshControl, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Modal, Animated as RNAnimated, RefreshControl, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useTheme, Theme } from '@/core/hooks/useTheme';
@@ -37,9 +37,12 @@ export default function ViewPostScreen() {
   const [isLiked, setIsLiked] = useState(false);
   const [showCensorshipError, setShowCensorshipError] = useState(false);
   const [censorshipError, setCensorshipError] = useState<{ reason?: string; toxicity_score?: number }>({});
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [summary, setSummary] = useState<string | null>(null);
+  const [showSummary, setShowSummary] = useState(false);
   
   const post = useQuery(NearbyPostModel).filtered('id = $0', parseInt(id))[0];
-  const comments = useQuery(CommentModel).filtered('postId = $0', parseInt(id)).sorted('createdAt', true);
+  const comments = useQuery(CommentModel).filtered('deleted == false').filtered('postId = $0', parseInt(id)).sorted('createdAt', true);
   const [currentPost, setCurrentPost] = useState<NearbyPostModel>(post);
 
   const incrementViews = async () => {
@@ -153,14 +156,52 @@ export default function ViewPostScreen() {
 
   const handleDeleteComment = async (commentId: number) => {
     try {
-      setIsDeleting(true);
-      await api.deleteComment(commentId);
-      Toast.success('Комментарий удалён');
+      Alert.alert('Удаление комментария', 'Вы уверены, что хотите удалить этот комментарий?', [
+        {
+          text: 'Отмена',
+          style: 'cancel',
+        },
+        {
+          text: 'Удалить',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setIsDeleting(true);
+              await api.deleteComment(commentId);
+              Toast.success('Комментарий удалён');
+            } catch (error) {
+              Toast.error("Не удалось удалить комментарий");
+              console.error('Ошибка при удалении комментария:', error);
+            } finally {
+              setIsDeleting(false);
+            }
+          },
+        },
+      ]);
     } catch (error) {
       Toast.error("Не удалось удалить комментарий");
       console.error('Ошибка при удалении комментария:', error);
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleSummarizeComments = async () => {
+    if (comments.length === 0) return;
+    try {
+      setIsSummarizing(true);
+      const response = await api.summarizeComments(currentPost.id);
+      if (!response.ok) {
+        Toast.error("Не удалось получить суммаризацию");
+        return;
+      }
+      setSummary(response.summary || 'Не удалось получить суммаризацию');
+      setShowSummary(true);
+    } catch (error) {
+      Toast.error("Не удалось получить суммаризацию");
+      console.error('Ошибка при получении суммаризации:', error);
+    } finally {
+      setIsSummarizing(false);
     }
   };
 
@@ -293,9 +334,28 @@ export default function ViewPostScreen() {
               >
                 <View style={styles.modalHeader}>
                   <Text style={styles.commentsTitle}>Комментарии</Text>
-                  <TouchableOpacity onPress={toggleComments} style={styles.closeModalButton}>
-                    <MaterialIcons name="close" size={24} color={theme === 'dark' ? '#fff' : '#000'} />
-                  </TouchableOpacity>
+                  <View style={styles.modalHeaderButtons}>
+                    {comments.length > 0 && (
+                      <TouchableOpacity 
+                        style={styles.summarizeButton} 
+                        onPress={handleSummarizeComments}
+                        disabled={isSummarizing}
+                      >
+                        {isSummarizing ? (
+                          <ActivityIndicator size="small" color={theme === 'dark' ? "#fff" : "#000"} />
+                        ) : (
+                          <MaterialIcons 
+                            name="support-agent" 
+                            size={24}
+                            color={theme === 'dark' ? '#fff' : '#000'} 
+                          />
+                        )}
+                      </TouchableOpacity>
+                    )}
+                    <TouchableOpacity onPress={toggleComments} style={styles.closeModalButton}>
+                      <MaterialIcons name="close" size={24} color={theme === 'dark' ? '#fff' : '#000'} />
+                    </TouchableOpacity>
+                  </View>
                 </View>
 
                 <ScrollView 
@@ -319,7 +379,7 @@ export default function ViewPostScreen() {
                         }}
                         text={comment.text}
                         createdAt={comment.createdAt.toISOString()}
-                        isAuthor={comment.authorId === api.profile?.id}
+                        isAuthor={comment.authorId === currentPost.authorId}
                         onDelete={() => handleDeleteComment(comment.id)}
                       />
                     ))
@@ -393,6 +453,26 @@ export default function ViewPostScreen() {
               onPress={() => setShowCensorshipError(false)}
             >
               <Text style={styles.censorshipErrorButtonText}>Понятно</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showSummary}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowSummary(false)}
+      >
+        <View style={[styles.modalOverlay, styles.centeredModal]}>
+          <View style={styles.summaryContainer}>
+            <Text style={styles.summaryTitle}>Суммаризация комментариев</Text>
+            <Text style={styles.summaryText}>{summary}</Text>
+            <TouchableOpacity 
+              style={styles.summaryButton}
+              onPress={() => setShowSummary(false)}
+            >
+              <Text style={styles.summaryButtonText}>Закрыть</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -648,6 +728,47 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     borderRadius: 8,
   },
   censorshipErrorButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  modalHeaderButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  summarizeButton: {
+    padding: 8,
+  },
+  summaryContainer: {
+    backgroundColor: theme === 'dark' ? '#1a1a1a' : '#fff',
+    borderRadius: 12,
+    padding: 20,
+    width: '80%',
+    maxWidth: 400,
+    alignItems: 'center',
+  },
+  summaryTitle: {
+    color: theme === 'dark' ? '#fff' : '#000',
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  summaryText: {
+    color: theme === 'dark' ? '#ccc' : '#666',
+    fontSize: 14,
+    marginBottom: 20,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  summaryButton: {
+    backgroundColor: '#FF4081',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  summaryButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '500',
