@@ -43,12 +43,21 @@ export default function StoriesView({ stories, initialIndex }: StoriesViewProps)
   }, [currentIndex]);
 
   const handlePress = (direction: 'left' | 'right') => {
-    if (direction === 'left' && currentIndex > 0) {
-      setCurrentIndex((prev) => prev - 1);
-      setProgress(0);
-    } else if (direction === 'right' && currentIndex < stories.length - 1) {
-      setCurrentIndex((prev) => prev + 1);
-      setProgress(0);
+    if (direction === 'left') {
+      if (currentIndex > 0) {
+        setCurrentIndex((prev) => prev - 1);
+        setProgress(0);
+      } else {
+        setCurrentIndex(0);
+        setProgress(0);
+      }
+    } else {
+      if (currentIndex < stories.length - 1) {
+        setCurrentIndex((prev) => prev + 1);
+        setProgress(0);
+      } else {
+        router.back();
+      }
     }
   };
 
@@ -72,12 +81,14 @@ export default function StoriesView({ stories, initialIndex }: StoriesViewProps)
 
       <View style={styles.storyContainer}>
         <TouchableOpacity
-          style={styles.touchArea}
+          style={[styles.touchArea, { left: 0 }]}
           onPress={() => handlePress('left')}
+          activeOpacity={0.9}
         />
         <TouchableOpacity
-          style={styles.touchArea}
+          style={[styles.touchArea, { right: 0 }]}
           onPress={() => handlePress('right')}
+          activeOpacity={0.9}
         />
         <Image
           source={{ uri: stories[currentIndex].image }}
