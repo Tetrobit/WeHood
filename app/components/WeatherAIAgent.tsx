@@ -46,7 +46,7 @@ export default function WeatherAIAgent({ visible, onClose, isLoading, recommenda
             )}
           </View>
 
-          <View style={styles.content}>
+          <View style={[styles.content, {minHeight: isLoading ? 250 : 80}]}>
             {isLoading ? (
               <View style={styles.loadingContainer}>
                 <LottieView
@@ -115,7 +115,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     padding: 5,
   },
   content: {
-    minHeight: 250,
+    height: 'auto',
   },
   loadingContainer: {
     flex: 1,
