@@ -1,39 +1,86 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image, TextInput, KeyboardAvoidingView, Platform, Modal, Animated as RNAnimated } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Modal, Animated as RNAnimated, RefreshControl, ScrollView, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useThemeName, DARK_THEME } from '@/core/hooks/useTheme';
-import { NearbyPost, Comment } from '@/core/hooks/useApi';
+import { Image } from 'expo-image';
+import { useTheme, Theme } from '@/core/hooks/useTheme';
+import { NearbyPost } from '@/core/hooks/useApi';
 import { getFileUrl } from '@/core/utils/url';
-import { AutoVideoView } from '@/app/components/AutoVideoPlayer';
+import { AutoVideoPlayer } from '@/app/components/AutoVideoPlayer';
 import { GestureHandlerRootView, PanGestureHandler } from 'react-native-gesture-handler';
 import useApi from '@/core/hooks/useApi';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useQuery } from '@realm/react';
-import { NearbyPostModel } from '@/core/models/nearby-post';
+import { useQuery, Realm } from '@realm/react';
+import { NearbyPostModel } from '@/core/models/NearbyPostModel';
+import { CommentModel } from '@/core/models/CommentModel';
+import { Comment } from '@/app/components/Comment';
+import { UserAvatar } from '@/app/components/UserAvatar';
+import LottieView from 'lottie-react-native';
+import { AnimatedText } from '@/app/components/AnimatedText';
+import ToastManager, { Toast } from 'toastify-react-native';
 
 const { width, height } = Dimensions.get('window');
 
 export default function ViewPostScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme!);
   const api = useApi();
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const slideAnim = React.useRef(new RNAnimated.Value(height)).current;
+  const opacityAnim = React.useRef(new RNAnimated.Value(0)).current;
+  const [refreshing, setRefreshing] = useState(false);
+  const likeScale = React.useRef(new RNAnimated.Value(1)).current;
+  const [isLiked, setIsLiked] = useState(false);
+  const [showCensorshipError, setShowCensorshipError] = useState(false);
+  const [censorshipError, setCensorshipError] = useState<{ reason?: string; toxicity_score?: number }>({});
   
   const post = useQuery(NearbyPostModel).filtered('id = $0', parseInt(id))[0];
-  const [currentPost, setCurrentPost] = useState<NearbyPost>(post);
+  const comments = useQuery(CommentModel).filtered('postId = $0', parseInt(id)).sorted('createdAt', true);
+  const [currentPost, setCurrentPost] = useState<NearbyPostModel>(post);
+
+  const incrementViews = async () => {
+    const response = await api.incerementViews(currentPost.id);
+    setCurrentPost({
+      ...currentPost,
+      views: response.views,
+      liked: response.liked,
+      likes: response.likes
+    } as NearbyPostModel);
+  };
+
+  React.useEffect(() => {
+    incrementViews();
+  }, []);
 
   const handleLike = async () => {
     try {
-      await api.likePost(currentPost.id);
+      const response = await api.likePost(currentPost.id);
       setCurrentPost({
         ...currentPost,
-        likes: currentPost.likes + 1
-      });
+        views: response.views,
+        liked: response.liked,
+        likes: response.likes
+      } as NearbyPostModel);
+      
+      // Анимация при лайке
+      RNAnimated.sequence([
+        RNAnimated.timing(likeScale, {
+          toValue: 1.3,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+        RNAnimated.timing(likeScale, {
+          toValue: 1,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+      ]).start();
+      
+      setIsLiked(response.liked);
     } catch (error) {
       console.error('Ошибка при лайке:', error);
     }
@@ -41,12 +88,20 @@ export default function ViewPostScreen() {
 
   const toggleComments = () => {
     if (!showComments) {
+      slideAnim.setValue(height);
       setShowComments(true);
-      RNAnimated.timing(slideAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
+      setTimeout(() => {
+        RNAnimated.timing(slideAnim, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        }).start();
+        RNAnimated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }).start();
+      }, 50);
     } else {
       RNAnimated.timing(slideAnim, {
         toValue: height,
@@ -55,8 +110,22 @@ export default function ViewPostScreen() {
       }).start(() => {
         setShowComments(false);
       });
+      RNAnimated.timing(opacityAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
     }
   };
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await api.getComments(currentPost.id);
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
 
   const handleSubmitComment = async () => {
     if (!newComment.trim() || isSubmitting) return;
@@ -64,17 +133,34 @@ export default function ViewPostScreen() {
     try {
       setIsSubmitting(true);
       const response = await api.addComment(currentPost.id, newComment.trim());
-      
-      setCurrentPost(prev => ({
-        ...prev,
-        comments: [...(prev.comments || []), response]
-      }));
-      
+      if (!response?.ok) {
+        setCensorshipError({
+          reason: response?.reason,
+          toxicity_score: response?.toxicity_score
+        });
+        setShowCensorshipError(true);
+        return;
+      }
+      Toast.success('Комментарий успешно отправлен');
       setNewComment('');
     } catch (error) {
+      Toast.error("Что-то пошло не так");
       console.error('Ошибка при отправке комментария:', error);
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: number) => {
+    try {
+      setIsDeleting(true);
+      await api.deleteComment(commentId);
+      Toast.success('Комментарий удалён');
+    } catch (error) {
+      Toast.error("Не удалось удалить комментарий");
+      console.error('Ошибка при удалении комментария:', error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -89,50 +175,69 @@ export default function ViewPostScreen() {
   return (
     <GestureHandlerRootView style={styles.container}>
       <View style={styles.content}>
-        {currentPost.type === 'image' ? (
-          <Image 
-            source={{ uri: getFileUrl(currentPost.fileId) }} 
-            style={styles.media}
-            resizeMode="contain"
-          />
-        ) : (
-          <AutoVideoView 
-            source={getFileUrl(currentPost.fileId)} 
-            style={styles.media}
-          />
-        )}
+        <View style={styles.mediaContainer}>
+          <View style={styles.mediaWrapper}>
+            {currentPost.type === 'image' ? (
+              <Image
+                source={{ uri: getFileUrl(currentPost.fileId) }} 
+                style={styles.media}
+                contentFit="contain"
+              />
+            ) : (
+              <AutoVideoPlayer 
+                source={getFileUrl(currentPost.fileId)} 
+                style={styles.media}
+              />
+            )}
+          </View>
+        </View>
 
         <View style={styles.overlay}>
           <View style={styles.topBar}>
-            <TouchableOpacity 
-              style={styles.authorContainer}
-              onPress={() => router.push({
-                pathname: "/services/profile/[id]",
-                params: { id: currentPost.author.id }
-              })}
-            >
-              {currentPost.author.avatar ? (
-                <Image 
-                  source={{ uri: currentPost.author.avatar }} 
-                  style={styles.authorAvatar}
+            <View style={styles.topBarUp}>
+              <TouchableOpacity 
+                style={styles.authorContainer}
+                onPress={() => {
+                  router.push({
+                    pathname: "/services/profile/[id]",
+                    params: { id: currentPost.authorId }
+                  });
+                }}
+              >
+                <UserAvatar
+                  firstName={currentPost.authorFirstName}
+                  lastName={currentPost.authorLastName}
+                  avatar={currentPost.authorAvatar}
+                  size={40}
                 />
-              ) : (
-                <View style={styles.authorAvatarPlaceholder}>
-                  <MaterialIcons name="person" size={24} color="#fff" />
+                <View style={styles.authorInfo}>
+                  <Text style={styles.authorName}>
+                    {`${currentPost.authorFirstName} ${currentPost.authorLastName}`}
+                  </Text>
+                  <Text style={styles.postDate}>
+                    {new Date(currentPost.createdAt).toLocaleDateString('ru-RU')}
+                  </Text>
                 </View>
-              )}
-              <View style={styles.authorInfo}>
-                <Text style={styles.authorName}>
-                  {`${currentPost.author.firstName} ${currentPost.author.lastName}`}
-                </Text>
-                <Text style={styles.postDate}>
-                  {new Date(currentPost.createdAt).toLocaleDateString('ru-RU')}
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
-              <MaterialIcons name="close" size={28} color="#fff" />
-            </TouchableOpacity>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
+                <MaterialIcons name="close" size={28} color={theme === 'dark' ? '#fff' : '#000'} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.topBarDown}>
+              {
+                currentPost.address && (
+                  <View style={styles.addressContainer}>
+                    <MaterialIcons name="location-on" size={16} color={theme === 'dark' ? '#ccc' : '#555'} />
+                    <View style={styles.addressTextContainer}>
+                      <AnimatedText
+                        style={styles.address}
+                        text={currentPost.address}
+                      />
+                    </View>
+                  </View>
+                )
+              }
+            </View>
           </View>
 
           <View style={styles.sideStatsContainer}>
@@ -141,12 +246,20 @@ export default function ViewPostScreen() {
               <Text style={styles.statText}>{currentPost.views || 0}</Text>
             </View>
             <TouchableOpacity style={styles.statItem} onPress={handleLike}>
-              <MaterialIcons name="thumb-up" size={24} color="#fff" />
-              <Text style={styles.statText}>{currentPost.likes || 0}</Text>
+              <RNAnimated.View style={{ transform: [{ scale: likeScale }] }}>
+                <MaterialIcons 
+                  name="thumb-up" 
+                  size={24} 
+                  color={currentPost.liked ? "#FF4081" : "#fff"} 
+                />
+              </RNAnimated.View>
+              <Text style={[styles.statText, currentPost.liked && styles.likedText]}>
+                {currentPost.likes || 0}
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.statItem} onPress={toggleComments}>
               <MaterialIcons name="chat-bubble" size={24} color="#fff" />
-              <Text style={styles.statText}>{currentPost.comments?.length || 0}</Text>
+              <Text style={styles.statText}>{comments.length || 0}</Text>
             </TouchableOpacity>
           </View>
 
@@ -160,38 +273,68 @@ export default function ViewPostScreen() {
             transparent
             animationType="none"
             onRequestClose={toggleComments}
+            statusBarTranslucent
           >
-            <TouchableOpacity 
-              style={styles.modalOverlay} 
-              activeOpacity={1} 
-              onPress={toggleComments}
+            <View 
+              style={[
+                styles.modalOverlay,
+                { opacity: showComments ? 1 : 0 }
+              ]} 
             >
               <RNAnimated.View 
                 style={[
                   styles.modalContent,
                   {
-                    transform: [{ translateY: slideAnim }]
+                    transform: [{ translateY: slideAnim }],
+                    opacity: opacityAnim,
+                    width: Dimensions.get('window').width,
                   }
                 ]}
               >
                 <View style={styles.modalHeader}>
                   <Text style={styles.commentsTitle}>Комментарии</Text>
                   <TouchableOpacity onPress={toggleComments} style={styles.closeModalButton}>
-                    <MaterialIcons name="close" size={24} color="#fff" />
+                    <MaterialIcons name="close" size={24} color={theme === 'dark' ? '#fff' : '#000'} />
                   </TouchableOpacity>
                 </View>
 
-                <View style={styles.commentsList}>
-                  {currentPost.comments && currentPost.comments.length > 0 ? (
-                    currentPost.comments.map((comment, index) => (
-                      <View key={index} style={styles.commentItem}>
-                        <Text style={styles.commentText}>{comment.text}</Text>
-                      </View>
+                <ScrollView 
+                  style={styles.commentsList}
+                  refreshControl={
+                    <RefreshControl
+                      refreshing={refreshing}
+                      onRefresh={onRefresh}
+                      tintColor="#fff"
+                    />
+                  }
+                >
+                  {comments.length > 0 ? (
+                    comments.map((comment) => (
+                      <Comment
+                        key={comment.id}
+                        author={{
+                          firstName: comment.authorFirstName,
+                          lastName: comment.authorLastName,
+                          avatar: comment.authorAvatar
+                        }}
+                        text={comment.text}
+                        createdAt={comment.createdAt.toISOString()}
+                        isAuthor={comment.authorId === api.profile?.id}
+                        onDelete={() => handleDeleteComment(comment.id)}
+                      />
                     ))
                   ) : (
-                    <Text style={styles.noCommentsText}>Пока нет комментариев</Text>
+                    <View style={styles.noCommentsContainer}>
+                      <Text style={styles.noCommentsText}>Пока нет комментариев</Text>
+                      <LottieView
+                        source={require('@/assets/lottie/comments.json')}
+                        autoPlay
+                        loop
+                        style={{ width: 200, height: 200 }}
+                      />
+                    </View>
                   )}
-                </View>
+                </ScrollView>
 
                 <KeyboardAvoidingView 
                   behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -200,7 +343,7 @@ export default function ViewPostScreen() {
                   <TextInput
                     style={styles.commentInput}
                     placeholder="Написать комментарий..."
-                    placeholderTextColor="rgba(255,255,255,0.5)"
+                    placeholderTextColor={theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'}
                     value={newComment}
                     onChangeText={setNewComment}
                     multiline
@@ -210,55 +353,98 @@ export default function ViewPostScreen() {
                     onPress={handleSubmitComment}
                     disabled={!newComment.trim() || isSubmitting}
                   >
-                    <MaterialIcons 
-                      name="send" 
-                      size={24} 
-                      color={newComment.trim() ? "#fff" : "rgba(255,255,255,0.3)"} 
-                    />
+                    {isSubmitting ? (
+                      <ActivityIndicator size="small" color={theme === 'dark' ? "#fff" : "#000"} />
+                    ) : (
+                      <MaterialIcons 
+                        name="send" 
+                        size={24} 
+                        color={theme === 'dark' ? "#fff" : "#000"}
+                        style={{ opacity: newComment.trim() ? 1 : 0.5 }}
+                      />
+                    )}
                   </TouchableOpacity>
                 </KeyboardAvoidingView>
               </RNAnimated.View>
-            </TouchableOpacity>
+            </View>
           </Modal>
         </View>
       </View>
+
+      <Modal
+        visible={showCensorshipError}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowCensorshipError(false)}
+      >
+        <View style={[styles.modalOverlay, styles.centeredModal]}>
+          <View style={styles.censorshipErrorContainer}>
+            <Text style={styles.censorshipErrorTitle}>Комментарий не прошёл проверку</Text>
+            {censorshipError.reason && (
+              <Text style={styles.censorshipErrorReason}>{censorshipError.reason}</Text>
+            )}
+            {censorshipError.toxicity_score !== undefined && (
+              <Text style={styles.censorshipErrorScore}>
+                Уровень токсичности: {(censorshipError.toxicity_score * 100).toFixed(1)}%
+              </Text>
+            )}
+            <TouchableOpacity 
+              style={styles.censorshipErrorButton}
+              onPress={() => setShowCensorshipError(false)}
+            >
+              <Text style={styles.censorshipErrorButtonText}>Понятно</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      <ToastManager />
     </GestureHandlerRootView>
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: theme === 'dark' ? '#000' : '#fff',
   },
   centerContent: {
     justifyContent: 'center',
     alignItems: 'center',
   },
   errorText: {
-    color: '#fff',
+    color: theme === 'dark' ? '#fff' : '#000',
     fontSize: 16,
   },
   content: {
     flex: 1,
   },
-  media: {
-    width: width,
-    height: height,
-  },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.3)',
   },
   topBar: {
     position: 'absolute',
-    top: 40,
-    left: 20,
-    right: 20,
+    top: 0,
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+    paddingTop: 10,
+    backgroundColor: theme === 'dark' ? '#000' : '#fff',
+    zIndex: 1,
+    flexDirection: 'column',
+  },
+  topBarUp: {
+    flex: 1,
+    width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    zIndex: 1,
+  },
+  topBarDown: {
+    flex: 1,
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   authorContainer: {
     flexDirection: 'row',
@@ -266,45 +452,36 @@ const makeStyles = (theme: string) => StyleSheet.create({
     flex: 1,
     marginRight: 20,
   },
-  authorAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 10,
-  },
-  authorAvatarPlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
   authorInfo: {
     flex: 1,
+    marginLeft: 12,
   },
   authorName: {
-    color: '#fff',
+    color: theme === 'dark' ? '#fff' : '#000',
     fontSize: 16,
     fontWeight: '500',
   },
   postDate: {
-    color: 'rgba(255,255,255,0.7)',
+    color: theme === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
     fontSize: 12,
     marginTop: 2,
   },
   closeButton: {
     padding: 8,
-    backgroundColor: 'rgba(0,0,0,0.5)',
     borderRadius: 20,
   },
   sideStatsContainer: {
     position: 'absolute',
-    right: 20,
+    right: 0,
     top: '50%',
     transform: [{ translateY: -100 }],
     alignItems: 'center',
+    paddingRight: 15,
+    backgroundColor: '#0006',
+    paddingLeft: 10,
+    paddingVertical: 10,
+    borderTopLeftRadius: 20,
+    borderBottomLeftRadius: 20,
     gap: 20,
   },
   statItem: {
@@ -320,8 +497,12 @@ const makeStyles = (theme: string) => StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
   },
+  centeredModal: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   modalContent: {
-    backgroundColor: 'rgba(0,0,0,0.9)',
+    backgroundColor: theme === 'dark' ? 'rgba(0,0,0,1)' : 'rgba(255,255,255,1)',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     height: height * 0.5,
@@ -337,7 +518,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     padding: 8,
   },
   commentsTitle: {
-    color: '#fff',
+    color: theme === 'dark' ? '#fff' : '#000',
     fontSize: 20,
     fontWeight: '600',
   },
@@ -345,25 +526,16 @@ const makeStyles = (theme: string) => StyleSheet.create({
     flex: 1,
     marginBottom: 5,
   },
-  commentItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
-  },
-  commentText: {
-    color: '#fff',
-    fontSize: 14,
-  },
   noCommentsText: {
-    color: '#fff',
+    color: theme === 'dark' ? '#fff' : '#000',
     fontSize: 14,
     textAlign: 'center',
-    padding: 20,
+    marginTop: 20,
   },
   commentInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -371,7 +543,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   commentInput: {
     flex: 1,
-    color: '#fff',
+    color: theme === 'dark' ? '#fff' : '#000',
     fontSize: 14,
     maxHeight: 60,
     paddingVertical: 6,
@@ -388,17 +560,96 @@ const makeStyles = (theme: string) => StyleSheet.create({
     left: 0,
     right: 0,
     padding: 20,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: theme === 'dark' ? 'rgba(0,0,0,1)' : 'rgba(255,255,255,1)',
   },
   title: {
-    color: '#fff',
+    color: theme === 'dark' ? '#fff' : '#000',
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 8,
   },
+  addressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 0,
+    marginTop: 10,
+  },
+  addressTextContainer: {
+    flex: 1,
+    marginLeft: 4,
+    height: 20,
+    overflow: 'hidden',
+  },
+  address: {
+    color: theme === 'dark' ? '#ccc' : '#555',
+    fontSize: 14,
+    opacity: 0.9,
+    flex: 1,
+  },
   description: {
-    color: '#fff',
+    color: theme === 'dark' ? '#fff' : '#000',
     fontSize: 14,
     opacity: 0.9,
   },
-}); 
+  likedText: {
+    color: "#FF4081",
+  },
+  noCommentsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  media: {
+    width: width,
+    height: height,
+    resizeMode: 'contain',
+  },
+  mediaContainer: {
+    height: '100%',
+    width: '100%',
+  },
+  mediaWrapper: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+    flexDirection: 'row',
+  },
+  censorshipErrorContainer: {
+    backgroundColor: theme === 'dark' ? '#1a1a1a' : '#fff',
+    borderRadius: 12,
+    padding: 20,
+    width: '80%',
+    maxWidth: 400,
+    alignItems: 'center',
+  },
+  censorshipErrorTitle: {
+    color: theme === 'dark' ? '#fff' : '#000',
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  censorshipErrorReason: {
+    color: theme === 'dark' ? '#ccc' : '#666',
+    fontSize: 14,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  censorshipErrorScore: {
+    color: '#FF4081',
+    fontSize: 14,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  censorshipErrorButton: {
+    backgroundColor: '#FF4081',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  censorshipErrorButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+});

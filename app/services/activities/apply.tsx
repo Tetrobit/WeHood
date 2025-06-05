@@ -1,8 +1,7 @@
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Button, Card, TextInput, HelperText } from 'react-native-paper';
 import { useState } from 'react';
-import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { useTheme, Theme } from '@/core/hooks/useTheme';
 
 type FormData = {
   childName: string;
@@ -15,7 +14,7 @@ type FormData = {
 };
 
 export default function ApplyScreen() {
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
@@ -146,35 +145,35 @@ export default function ApplyScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#000' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#000' : '#f5f5f5',
   },
   header: {
     padding: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 8,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   subtitle: {
     fontSize: 16,
-    color: theme === DARK_THEME ? '#ccc' : '#666',
+    color: theme === 'dark' ? '#ccc' : '#666',
     marginBottom: 16,
   },
   formCard: {
     margin: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   formContent: {
     gap: 16,
   },
   input: {
-    backgroundColor: theme === DARK_THEME ? '#333' : '#fff',
+    backgroundColor: theme === 'dark' ? '#333' : '#fff',
   },
   aiButton: {
     marginBottom: 16,

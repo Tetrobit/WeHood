@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions } from 'rea
 import { IFlat } from '@/app/types/flat';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
+import { useTheme } from '@/core/hooks/useTheme';
 
 interface FlatCardProps {
   flat: IFlat;
@@ -12,7 +12,7 @@ interface FlatCardProps {
 const { width } = Dimensions.get('window');
 
 export default function FlatCard({ flat }: FlatCardProps) {
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme);
 
   return (
@@ -29,7 +29,7 @@ export default function FlatCard({ flat }: FlatCardProps) {
         <View style={styles.header}>
           <Text style={styles.price}>{flat.price.toLocaleString()} ₽/мес</Text>
           <View style={styles.viewersContainer}>
-            <MaterialCommunityIcons name="eye" size={16} color={theme === DARK_THEME ? '#fff' : '#000'} />
+            <MaterialCommunityIcons name="eye" size={16} color={theme === 'dark' ? '#fff' : '#000'} />
             <Text style={styles.viewersText}>{flat.currentViewers}</Text>
           </View>
         </View>
@@ -37,15 +37,15 @@ export default function FlatCard({ flat }: FlatCardProps) {
         <Text style={styles.address} numberOfLines={1}>{flat.address}</Text>
         <View style={styles.details}>
           <View style={styles.detailItem}>
-            <MaterialCommunityIcons name="bed" size={16} color={theme === DARK_THEME ? '#fff' : '#000'} />
+            <MaterialCommunityIcons name="bed" size={16} color={theme === 'dark' ? '#fff' : '#000'} />
             <Text style={styles.detailText}>{flat.rooms} комн.</Text>
           </View>
           <View style={styles.detailItem}>
-            <MaterialCommunityIcons name="ruler" size={16} color={theme === DARK_THEME ? '#fff' : '#000'} />
+            <MaterialCommunityIcons name="ruler" size={16} color={theme === 'dark' ? '#fff' : '#000'} />
             <Text style={styles.detailText}>{flat.area} м²</Text>
           </View>
           <View style={styles.detailItem}>
-            <MaterialCommunityIcons name="stairs" size={16} color={theme === DARK_THEME ? '#fff' : '#000'} />
+            <MaterialCommunityIcons name="stairs" size={16} color={theme === 'dark' ? '#fff' : '#000'} />
             <Text style={styles.detailText}>{flat.floor}/{flat.totalFloors} эт.</Text>
           </View>
         </View>
@@ -62,9 +62,9 @@ export default function FlatCard({ flat }: FlatCardProps) {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
     borderRadius: 12,
     marginBottom: 16,
     overflow: 'hidden',
@@ -92,12 +92,12 @@ const makeStyles = (theme: string) => StyleSheet.create({
   price: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   viewersContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#333' : '#f5f5f5',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
@@ -105,17 +105,17 @@ const makeStyles = (theme: string) => StyleSheet.create({
   viewersText: {
     marginLeft: 4,
     fontSize: 12,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   title: {
     fontSize: 16,
     fontWeight: '500',
     marginBottom: 4,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   address: {
     fontSize: 14,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
     marginBottom: 8,
   },
   details: {
@@ -130,7 +130,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   detailText: {
     marginLeft: 4,
     fontSize: 14,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   distance: {
     flexDirection: 'row',

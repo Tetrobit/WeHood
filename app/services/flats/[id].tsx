@@ -2,9 +2,9 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Linking } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
+import { useTheme, Theme } from '@/core/hooks/useTheme';
 import ImageGallery from '@/app/components/ImageGallery';
-import { IFlatDetails, IReview } from '@/app/types/flat';
+import { IFlatDetails } from '@/app/types/flat';
 
 // Моковые данные для примера
 const mockFlat: IFlatDetails = {
@@ -56,7 +56,7 @@ const mockFlat: IFlatDetails = {
 
 export default function FlatDetailsScreen() {
   const { id } = useLocalSearchParams();
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme);
 
   // В реальном приложении здесь будет запрос к API
@@ -88,7 +88,7 @@ export default function FlatDetailsScreen() {
             <MaterialCommunityIcons 
               name="arrow-left" 
               size={24} 
-              color={theme === DARK_THEME ? '#fff' : '#000'} 
+              color={theme === 'dark' ? '#fff' : '#000'} 
             />
           </TouchableOpacity>
           <Text style={styles.price}>{flat.price.toLocaleString()} ₽/мес</Text>
@@ -100,15 +100,15 @@ export default function FlatDetailsScreen() {
         {/* Детали квартиры */}
         <View style={styles.details}>
           <View style={styles.detailItem}>
-            <MaterialCommunityIcons name="bed" size={24} color={theme === DARK_THEME ? '#fff' : '#000'} />
+            <MaterialCommunityIcons name="bed" size={24} color={theme === 'dark' ? '#fff' : '#000'} />
             <Text style={styles.detailText}>{flat.rooms} комн.</Text>
           </View>
           <View style={styles.detailItem}>
-            <MaterialCommunityIcons name="ruler" size={24} color={theme === DARK_THEME ? '#fff' : '#000'} />
+            <MaterialCommunityIcons name="ruler" size={24} color={theme === 'dark' ? '#fff' : '#000'} />
             <Text style={styles.detailText}>{flat.area} м²</Text>
           </View>
           <View style={styles.detailItem}>
-            <MaterialCommunityIcons name="stairs" size={24} color={theme === DARK_THEME ? '#fff' : '#000'} />
+            <MaterialCommunityIcons name="stairs" size={24} color={theme === 'dark' ? '#fff' : '#000'} />
             <Text style={styles.detailText}>{flat.floor}/{flat.totalFloors} эт.</Text>
           </View>
         </View>
@@ -171,10 +171,10 @@ export default function FlatDetailsScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#111' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#111' : '#f5f5f5',
   },
   content: {
     padding: 16,
@@ -191,17 +191,17 @@ const makeStyles = (theme: string) => StyleSheet.create({
   price: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   title: {
     fontSize: 20,
     fontWeight: '500',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     marginBottom: 8,
   },
   address: {
     fontSize: 16,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
     marginBottom: 16,
   },
   details: {
@@ -216,12 +216,12 @@ const makeStyles = (theme: string) => StyleSheet.create({
   detailText: {
     marginLeft: 8,
     fontSize: 16,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   stats: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 24,
@@ -232,12 +232,12 @@ const makeStyles = (theme: string) => StyleSheet.create({
   statValue: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     marginTop: 4,
   },
   statLabel: {
     fontSize: 14,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
   },
   section: {
     marginBottom: 24,
@@ -245,19 +245,19 @@ const makeStyles = (theme: string) => StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     marginBottom: 12,
   },
   description: {
     fontSize: 16,
     lineHeight: 24,
-    color: theme === DARK_THEME ? '#ddd' : '#333',
+    color: theme === 'dark' ? '#ddd' : '#333',
   },
   landlord: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
     borderRadius: 12,
     padding: 16,
   },
@@ -267,12 +267,12 @@ const makeStyles = (theme: string) => StyleSheet.create({
   landlordName: {
     fontSize: 16,
     fontWeight: '500',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     marginBottom: 4,
   },
   landlordPhone: {
     fontSize: 14,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
   },
   callButton: {
     flexDirection: 'row',
@@ -289,7 +289,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     fontWeight: '500',
   },
   review: {
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -302,11 +302,11 @@ const makeStyles = (theme: string) => StyleSheet.create({
   reviewAuthor: {
     fontSize: 16,
     fontWeight: '500',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   reviewDate: {
     fontSize: 14,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
   },
   rating: {
     flexDirection: 'row',
@@ -315,6 +315,6 @@ const makeStyles = (theme: string) => StyleSheet.create({
   reviewText: {
     fontSize: 14,
     lineHeight: 20,
-    color: theme === DARK_THEME ? '#ddd' : '#333',
+    color: theme === 'dark' ? '#ddd' : '#333',
   },
 }); 

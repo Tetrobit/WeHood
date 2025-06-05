@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
-import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
+import { useTheme, Theme } from '@/core/hooks/useTheme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Card, Chip, Menu, Divider, Button } from 'react-native-paper';
@@ -60,7 +60,7 @@ const mockViewedFlats: (IFlat & { viewedAt: string; isHidden?: boolean })[] = [
 type SortOption = 'date' | 'price-asc' | 'price-desc';
 
 export default function ViewedFlatsScreen() {
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme);
   
   const [viewedFlats, setViewedFlats] = useState(mockViewedFlats);
@@ -119,7 +119,7 @@ export default function ViewedFlatsScreen() {
           <MaterialCommunityIcons 
             name="arrow-left" 
             size={24} 
-            color={theme === DARK_THEME ? '#fff' : '#000'} 
+            color={theme === 'dark' ? '#fff' : '#000'} 
           />
         </TouchableOpacity>
         <Text style={styles.title}>Просмотренные квартиры</Text>
@@ -180,7 +180,7 @@ export default function ViewedFlatsScreen() {
                     <MaterialCommunityIcons 
                       name="dots-vertical" 
                       size={24} 
-                      color={theme === DARK_THEME ? '#fff' : '#000'} 
+                      color={theme === 'dark' ? '#fff' : '#000'} 
                     />
                   </TouchableOpacity>
                 </View>
@@ -189,15 +189,15 @@ export default function ViewedFlatsScreen() {
                 
                 <View style={styles.details}>
                   <View style={styles.detailItem}>
-                    <MaterialCommunityIcons name="bed" size={20} color={theme === DARK_THEME ? '#fff' : '#000'} />
+                    <MaterialCommunityIcons name="bed" size={20} color={theme === 'dark' ? '#fff' : '#000'} />
                     <Text style={styles.detailText}>{flat.rooms} комн.</Text>
                   </View>
                   <View style={styles.detailItem}>
-                    <MaterialCommunityIcons name="ruler" size={20} color={theme === DARK_THEME ? '#fff' : '#000'} />
+                    <MaterialCommunityIcons name="ruler" size={20} color={theme === 'dark' ? '#fff' : '#000'} />
                     <Text style={styles.detailText}>{flat.area} м²</Text>
                   </View>
                   <View style={styles.detailItem}>
-                    <MaterialCommunityIcons name="stairs" size={20} color={theme === DARK_THEME ? '#fff' : '#000'} />
+                    <MaterialCommunityIcons name="stairs" size={20} color={theme === 'dark' ? '#fff' : '#000'} />
                     <Text style={styles.detailText}>{flat.floor}/{flat.totalFloors} эт.</Text>
                   </View>
                 </View>
@@ -248,16 +248,16 @@ export default function ViewedFlatsScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#111' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#111' : '#f5f5f5',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   backButton: {
     marginRight: 16,
@@ -265,15 +265,15 @@ const makeStyles = (theme: string) => StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   filterContainer: {
     padding: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   chip: {
     marginRight: 8,
-    backgroundColor: theme === DARK_THEME ? '#fff' : '#f5f5f5'
+    backgroundColor: theme === 'dark' ? '#fff' : '#f5f5f5'
   },
   content: {
     flex: 1,
@@ -281,7 +281,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   flatCard: {
     marginBottom: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
     borderRadius: 12,
     overflow: 'hidden',
   },
@@ -300,13 +300,13 @@ const makeStyles = (theme: string) => StyleSheet.create({
   price: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   flatTitle: {
     fontSize: 16,
     fontWeight: '500',
     marginTop: 8,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   address: {
     fontSize: 14,
@@ -325,7 +325,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   detailText: {
     marginLeft: 4,
     fontSize: 14,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   viewedInfo: {
     flexDirection: 'row',
@@ -335,7 +335,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     paddingTop: 12,
     marginBottom: 12,
     borderTopWidth: 1,
-    borderTopColor: theme === DARK_THEME ? '#333' : '#eee',
+    borderTopColor: theme === 'dark' ? '#333' : '#eee',
   },
   viewedText: {
     marginLeft: 8,

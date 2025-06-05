@@ -1,8 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Card, Searchbar, FAB } from 'react-native-paper';
 import { useState } from 'react';
-import { DARK_THEME } from '@/core/hooks/useTheme';
-import { useThemeName } from '@/core/hooks/useTheme';
+import { useTheme, Theme } from '@/core/hooks/useTheme';
 import { router } from 'expo-router';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
@@ -82,7 +81,7 @@ const categories = ['Все', 'Одежда', 'Мебель', 'Техника', 
 export default function FleaMarketScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Все');
-  const theme = useThemeName() ?? 'light';
+  const [theme] = useTheme();
   const styles = makeStyles(theme);
 
   const filteredProducts = demoProducts.filter(product => {
@@ -96,7 +95,7 @@ export default function FleaMarketScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.replace('/services')} style={{ position: 'absolute', left: 16, zIndex: 1 }}>
-          <MaterialCommunityIcons name="arrow-left" size={28} color={theme === DARK_THEME ? '#fff' : '#000'} />
+          <MaterialCommunityIcons name="arrow-left" size={28} color={theme === 'dark' ? '#fff' : '#000'} />
         </TouchableOpacity>
         <Text style={[styles.title, { flex: 1, textAlign: 'center' }]}>Барахолка</Text>
         <View style={{ width: 28, opacity: 0 }} />
@@ -104,10 +103,10 @@ export default function FleaMarketScreen() {
 
       <View style={styles.searchBarContainer}>
         <Searchbar
-          iconColor={theme === DARK_THEME ? '#fff' : '#000'}
-          cursorColor={theme === DARK_THEME ? '#fff' : '#000'}
-          placeholderTextColor={theme === DARK_THEME ? '#fff' : '#000'}
-          inputStyle={{ color: theme === DARK_THEME ? '#fff' : '#000' }}
+          iconColor={theme === 'dark' ? '#fff' : '#000'}
+          cursorColor={theme === 'dark' ? '#fff' : '#000'}
+          placeholderTextColor={theme === 'dark' ? '#fff' : '#000'}
+          inputStyle={{ color: theme === 'dark' ? '#fff' : '#000' }}
           placeholder="Поиск товаров"
           onChangeText={setSearchQuery}
           value={searchQuery}
@@ -178,14 +177,14 @@ export default function FleaMarketScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#000' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#000' : '#f5f5f5',
   },
   header: {
     padding: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
     elevation: 2,
     flexDirection: 'row',
     alignItems: 'center',
@@ -194,26 +193,26 @@ const makeStyles = (theme: string) => StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   searchBarContainer: {
     paddingHorizontal: 16,
     paddingBottom: 8,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   searchBar: {
     elevation: 0,
-    backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#333' : '#f5f5f5',
     borderRadius: 8,
   },
   categoriesContainer: {
     paddingHorizontal: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: theme === DARK_THEME ? '#333' : '#eee',
+    borderBottomColor: theme === 'dark' ? '#333' : '#eee',
   },
   categoriesScroll: {
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
     marginBottom: 16,
   },
   categoryButton: {
@@ -221,14 +220,14 @@ const makeStyles = (theme: string) => StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     marginRight: 8,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#222' : '#f5f5f5',
   },
   categoryButtonActive: {
     backgroundColor: '#FF9800',
   },
   categoryText: {
     fontSize: 14,
-    color: theme === DARK_THEME ? '#fff' : '#666',
+    color: theme === 'dark' ? '#fff' : '#666',
   },
   categoryTextActive: {
     color: '#fff',
@@ -240,7 +239,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   productCard: {
     marginBottom: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   productImage: {
     height: 200,
@@ -249,17 +248,17 @@ const makeStyles = (theme: string) => StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginTop: 8,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   productPrice: {
     fontSize: 20,
     fontWeight: 'bold',
     marginVertical: 8,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   productDescription: {
     fontSize: 14,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
     marginBottom: 8,
   },
   authorContainer: {
@@ -270,7 +269,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   authorName: {
     marginLeft: 8,
     fontSize: 14,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -280,7 +279,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   ratingText: {
     marginLeft: 4,
     fontSize: 14,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
   },
   bottomSpacer: {
     height: 80,

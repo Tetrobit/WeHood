@@ -2,9 +2,9 @@ import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Dimensions
 import { Card, Button } from 'react-native-paper';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router, useFocusEffect } from 'expo-router';
-import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
+import { Theme, useTheme } from '@/core/hooks/useTheme';
 import { useQuery } from '@realm/react';
-import Profile from '@/core/models/profile';
+import UserModel from '@/core/models/UserModel';
 import Carousel from 'react-native-reanimated-carousel';
 import * as Network from 'expo-network';
 import * as Location from 'expo-location';
@@ -93,9 +93,9 @@ const serviceImages: Record<string, string> = {
 };
 
 export default function HomeScreen() {
-  const [profile] = useQuery(Profile);
+  const [profile] = useQuery(UserModel);
   const [avatarUri, setAvatarUri] = useState(profile?.avatar);
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme!);
   const { lastLocation, requestGeolocation } = useGeolocation();
   const { lastWeatherForecast } = useWeather();
@@ -113,7 +113,7 @@ export default function HomeScreen() {
 
   let weatherColor = '#ebb010';
   if (lastWeatherForecast?.list?.[0]?.weather[0]?.main === 'Clear' && ((new Date().getHours() < 6 || new Date().getHours() > 18))) {
-    if (theme === DARK_THEME) {
+    if (theme === 'dark') {
       weatherColor = '#ffffff';
     } else {
       weatherColor = '#023e8a';
@@ -123,7 +123,7 @@ export default function HomeScreen() {
     weatherColor = '#ebb010';
   }
   else {
-    if (theme === DARK_THEME) {
+    if (theme === 'dark') {
       weatherColor = '#ffffff';
     } else {
       weatherColor = '#000000';
@@ -268,10 +268,10 @@ export default function HomeScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#000' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#000' : '#f5f5f5',
   },
   servicesGridModern: {
     flexDirection: 'row',
@@ -289,7 +289,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     shadowOpacity: 0.18,
     shadowRadius: 8,
     overflow: 'hidden',
-    backgroundColor: theme === DARK_THEME ? '#111' : '#fff',
+    backgroundColor: theme === 'dark' ? '#111' : '#fff',
   },
   serviceModernContent: {
     flex: 1,
@@ -305,7 +305,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   serviceModernTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: theme === DARK_THEME ? '#fff' : '#111',
+    color: theme === 'dark' ? '#fff' : '#111',
     marginBottom: 2,
   },
   serviceModernImage: {
@@ -322,7 +322,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     alignItems: 'center',
     padding: 12,
     paddingVertical: 8,
-    backgroundColor: theme === DARK_THEME ? '#000000' : '#fff',
+    backgroundColor: theme === 'dark' ? '#000000' : '#fff',
     elevation: 2,
   },
   locationContainer: {
@@ -343,16 +343,16 @@ const makeStyles = (theme: string) => StyleSheet.create({
     marginLeft: 6,
     paddingLeft: 6,
     borderLeftWidth: 1,
-    borderLeftColor: theme === DARK_THEME ? '#222' : '#eee',
+    borderLeftColor: theme === 'dark' ? '#222' : '#eee',
   },
   location: {
     fontSize: 16,
     fontWeight: '600',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   city: {
     fontSize: 14,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
   },
   profileContainer: {
     width: 40,
@@ -369,7 +369,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     margin: 16,
     borderRadius: 16,
     elevation: 4,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   rideContent: {
     flexDirection: 'row',
@@ -383,18 +383,18 @@ const makeStyles = (theme: string) => StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 8,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   rideSubtitle: {
     fontSize: 14,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
     lineHeight: 20,
     marginBottom: 12,
   },
   rideButton: {
     borderRadius: 8,
     marginTop: 8,
-    backgroundColor: theme === DARK_THEME ? '#444' : '#000',
+    backgroundColor: theme === 'dark' ? '#444' : '#000',
   },
   carImage: {
     width: 120,
@@ -408,7 +408,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 16,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   newsContainer: {
     padding: 16,
@@ -417,13 +417,13 @@ const makeStyles = (theme: string) => StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 16,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   newsCard: {
     marginBottom: 16,
     borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   newsImage: {
     height: 160,
@@ -433,17 +433,17 @@ const makeStyles = (theme: string) => StyleSheet.create({
     fontWeight: '600',
     marginTop: 12,
     marginBottom: 8,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   newsDescription: {
     fontSize: 14,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
     marginBottom: 8,
     lineHeight: 20,
   },
   newsTime: {
     fontSize: 12,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
   },
   carouselContainer: {
     marginTop: 8,
@@ -452,7 +452,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     height: 200,
     borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
   },
   carouselImage: {
     width: '100%',

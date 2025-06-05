@@ -4,12 +4,13 @@ import { CameraView, CameraType, useCameraPermissions, Camera, CameraMode } from
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { DARK_THEME, LIGHT_THEME, useThemeName } from '@/core/hooks/useTheme';
+import { useTheme, Theme } from '@/core/hooks/useTheme';
 import useGeolocation from '@/core/hooks/useGeolocation';
 import ToastManager, { Toast } from 'toastify-react-native';
 import { UploadNearbyPostRequest, useApi } from '@/core/hooks/useApi';
 import LottieView from 'lottie-react-native';
 import { compressImage } from '@/core/utils/image';
+import AnimatedText from '@/app/components/AnimatedText';
 
 export default function AddContentScreen() {
   const { uploadNearbyPost, uploadFile } = useApi();
@@ -22,7 +23,7 @@ export default function AddContentScreen() {
   const [contentType, setContentType] = useState<'image' | 'video' | null>(null);
   const cameraRef = useRef<CameraView>(null);
   const router = useRouter();
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const { lastLocation, requestGeolocation } = useGeolocation();
   const styles = makeStyles(theme!);
   const player = useVideoPlayer(contentType === 'video' && mediaUri ? mediaUri : null);
@@ -82,7 +83,6 @@ export default function AddContentScreen() {
 
   React.useLayoutEffect(() => {
     if (mediaUri && contentType === 'video') {
-      console.log(mediaUri, contentType);
       setTimeout(() => {
         player.play();
       }, 1000);
@@ -109,6 +109,7 @@ export default function AddContentScreen() {
         title: title,
         description: description,
         fileId: fileId,
+        address: [lastLocation.locality, lastLocation.district, lastLocation.street, lastLocation.house].filter(v => v && v.length).join(', '),
         type: contentType!,
       }
 
@@ -211,7 +212,7 @@ export default function AddContentScreen() {
             placeholder="Добавьте название..."
             value={title}
             onChangeText={setTitle}
-            placeholderTextColor={theme === DARK_THEME ? '#666' : '#999'}
+            placeholderTextColor={theme === 'dark' ? '#666' : '#999'}
           />
           <TextInput
             style={styles.descriptionInput}
@@ -222,9 +223,10 @@ export default function AddContentScreen() {
           />
           <View style={styles.locationInfo}>
             <MaterialIcons name="location-on" size={16} color="#666" />
-            <Text style={styles.locationText}>
-              {[lastLocation.locality, lastLocation.district, lastLocation.street, lastLocation.house].filter(v => v && v.length).join(', ')}
-            </Text>
+            <AnimatedText
+              style={styles.locationText}
+              text={[lastLocation.locality, lastLocation.district, lastLocation.street, lastLocation.house].filter(v => v && v.length).join(', ')}
+            />
           </View>
           <View style={styles.buttonsContainer}>
             <TouchableOpacity 
@@ -247,14 +249,14 @@ export default function AddContentScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#000' : '#fff',
+    backgroundColor: theme === 'dark' ? '#000' : '#fff',
   },
   message: {
     fontSize: 16,
-    color: theme === DARK_THEME ? '#fff' : '#222',
+    color: theme === 'dark' ? '#fff' : '#222',
     textAlign: 'center',
     marginBottom: 20,
   },
@@ -272,7 +274,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '600',
-    color: theme === DARK_THEME ? '#fff' : '#222',
+    color: theme === 'dark' ? '#fff' : '#222',
     textAlign: 'center',
     marginBottom: 30,
   },
@@ -340,20 +342,20 @@ const makeStyles = (theme: string) => StyleSheet.create({
   },
   descriptionInput: {
     borderWidth: 1,
-    borderColor: theme === DARK_THEME ? '#444' : '#ddd',
+    borderColor: theme === 'dark' ? '#444' : '#ddd',
     borderRadius: 10,
     padding: 15,
-    color: theme === DARK_THEME ? '#fff' : '#222',
+    color: theme === 'dark' ? '#fff' : '#222',
     minHeight: 100,
     textAlignVertical: 'top',
     marginBottom: 15,
   },
   titleInput: {
     borderWidth: 1,
-    borderColor: theme === DARK_THEME ? '#444' : '#ddd',
+    borderColor: theme === 'dark' ? '#444' : '#ddd',
     borderRadius: 10,
     padding: 15,
-    color: theme === DARK_THEME ? '#fff' : '#222',
+    color: theme === 'dark' ? '#fff' : '#222',
     fontSize: 18,
     fontWeight: '500',
     marginBottom: 15,
@@ -362,11 +364,13 @@ const makeStyles = (theme: string) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
+    overflow: 'hidden',
   },
   locationText: {
     marginLeft: 5,
     color: '#666',
     fontSize: 14,
+    flex: 1,
   },
   buttonsContainer: {
     flexDirection: 'row',

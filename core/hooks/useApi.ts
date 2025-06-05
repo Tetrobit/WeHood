@@ -2,10 +2,11 @@ import { API_URL, MEDIA_URL } from "@/core/constants/environment";
 import * as Device from 'expo-device';
 import { useSharedValue } from "react-native-reanimated";
 import { useQuery, useRealm } from "@realm/react";
-import Profile from "../models/profile";
-import { User } from "realm";
-import { NearbyPostModel } from "../models/nearby-post";
+import UserModel from "../models/UserModel";
+import { NearbyPostModel } from "../models/NearbyPostModel";
 import Realm from "realm";
+import { CommentModel } from "../models/CommentModel";
+import * as SecureStorage from 'expo-secure-store';
 
 export interface VKParameters {
   vkAppId: string;
@@ -146,25 +147,58 @@ export interface UploadNearbyPostRequest {
   description: string;
   fileId: string;
   type: 'image' | 'video';
+  address?: string;
 }
 
-export interface Comment {
-  id: number;
-  text: string;
-  userId: number;
+export interface CommentResponse {
+  ok?: boolean;
+  reason?: string;
+  toxicity_score?: number;
+  author: {
+    avatar: string;
+    createdAt: string;
+    email: string;
+    firstName: string;
+    id: string;
+    lastName: string;
+    password: string | null;
+    updatedAt: string;
+    vkId: string;
+  },
   createdAt: string;
+  id: number;
+  post: {
+    createdAt: string;
+    description: string;
+    fileId: string;
+    id: number;
+    latitude: string;
+    likes: number;
+    location: {
+      coordinates: string[];
+      type: string;
+    };
+    longitude: string;
+    title: string;
+    type: string;
+    updatedAt: string;
+    views: number;
+  },
+  text: string;
+  updatedAt: string;
 }
 
 export interface NearbyPost {
   title: string;
   description: string;
-  latitude: number;
-  longitude: number;
+  latitude: number|string;
+  longitude: number|string;
   fileId: string;
+  address?: string;
   author: {
     id: string;
     vkId: string;
-    avatar: string;
+    avatar?: string;
     email: string;
     firstName: string;
     lastName: string;
@@ -175,9 +209,11 @@ export interface NearbyPost {
   id: number;
   views: number;
   likes: number;
+  liked: boolean;
   createdAt: Date;
   updatedAt: Date;
   comments?: Comment[];
+  deleted?: boolean;
 }
 
 export interface UploadNearbyPostResponse extends NearbyPost {};
@@ -191,7 +227,7 @@ export interface UploadFileResponse {
 
 export const useApi = () => {
   const realm = useRealm();
-  const [profile] = useQuery(Profile);
+  const [profile] = useQuery(UserModel);
   const codeVerifier = useSharedValue<string | null>(null);
 
   const getVKParameters = async (): Promise<VKParameters> => {
@@ -234,12 +270,12 @@ export const useApi = () => {
     const data = await response.json();
 
     realm.write(() => {
-      realm.delete(realm.objects(Profile));
+      realm.create(UserModel, UserModel.fromLoginWithVK(data));
     });
 
-    realm.write(() => {
-      realm.create(Profile, Profile.fromLoginWithVK(data));
-    });
+    SecureStorage.setItem('token', data.token);
+    SecureStorage.setItem('user_id', data.user.id);
+    SecureStorage.setItem('device_id', data.device.id);
 
     return data;
   }
@@ -249,16 +285,16 @@ export const useApi = () => {
       ...options,
       headers: {
         ...options.headers,
-        'Authorization': `Bearer ${profile?.token}`,
+        'Authorization': `Bearer ${SecureStorage.getItem('token')}`,
       },
     });
     return response.json();
   }
 
   const logout = async () => {
-    realm.write(() => {
-      realm.delete(realm.objects(Profile));
-    })
+    await SecureStorage.deleteItemAsync('token');
+    await SecureStorage.deleteItemAsync('user_id');
+    await SecureStorage.deleteItemAsync('device_id');
   }
 
   const checkEmailExists = async (email: string): Promise<CheckEmailExistsResponse> => {
@@ -310,13 +346,9 @@ export const useApi = () => {
 
     const data = await response.json();
 
-    realm.write(() => {
-      realm.delete(realm.objects(Profile));
-    });
-
-    realm.write(() => {
-      realm.create(Profile, Profile.fromRegister(data));
-    });
+    SecureStorage.setItem('token', data.token);
+    SecureStorage.setItem('user_id', data.user.id);
+    SecureStorage.setItem('device_id', data.device.id);
 
     return data;
   }
@@ -346,13 +378,9 @@ export const useApi = () => {
       return data;
     }
 
-    realm.write(() => {
-      realm.delete(realm.objects(Profile));
-    });
-
-    realm.write(() => {
-      realm.create(Profile, Profile.fromLogin(data));
-    });
+    SecureStorage.setItem('token', data.token);
+    SecureStorage.setItem('user_id', data.user.id);
+    SecureStorage.setItem('device_id', data.device.id);
 
     return data;
   }
@@ -434,7 +462,7 @@ export const useApi = () => {
 
   const getNearbyPosts = async (latitude: number, longitude: number): Promise<NearbyPost[]> => {
     const posts = await withAuth<NearbyPost[]>(`${API_URL}/api/nearby/posts?latitude=${latitude}&longitude=${longitude}&radius=100000`);
-    
+
     // Сохраняем посты в Realm
     realm.write(() => {
       posts.forEach(post => {
@@ -444,6 +472,7 @@ export const useApi = () => {
           longitude: Number(post.longitude),
           views: Math.round(Number(post.views)),
           likes: Math.round(Number(post.likes)),
+          liked: post.liked,
           createdAt: new Date(post.createdAt),
           updatedAt: new Date(post.updatedAt),
           author: {
@@ -459,26 +488,89 @@ export const useApi = () => {
     return posts;
   }
 
-  const likePost = async (postId: number): Promise<void> => {
-    return await withAuth<void>(`${API_URL}/api/nearby/posts/${postId}/like`, {
+  const likePost = async (postId: number): Promise<{ views: number, liked: boolean, likes: number }> => {
+    const response = await withAuth<NearbyPost>(`${API_URL}/api/nearby/posts/${postId}/like`, {
       method: 'POST',
     });
+    realm.write(() => {
+      const post = realm.objectForPrimaryKey(NearbyPostModel, postId);
+      if (post) {
+        post.liked = response.liked;
+        post.likes = response.likes;
+        realm.create(NearbyPostModel, post, Realm.UpdateMode.Modified);
+      }
+    });
+    return response;
   };
 
-  const dislikePost = async (postId: number): Promise<void> => {
-    return await withAuth<void>(`${API_URL}/api/nearby/posts/${postId}/dislike`, {
+  const incerementViews = async (postId: number): Promise<{ views: number, liked: boolean, likes: number }> => {
+    const response = await withAuth<NearbyPost>(`${API_URL}/api/nearby/posts/${postId}/view`, {
       method: 'POST',
     });
+    realm.write(() => {
+      const post = realm.objectForPrimaryKey(NearbyPostModel, postId);
+      if (post) {
+        post.views = response.views;
+        post.liked = response.liked;
+        post.likes = response.likes;
+        realm.create(NearbyPostModel, post, Realm.UpdateMode.Modified);
+      }
+    });
+    return response;
   };
 
-  const addComment = async (postId: number, text: string): Promise<Comment> => {
-    return await withAuth<Comment>(`${API_URL}/api/nearby/posts/${postId}/comments`, {
+  const addComment = async (postId: number, text: string): Promise<CommentResponse> => {
+    const comment = await withAuth<CommentResponse>(`${API_URL}/api/nearby/posts/${postId}/comments`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ text }),
     });
+
+    if (comment.ok) {
+        realm.write(() => {
+          realm.create(CommentModel, CommentModel.fromApi(comment), Realm.UpdateMode.Modified);
+        });
+    }
+
+    return comment;
+  };
+
+  const getComments = async (postId: number): Promise<CommentResponse[]> => {
+    const comments = await withAuth<CommentResponse[]>(`${API_URL}/api/nearby/posts/${postId}/comments`);
+
+    realm.write(() => {
+      comments.forEach(comment => {
+        realm.create(CommentModel, CommentModel.fromApi({
+          ...comment,
+          post: {
+            id: postId,
+          }
+        } as CommentResponse), Realm.UpdateMode.Modified);
+      });
+    });
+    return comments;
+  };
+
+  const deletePost = async (postId: number): Promise<NearbyPost> => {
+    const post = await withAuth<NearbyPost>(`${API_URL}/api/nearby/posts/${postId}`, {
+      method: 'DELETE',
+    });
+    realm.write(() => {
+      realm.create(NearbyPostModel, NearbyPostModel.fromApi(post), Realm.UpdateMode.Modified);
+    });
+    return post;
+  };
+
+  const deleteComment = async (commentId: number): Promise<CommentResponse> => {
+    const comment = await withAuth<CommentResponse>(`${API_URL}/api/nearby/comments/${commentId}`, {
+      method: 'DELETE',
+    });
+    realm.write(() => {
+      realm.create(CommentModel, CommentModel.fromApi(comment), Realm.UpdateMode.Modified);
+    });
+    return comment;
   };
 
   return {
@@ -500,8 +592,11 @@ export const useApi = () => {
     uploadFile,
     getNearbyPosts,
     likePost,
-    dislikePost,
+    incerementViews,
     addComment,
+    getComments,
+    deletePost,
+    deleteComment,
   }
 }
 

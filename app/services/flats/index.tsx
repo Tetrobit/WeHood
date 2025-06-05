@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { Searchbar, FAB } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
+import { useTheme, Theme } from '@/core/hooks/useTheme';
 import FlatCard from '@/app/components/FlatCard';
 import { IFlat } from '@/app/types/flat';
 
@@ -57,7 +57,7 @@ const mockFlats: IFlat[] = [
 
 export default function FlatsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme);
 
   const filteredFlats = mockFlats.filter(flat =>
@@ -72,7 +72,7 @@ export default function FlatsScreen() {
           <MaterialCommunityIcons 
             name="arrow-left" 
             size={24} 
-            color={theme === DARK_THEME ? '#fff' : '#000'} 
+            color={theme === 'dark' ? '#fff' : '#000'} 
           />
         </TouchableOpacity>
         <Text style={styles.title}>Аренда квартир</Text>
@@ -84,14 +84,14 @@ export default function FlatsScreen() {
             <MaterialCommunityIcons 
               name="heart-outline" 
               size={24} 
-              color={theme === DARK_THEME ? '#fff' : '#000'} 
+              color={theme === 'dark' ? '#fff' : '#000'} 
             />
           </TouchableOpacity>
           <TouchableOpacity style={styles.headerButton}>
             <MaterialCommunityIcons 
               name="tune" 
               size={24} 
-              color={theme === DARK_THEME ? '#fff' : '#000'} 
+              color={theme === 'dark' ? '#fff' : '#000'} 
             />
           </TouchableOpacity>
         </View>
@@ -102,9 +102,9 @@ export default function FlatsScreen() {
         onChangeText={setSearchQuery}
         value={searchQuery}
         style={styles.searchBar}
-        iconColor={theme === DARK_THEME ? '#fff' : '#000'}
-        inputStyle={{ color: theme === DARK_THEME ? '#fff' : '#000' }}
-        placeholderTextColor={theme === DARK_THEME ? '#aaa' : '#666'}
+        iconColor={theme === 'dark' ? '#fff' : '#000'}
+        inputStyle={{ color: theme === 'dark' ? '#fff' : '#000' }}
+        placeholderTextColor={theme === 'dark' ? '#aaa' : '#666'}
       />
 
       <ScrollView 
@@ -127,10 +127,10 @@ export default function FlatsScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#111' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#111' : '#f5f5f5',
   },
   header: {
     flexDirection: 'row',
@@ -143,11 +143,11 @@ const makeStyles = (theme: string) => StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
   },
   searchBar: {
     margin: 16,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
     elevation: 2,
   },
   content: {

@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Animated, PanResponder } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather, Ionicons } from '@expo/vector-icons';
-import { DARK_THEME, ThemeName, useThemeName } from '@/core/hooks/useTheme';
+import { Theme, useTheme } from '@/core/hooks/useTheme';
 import { router } from 'expo-router';
 import useWeather from '@/core/hooks/useWeather';
 import { getShortDay, getWeatherCondition, getWeatherIcon } from '@/core/utils/weather';
@@ -21,7 +21,7 @@ interface DayForecast {
 }
 
 const WeatherDetailsScreen: React.FC = () => {
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const { lastWeatherForecast } = useWeather();
 
   let forecast: { [key: string]: (typeof lastWeatherForecast.list[number])[] } = {};
@@ -71,7 +71,7 @@ const WeatherDetailsScreen: React.FC = () => {
     condition: day.condition,
     highTemp: day.highTemp,
     lowTemp: day.lowTemp,
-    icon: getWeatherIcon(day.icon, theme === DARK_THEME ? 'white' : 'black', 25),
+    icon: getWeatherIcon(day.icon, theme === 'dark' ? 'white' : 'black', 25),
   }));
   
   const styles = React.useMemo(() => makeStyles(theme!), [theme]);
@@ -95,14 +95,14 @@ const WeatherDetailsScreen: React.FC = () => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={24} color={theme === DARK_THEME ? "white" : "black"} />
+          <Ionicons name="chevron-back" size={24} color={theme === 'dark' ? "white" : "black"} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Ionicons name="calendar-outline" size={22} color={theme === DARK_THEME ? "white" : "black"} />
+          <Ionicons name="calendar-outline" size={22} color={theme === 'dark' ? "white" : "black"} />
           <Text style={styles.headerText}>7 дней</Text>
         </View>
         <TouchableOpacity>
-          <Ionicons name="ellipsis-vertical" size={24} color={theme === DARK_THEME ? "white" : "black"} />
+          <Ionicons name="ellipsis-vertical" size={24} color={theme === 'dark' ? "white" : "black"} />
         </TouchableOpacity>
       </View>
 
@@ -172,12 +172,12 @@ const WeatherDetailsScreen: React.FC = () => {
   );
 };
 
-const makeStyles = (theme: ThemeName) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
   },
   safeArea: {
-    backgroundColor: theme === DARK_THEME ? '#000000' : '#FFFFFF',
+    backgroundColor: theme === 'dark' ? '#000000' : '#FFFFFF',
     flex: 1,
   },
   header: {
@@ -194,7 +194,7 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
     gap: 8,
   },
   headerText: {
-    color: theme === DARK_THEME ? "white" : "black",
+    color: theme === 'dark' ? "white" : "black",
     fontSize: 22,
     fontWeight: '600',
   },
@@ -284,7 +284,7 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
     marginTop: 2,
   },
   weekContainer: {
-    backgroundColor: theme === DARK_THEME ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: theme === 'dark' ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.3)',
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     flex: 1,
@@ -298,7 +298,7 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
     paddingVertical: 12,
   },
   dayText: {
-    color: theme === DARK_THEME ? "white" : "black",
+    color: theme === 'dark' ? "white" : "black",
     fontSize: 16,
     fontWeight: 'bold',
     width: 50,
@@ -314,17 +314,17 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
     marginRight: 10,
   },
   dayCondition: {
-    color: theme === DARK_THEME ? "white" : "black",
+    color: theme === 'dark' ? "white" : "black",
     fontWeight: 'bold',
     fontSize: 16,
   },
   dayHighTemp: {
-    color: theme === DARK_THEME ? "white" : "black",
+    color: theme === 'dark' ? "white" : "black",
     fontSize: 16,
     fontWeight: 'bold',
   },
   dayLowTemp: {
-    color: theme === DARK_THEME ? "#fff9" : "#0006",
+    color: theme === 'dark' ? "#fff9" : "#0006",
     fontSize: 16,
     fontWeight: 'bold',
   },

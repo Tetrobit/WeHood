@@ -4,10 +4,9 @@ import { Card, Button } from 'react-native-paper';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useThemeName } from '@/core/hooks/useTheme';
-import { DARK_THEME } from '@/core/hooks/useTheme';
+import { Theme, useTheme } from '@/core/hooks/useTheme';
 import { useQuery } from '@realm/react';
-import Profile from '@/core/models/profile';
+import UserModel from '@/core/models/UserModel';
 
 const mockNews = [
   {
@@ -45,8 +44,8 @@ const defaultAvatar = 'https://randomuser.me/api/portraits/lego/1.jpg';
 export default function NewsDetailsScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const theme = useThemeName() ?? 'light';
-  const isDark = theme === DARK_THEME;
+  const [theme] = useTheme();
+  const isDark = theme === 'dark';
   const styles = makeStyles(theme);
   const news = mockNews.find(n => n.id === id) ?? mockNews[0];
   const [likes, setLikes] = useState(news.likes);
@@ -54,7 +53,7 @@ export default function NewsDetailsScreen() {
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState(news.comments);
   const commentsListRef = useRef<FlatList>(null);
-  const [profile] = useQuery(Profile);
+  const [user] = useQuery(UserModel);
   const [commentLikes, setCommentLikes] = useState<Record<string, number>>({});
   const [likedComments, setLikedComments] = useState<Record<string, boolean>>({});
 
@@ -172,7 +171,7 @@ export default function NewsDetailsScreen() {
           <View key={item.id} style={styles.commentItem}>
             {item.author === 'Вы' ? (
               <Image
-                source={{ uri: profile?.avatar || defaultAvatar }}
+                source={{ uri: user?.avatar || defaultAvatar }}
                 style={styles.commentAvatar}
               />
             ) : (
@@ -218,8 +217,8 @@ export default function NewsDetailsScreen() {
   );
 }
 
-const makeStyles = (theme: string) => {
-  const isDark = theme === DARK_THEME;
+const makeStyles = (theme: Theme) => {
+  const isDark = theme === 'dark';
   return StyleSheet.create({
     root: {
       flex: 1,

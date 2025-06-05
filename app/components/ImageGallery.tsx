@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { View, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel';
-import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
+import { useTheme } from '@/core/hooks/useTheme';
 
 interface ImageGalleryProps {
   images: string[];
@@ -13,7 +13,7 @@ const { width: screenWidth } = Dimensions.get('window');
 export default function ImageGallery({ images }: ImageGalleryProps) {
   const carouselRef = useRef<ICarouselInstance>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme);
 
   const onNext = () => {
@@ -70,7 +70,7 @@ export default function ImageGallery({ images }: ImageGalleryProps) {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     position: 'relative',
   },

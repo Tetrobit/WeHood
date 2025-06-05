@@ -3,9 +3,8 @@ import { View, Text, StyleSheet, Image, SafeAreaView, TouchableOpacity, LayoutAn
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather, Fontisto, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import WeatherRain from '@/components/weather-rain';
-import { DARK_THEME, LIGHT_THEME, ThemeName } from '@/core/hooks/useTheme';
-import { useSetTheme, useThemeName } from '@/core/hooks/useTheme';
+import WeatherRain from '@/app/components/WeatherRain';
+import { Theme, useTheme } from '@/core/hooks/useTheme';
 import { setStatusBarBackgroundColor } from 'expo-status-bar';
 import useGeolocation from '@/core/hooks/useGeolocation';
 import useWeather from '@/core/hooks/useWeather';
@@ -25,7 +24,7 @@ interface HourlyForecast {
 }
 
 const WeatherScreen: React.FC = () => {
-  const themeName = useThemeName();
+  const [theme] = useTheme();
   const { lastLocation } = useGeolocation();
   const { lastWeatherForecast, lastWeatherForecastRecord } = useWeather();
   const metrics: WeatherMetric[] = [
@@ -37,14 +36,14 @@ const WeatherScreen: React.FC = () => {
   const hourlyForecast: HourlyForecast[] = lastWeatherForecast?.list?.slice(0, 4).map((item) => ({
     time: new Date(item.dt_txt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }),
     temperature: Math.round(item.main.temp - 273.15),
-    icon: getWeatherIcon(item.weather[0].main, themeName === DARK_THEME ? 'white' : 'black', 24),
+    icon: getWeatherIcon(item.weather[0].main, theme === 'dark' ? 'white' : 'black', 24),
   }));
 
   const onBack = () => {
     router.back();
   }
 
-  const styles = React.useMemo(() => makeStyles(themeName!), [themeName]);
+  const styles = React.useMemo(() => makeStyles(theme), [theme]);
 
   const pan = useRef(new Animated.ValueXY()).current;
   const panResponder = useRef(
@@ -136,10 +135,10 @@ const WeatherScreen: React.FC = () => {
           <Text style={styles.forecastTitle}>Сегодня</Text>
           <TouchableOpacity 
             style={styles.daysButton}
-            onPress={() => router.push('/weather-details')}
+            onPress={() => router.push('/weather/forecast')}
           >
             <Text style={styles.daysButtonText}>7 дней</Text>
-            <Ionicons name="chevron-forward" size={20} color={themeName === DARK_THEME ? 'white' : 'black'} />
+            <Ionicons name="chevron-forward" size={20} color={theme === 'dark' ? 'white' : 'black'} />
           </TouchableOpacity>
         </View>
         <View style={styles.hourlyContainer}>
@@ -163,7 +162,7 @@ const WeatherScreen: React.FC = () => {
   );
 };
 
-const makeStyles = (theme: ThemeName) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     borderRadius: 50,
     margin: 7,
@@ -186,7 +185,7 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#000000' : '#ffffff',
+    backgroundColor: theme === 'dark' ? '#000000' : '#ffffff',
   },
   view: {
   },
@@ -281,7 +280,7 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
     alignItems: 'center',
   },
   forecastTitle: {
-    color: theme === DARK_THEME ? 'white' : 'black',
+    color: theme === 'dark' ? 'white' : 'black',
     fontSize: 20,
     fontWeight: '600',
   },
@@ -290,7 +289,7 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
     alignItems: 'center',
   },
   daysButtonText: {
-    color: theme === DARK_THEME ? 'white' : 'black',
+    color: theme === 'dark' ? 'white' : 'black',
     fontSize: 16,
     marginRight: 5,
   },
@@ -303,15 +302,15 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderRadius: 20,
-    borderColor: theme === DARK_THEME ? '#7777' : '#7771',
+    borderColor: theme === 'dark' ? '#7777' : '#7771',
     padding: 15,
     width: '23%',
   },
   activeHourly: {
-    backgroundColor: theme === DARK_THEME ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.05)',
+    backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.05)',
   },
   hourlyTime: {
-    color: theme === DARK_THEME ? 'white' : 'black',
+    color: theme === 'dark' ? 'white' : 'black',
     fontSize: 14,
   },
   hourlyIcon: {
@@ -319,7 +318,7 @@ const makeStyles = (theme: ThemeName) => StyleSheet.create({
     marginVertical: 8,
   },
   hourlyTemp: {
-    color: theme === DARK_THEME ? 'white' : 'black',
+    color: theme === 'dark' ? 'white' : 'black',
     fontSize: 16,
     fontWeight: '600',
   },

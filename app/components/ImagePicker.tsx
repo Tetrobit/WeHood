@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { DARK_THEME, useThemeName } from '@/core/hooks/useTheme';
+import { useTheme } from '@/core/hooks/useTheme';
 
 interface ImagePickerProps {
   images: string[];
@@ -11,7 +11,7 @@ interface ImagePickerProps {
 }
 
 export default function CustomImagePicker({ images, onImagesChange, maxImages = 10 }: ImagePickerProps) {
-  const theme = useThemeName();
+  const [theme] = useTheme();
   const styles = makeStyles(theme);
 
   const pickImage = async () => {
@@ -62,7 +62,7 @@ export default function CustomImagePicker({ images, onImagesChange, maxImages = 
             <MaterialCommunityIcons 
               name="camera-plus" 
               size={32} 
-              color={theme === DARK_THEME ? '#fff' : '#000'} 
+              color={theme === 'dark' ? '#fff' : '#000'} 
             />
             <Text style={styles.addButtonText}>
               Добавить фото ({images.length}/{maxImages})
@@ -74,7 +74,7 @@ export default function CustomImagePicker({ images, onImagesChange, maxImages = 
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     marginBottom: 16,
   },
@@ -104,18 +104,18 @@ const makeStyles = (theme: string) => StyleSheet.create({
   addButton: {
     width: 160,
     height: 90,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#222' : '#f5f5f5',
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: theme === DARK_THEME ? '#333' : '#ddd',
+    borderColor: theme === 'dark' ? '#333' : '#ddd',
     borderStyle: 'dashed',
   },
   addButtonText: {
     marginTop: 8,
     fontSize: 12,
-    color: theme === DARK_THEME ? '#fff' : '#000',
+    color: theme === 'dark' ? '#fff' : '#000',
     textAlign: 'center',
   },
 }); 

@@ -1,6 +1,6 @@
 import { Realm } from '@realm/react';
 
-export class Geolocation extends Realm.Object<Geolocation, "latitude" | "longitude" | "timestamp" | "geocoded"> {
+export class GeolocationModel extends Realm.Object<GeolocationModel, "latitude" | "longitude" | "timestamp" | "geocoded"> {
   _id = new Realm.BSON.ObjectId();
   latitude!: number;
   longitude!: number;
@@ -57,4 +57,4 @@ export class Geolocation extends Realm.Object<Geolocation, "latitude" | "longitu
   };
 }
 
-export default Geolocation;
+export default GeolocationModel;

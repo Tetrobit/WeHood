@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import * as Location from 'expo-location';
 import { useQuery, useRealm } from '@realm/react';
 import { useApi, WeatherForecastResponse } from '@/core/hooks/useApi';
-import Geolocation from '@/core/models/geolocation';
-import WeatherForecast from '@/core/models/weather-forecast';
+import GeolocationModel from '@/core/models/GeolocationModel';
+import WeatherForecastModel from '@/core/models/WeatherForecastModel';
 import useGeolocation from './useGeolocation';
 
 export const useWeather = () => {
@@ -11,7 +11,7 @@ export const useWeather = () => {
   const realm = useRealm();
   const { lastLocation } = useGeolocation();
   const [lastWeatherForecastRecord] = useQuery({
-    type: WeatherForecast,
+    type: WeatherForecastModel,
     query: (realm) => realm.sorted('timestamp', true),
   });
 
@@ -28,7 +28,7 @@ export const useWeather = () => {
         console.log("get weather");
         if (weather.error) throw new Error(weather.error);
         realm.write(() => {
-          realm.create(WeatherForecast, WeatherForecast.generate(JSON.stringify(weather)));
+          realm.create(WeatherForecastModel, WeatherForecastModel.generate(JSON.stringify(weather)));
         });
       } catch (error) {
         console.log('Error: getWeather', error);

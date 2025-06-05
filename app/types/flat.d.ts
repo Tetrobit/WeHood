@@ -33,4 +33,6 @@ export interface IReview {
 
 export interface IFlatDetails extends IFlat {
   reviews: IReview[];
-} 
+}
+
+export default IFlat;

@@ -1,8 +1,8 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Alert, Platform, Animated, TextInput, BackHandler, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { DARK_THEME, LIGHT_THEME, useSetTheme, useThemeName } from '@/core/hooks/useTheme';
+import { useTheme } from '@/core/hooks/useTheme';
 import { useQuery } from '@realm/react';
-import Profile from '@/core/models/profile';
+import UserModel from '@/core/models/UserModel';
 import { router } from 'expo-router';
 import useApi from '@/core/hooks/useApi';
 import { useState, useRef, useEffect } from 'react';
@@ -29,11 +29,10 @@ const HOBBIES = [
 ];
 
 export default function ProfileScreen() {
-  const [profile] = useQuery(Profile);
+  const [profile] = useQuery(UserModel);
   const api = useApi();
-  const theme = useThemeName();
+  const [theme, setTheme] = useTheme();
   const styles = makeStyles(theme!);
-  const setTheme = useSetTheme();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [avatarUri, setAvatarUri] = useState(profile?.avatar);
@@ -101,7 +100,7 @@ export default function ProfileScreen() {
   };
 
   const onChangeTheme = () => {
-    setTheme(theme === DARK_THEME ? LIGHT_THEME : DARK_THEME);
+    setTheme(theme === 'dark' ? 'light' : 'dark');
   }
 
   const onLogout = () => {
@@ -220,73 +219,73 @@ export default function ProfileScreen() {
       <View style={[styles.container, { padding: 20 }]}> 
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12, position: 'relative', height: 36 }}>
           <TouchableOpacity onPress={() => setEditTab(false)} style={{ position: 'absolute', left: 0, top: 0, padding: 2, zIndex: 2 }}>
-            <ArrowLeftIcon size={22} color={theme === DARK_THEME ? '#fff' : '#222'} />
+            <ArrowLeftIcon size={22} color={theme === 'dark' ? '#fff' : '#222'} />
           </TouchableOpacity>
           <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-            <Text style={{ fontSize: 18, fontWeight: '500', color: theme === DARK_THEME ? '#fff' : '#222', textAlign: 'center' }}>Редактировать профиль</Text>
+            <Text style={{ fontSize: 18, fontWeight: '500', color: theme === 'dark' ? '#fff' : '#222', textAlign: 'center' }}>Редактировать профиль</Text>
           </View>
         </View>
-        <Text style={{ color: theme === DARK_THEME ? '#aaa' : '#666', fontSize: 15, marginBottom: 2, marginLeft: 4 }}>Имя</Text>
+        <Text style={{ color: theme === 'dark' ? '#aaa' : '#666', fontSize: 15, marginBottom: 2, marginLeft: 4 }}>Имя</Text>
         <TextInput
           style={[
             styles.input,
             {
-              color: theme === DARK_THEME ? '#fff' : '#222',
-              backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5',
+              color: theme === 'dark' ? '#fff' : '#222',
+              backgroundColor: theme === 'dark' ? '#333' : '#f5f5f5',
               borderWidth: 1,
-              borderColor: theme === DARK_THEME ? '#444' : '#ccc',
+              borderColor: theme === 'dark' ? '#444' : '#ccc',
               borderRadius: 10,
             },
           ]}
           placeholder="Имя"
-          placeholderTextColor={theme === DARK_THEME ? '#888' : '#aaa'}
+          placeholderTextColor={theme === 'dark' ? '#888' : '#aaa'}
           value={editData.firstName}
           onChangeText={v => handleEditChange('firstName', v)}
         />
-        <Text style={{ color: theme === DARK_THEME ? '#aaa' : '#666', fontSize: 15, marginBottom: 2, marginTop: 8, marginLeft: 4 }}>Фамилия</Text>
+        <Text style={{ color: theme === 'dark' ? '#aaa' : '#666', fontSize: 15, marginBottom: 2, marginTop: 8, marginLeft: 4 }}>Фамилия</Text>
         <TextInput
           style={[
             styles.input,
             {
-              color: theme === DARK_THEME ? '#fff' : '#222',
-              backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5',
+              color: theme === 'dark' ? '#fff' : '#222',
+              backgroundColor: theme === 'dark' ? '#333' : '#f5f5f5',
               borderWidth: 1,
-              borderColor: theme === DARK_THEME ? '#444' : '#ccc',
+              borderColor: theme === 'dark' ? '#444' : '#ccc',
               borderRadius: 10,
             },
           ]}
           placeholder="Фамилия"
-          placeholderTextColor={theme === DARK_THEME ? '#888' : '#aaa'}
+          placeholderTextColor={theme === 'dark' ? '#888' : '#aaa'}
           value={editData.lastName}
           onChangeText={v => handleEditChange('lastName', v)}
         />
-        <Text style={{ color: theme === DARK_THEME ? '#aaa' : '#666', fontSize: 15, marginBottom: 2, marginTop: 8, marginLeft: 4 }}>Возраст</Text>
+        <Text style={{ color: theme === 'dark' ? '#aaa' : '#666', fontSize: 15, marginBottom: 2, marginTop: 8, marginLeft: 4 }}>Возраст</Text>
         <TextInput
           style={[
             styles.input,
             {
-              color: theme === DARK_THEME ? '#fff' : '#222',
-              backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5',
+              color: theme === 'dark' ? '#fff' : '#222',
+              backgroundColor: theme === 'dark' ? '#333' : '#f5f5f5',
               borderWidth: 1,
-              borderColor: theme === DARK_THEME ? '#444' : '#ccc',
+              borderColor: theme === 'dark' ? '#444' : '#ccc',
               borderRadius: 10,
             },
           ]}
           placeholder="Возраст"
-          placeholderTextColor={theme === DARK_THEME ? '#888' : '#aaa'}
+          placeholderTextColor={theme === 'dark' ? '#888' : '#aaa'}
           value={editData.age}
           onChangeText={v => handleEditChange('age', v.replace(/[^0-9]/g, ''))}
           keyboardType="numeric"
         />
-        <Text style={{ color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 16, marginTop: 18, marginBottom: 8 }}>Увлечения:</Text>
+        <Text style={{ color: theme === 'dark' ? '#fff' : '#222', fontSize: 16, marginTop: 18, marginBottom: 8 }}>Увлечения:</Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
           {HOBBIES.map(hobby => (
             <TouchableOpacity
               key={hobby}
               style={{
                 backgroundColor: editData.hobbies.includes(hobby)
-                  ? (theme === DARK_THEME ? '#007AFF' : '#007AFF')
-                  : (theme === DARK_THEME ? '#333' : '#eee'),
+                  ? (theme === 'dark' ? '#007AFF' : '#007AFF')
+                  : (theme === 'dark' ? '#333' : '#eee'),
                 borderRadius: 16,
                 paddingHorizontal: 14,
                 paddingVertical: 7,
@@ -296,7 +295,7 @@ export default function ProfileScreen() {
               }}
               onPress={() => handleToggleHobby(hobby)}
             >
-              <Text style={{ color: editData.hobbies.includes(hobby) ? '#fff' : (theme === DARK_THEME ? '#fff' : '#222'), fontSize: 15 }}>{hobby}</Text>
+              <Text style={{ color: editData.hobbies.includes(hobby) ? '#fff' : (theme === 'dark' ? '#fff' : '#222'), fontSize: 15 }}>{hobby}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -328,8 +327,8 @@ export default function ProfileScreen() {
           pointerEvents="none"
         >
           <View style={{
-            backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
-            borderColor: theme === DARK_THEME ? '#444' : '#ddd',
+            backgroundColor: theme === 'dark' ? '#222' : '#fff',
+            borderColor: theme === 'dark' ? '#444' : '#ddd',
             borderWidth: 1,
             borderRadius: 16,
             paddingHorizontal: 24,
@@ -341,7 +340,7 @@ export default function ProfileScreen() {
             minWidth: 180,
             maxWidth: 320,
           }}>
-            <Text style={{ color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 16, textAlign: 'center' }}>{toastMessage}</Text>
+            <Text style={{ color: theme === 'dark' ? '#fff' : '#222', fontSize: 16, textAlign: 'center' }}>{toastMessage}</Text>
           </View>
         </Animated.View>
       )}
@@ -363,28 +362,28 @@ export default function ProfileScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Личная информация</Text>
           <TouchableOpacity style={styles.menuItem} onPress={() => setEditTab(true)}>
-            <Ionicons name="person-outline" size={24} color={theme === DARK_THEME ? '#fff' : '#222'} />
+            <Ionicons name="person-outline" size={24} color={theme === 'dark' ? '#fff' : '#222'} />
             <Text style={styles.menuText}>Редактировать профиль</Text>
-            <Ionicons name="chevron-forward" size={24} color={theme === DARK_THEME ? '#fff' : '#999'} />
+            <Ionicons name="chevron-forward" size={24} color={theme === 'dark' ? '#fff' : '#999'} />
           </TouchableOpacity>
           <TouchableOpacity style={[styles.menuItem, styles.lastMenuItem]} onPress={() => showToast('В разработке...')}>
-            <Ionicons name="settings-outline" size={24} color={theme === DARK_THEME ? '#fff' : '#222'} />
+            <Ionicons name="settings-outline" size={24} color={theme === 'dark' ? '#fff' : '#222'} />
             <Text style={styles.menuText}>Настройки</Text>
-            <Ionicons name="chevron-forward" size={24} color={theme === DARK_THEME ? '#fff' : '#999'} />
+            <Ionicons name="chevron-forward" size={24} color={theme === 'dark' ? '#fff' : '#999'} />
           </TouchableOpacity>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Безопасность</Text>
           <TouchableOpacity style={styles.menuItem} onPress={() => setPasswordModalVisible(true)}>
-            <Ionicons name="lock-closed-outline" size={24} color={theme === DARK_THEME ? '#fff' : '#222'} />
+            <Ionicons name="lock-closed-outline" size={24} color={theme === 'dark' ? '#fff' : '#222'} />
             <Text style={styles.menuText}>Изменить пароль</Text>
-            <Ionicons name="chevron-forward" size={24} color={theme === DARK_THEME ? '#fff' : '#999'} />
+            <Ionicons name="chevron-forward" size={24} color={theme === 'dark' ? '#fff' : '#999'} />
           </TouchableOpacity>
           <TouchableOpacity style={[styles.menuItem, styles.lastMenuItem]} onPress={() => setNotifModalVisible(true)}>
-            <Ionicons name="notifications-outline" size={24} color={theme === DARK_THEME ? '#fff' : '#222'} />
+            <Ionicons name="notifications-outline" size={24} color={theme === 'dark' ? '#fff' : '#222'} />
             <Text style={styles.menuText}>Уведомления</Text>
-            <Ionicons name="chevron-forward" size={24} color={theme === DARK_THEME ? '#fff' : '#999'} />
+            <Ionicons name="chevron-forward" size={24} color={theme === 'dark' ? '#fff' : '#999'} />
           </TouchableOpacity>
         </View>
 
@@ -392,21 +391,21 @@ export default function ProfileScreen() {
           <Text style={styles.sectionTitle}>Настройки</Text>
           <View style={[styles.menuItem, styles.lastMenuItem]}>
             <Ionicons 
-              name={theme === DARK_THEME ? "moon" : "sunny"} 
+              name={theme === 'dark' ? "moon" : "sunny"} 
               size={24} 
-              color={theme === DARK_THEME ? '#fff' : '#222'} 
+              color={theme === 'dark' ? '#fff' : '#222'} 
             />
             <Text style={styles.menuText}>Тёмная тема</Text>
             <Switch
-              value={theme === DARK_THEME}
+              value={theme === 'dark'}
               onValueChange={onChangeTheme}
               trackColor={{ false: '#767577', true: '#81b0ff' }}
-              thumbColor={theme === DARK_THEME ? '#007AFF' : '#f4f3f4'}
+              thumbColor={theme === 'dark' ? '#007AFF' : '#f4f3f4'}
             />
           </View>
         </View>
-        <TouchableOpacity style={[styles.rustoreBox, { backgroundColor: theme === DARK_THEME ? '#111' : '#f2f2f7' }]} activeOpacity={0.8} onPress={() => Linking.openURL('https://www.rustore.ru/catalog/app/com.so_dam.wehood')}>
-          <Text style={[styles.rustoreText, { color: theme === DARK_THEME ? '#fff' : '#222' }]}>Пожалуйста, оставьте отзыв на RuStore, нам важно знать ваше мнение</Text>
+        <TouchableOpacity style={[styles.rustoreBox, { backgroundColor: theme === 'dark' ? '#111' : '#f2f2f7' }]} activeOpacity={0.8} onPress={() => Linking.openURL('https://www.rustore.ru/catalog/app/com.so_dam.wehood')}>
+          <Text style={[styles.rustoreText, { color: theme === 'dark' ? '#fff' : '#222' }]}>Пожалуйста, оставьте отзыв на RuStore, нам важно знать ваше мнение</Text>
         </TouchableOpacity> 
 
         <Modal
@@ -421,8 +420,8 @@ export default function ProfileScreen() {
           backdropTransitionOutTiming={400}
           style={{ justifyContent: 'center', alignItems: 'center', margin: 0 }}
         >
-          <View style={{ backgroundColor: theme === DARK_THEME ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 320, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Сменить фото профиля</Text>
+          <View style={{ backgroundColor: theme === 'dark' ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 320, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === 'dark' ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Сменить фото профиля</Text>
             <TouchableOpacity
               style={{ backgroundColor: '#007AFF', borderRadius: 12, padding: 16, marginBottom: 16, alignItems: 'center', shadowColor: '#007AFF', shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 }}
               onPress={pickImage}
@@ -430,11 +429,11 @@ export default function ProfileScreen() {
               <Text style={{ color: '#fff', fontSize: 17, fontWeight: '600' }}>Выбрать из галереи</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={{ backgroundColor: theme === DARK_THEME ? '#444' : '#eee', borderRadius: 12, padding: 16, marginBottom: 16, alignItems: 'center' }}
+              style={{ backgroundColor: theme === 'dark' ? '#444' : '#eee', borderRadius: 12, padding: 16, marginBottom: 16, alignItems: 'center' }}
               onPress={() => {}}
               disabled
             >
-              <Text style={{ color: theme === DARK_THEME ? '#aaa' : '#888', fontSize: 17, fontWeight: '600' }}>Сгенерировать (скоро)</Text>
+              <Text style={{ color: theme === 'dark' ? '#aaa' : '#888', fontSize: 17, fontWeight: '600' }}>Сгенерировать (скоро)</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={{ alignItems: 'center', marginTop: 4 }}
@@ -457,25 +456,25 @@ export default function ProfileScreen() {
           backdropTransitionOutTiming={400}
           style={{ justifyContent: 'center', alignItems: 'center', margin: 0 }}
         >
-          <View style={{ backgroundColor: theme === DARK_THEME ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 340, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Настройки уведомлений</Text>
+          <View style={{ backgroundColor: theme === 'dark' ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 340, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === 'dark' ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Настройки уведомлений</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 22 }}>
-              <Text style={{ flex: 1, color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 17 }}>Отключение уведомлений</Text>
+              <Text style={{ flex: 1, color: theme === 'dark' ? '#fff' : '#222', fontSize: 17 }}>Отключение уведомлений</Text>
               <Switch
                 value={!notificationsEnabled ? false : true}
                 onValueChange={v => toggleNotifications(v)}
                 trackColor={{ false: '#767577', true: '#81b0ff' }}
-                thumbColor={theme === DARK_THEME ? '#007AFF' : '#f4f3f4'}
+                thumbColor={theme === 'dark' ? '#007AFF' : '#f4f3f4'}
               />
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 22 }}>
-              <Text style={{ flex: 1, color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 17 }}>Беззвучные уведомления</Text>
+              <Text style={{ flex: 1, color: theme === 'dark' ? '#fff' : '#222', fontSize: 17 }}>Беззвучные уведомления</Text>
               <Switch
                 value={silentNotifications}
                 onValueChange={v => toggleSilent(v)}
                 disabled={!notificationsEnabled}
                 trackColor={{ false: '#767577', true: '#81b0ff' }}
-                thumbColor={theme === DARK_THEME ? '#007AFF' : '#f4f3f4'}
+                thumbColor={theme === 'dark' ? '#007AFF' : '#f4f3f4'}
               />
             </View>
             <TouchableOpacity style={{ alignItems: 'center', marginTop: 4 }} onPress={() => setNotifModalVisible(false)}>
@@ -497,9 +496,9 @@ export default function ProfileScreen() {
           backdropTransitionOutTiming={400}
           style={{ justifyContent: 'center', alignItems: 'center', margin: 0 }}
         >
-          <View style={{ backgroundColor: theme === DARK_THEME ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 340, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Изменить пароль</Text>
-            <Text style={{ color: theme === DARK_THEME ? '#aaa' : '#666', fontSize: 14, marginBottom: 10, textAlign: 'center' }}>
+          <View style={{ backgroundColor: theme === 'dark' ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 340, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === 'dark' ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Изменить пароль</Text>
+            <Text style={{ color: theme === 'dark' ? '#aaa' : '#666', fontSize: 14, marginBottom: 10, textAlign: 'center' }}>
               Введите старый пароль (если вход через VK — оставьте поле пустым)
             </Text>
             <Controller
@@ -507,9 +506,9 @@ export default function ProfileScreen() {
               name="oldPassword"
               render={({ field: { onChange, value } }) => (
                 <TextInput
-                  style={[styles.input, { color: theme === DARK_THEME ? '#fff' : '#222', backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5' }]}
+                  style={[styles.input, { color: theme === 'dark' ? '#fff' : '#222', backgroundColor: theme === 'dark' ? '#333' : '#f5f5f5' }]}
                   placeholder="Старый пароль"
-                  placeholderTextColor={theme === DARK_THEME ? '#888' : '#aaa'}
+                  placeholderTextColor={theme === 'dark' ? '#888' : '#aaa'}
                   secureTextEntry
                   value={value}
                   onChangeText={onChange}
@@ -521,9 +520,9 @@ export default function ProfileScreen() {
               name="newPassword"
               render={({ field: { onChange, value } }) => (
                 <TextInput
-                  style={[styles.input, { color: theme === DARK_THEME ? '#fff' : '#222', backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5' }]}
+                  style={[styles.input, { color: theme === 'dark' ? '#fff' : '#222', backgroundColor: theme === 'dark' ? '#333' : '#f5f5f5' }]}
                   placeholder="Новый пароль"
-                  placeholderTextColor={theme === DARK_THEME ? '#888' : '#aaa'}
+                  placeholderTextColor={theme === 'dark' ? '#888' : '#aaa'}
                   secureTextEntry
                   value={value}
                   onChangeText={onChange}
@@ -535,9 +534,9 @@ export default function ProfileScreen() {
               name="repeatPassword"
               render={({ field: { onChange, value } }) => (
                 <TextInput
-                  style={[styles.input, { color: theme === DARK_THEME ? '#fff' : '#222', backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5' }]}
+                  style={[styles.input, { color: theme === 'dark' ? '#fff' : '#222', backgroundColor: theme === 'dark' ? '#333' : '#f5f5f5' }]}
                   placeholder="Повторите пароль"
-                  placeholderTextColor={theme === DARK_THEME ? '#888' : '#aaa'}
+                  placeholderTextColor={theme === 'dark' ? '#888' : '#aaa'}
                   secureTextEntry
                   value={value}
                   onChangeText={onChange}
@@ -564,17 +563,17 @@ export default function ProfileScreen() {
   );
 }
 
-const makeStyles = (theme: string) => StyleSheet.create({
+const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === DARK_THEME ? '#000' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#000' : '#f5f5f5',
   },
   header: {
     alignItems: 'center',
     padding: 20,
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: theme === DARK_THEME ? '#333' : '#eee',
+    borderBottomColor: theme === 'dark' ? '#333' : '#eee',
   },
   avatarContainer: {
     position: 'relative',
@@ -589,7 +588,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     position: 'absolute',
     right: 0,
     bottom: 0,
-    backgroundColor: theme === DARK_THEME ? '#007AFF' : '#007AFF',
+    backgroundColor: theme === 'dark' ? '#007AFF' : '#007AFF',
     width: 32,
     height: 32,
     borderRadius: 16,
@@ -600,14 +599,14 @@ const makeStyles = (theme: string) => StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 5,
-    color: theme === DARK_THEME ? '#fff' : '#222',
+    color: theme === 'dark' ? '#fff' : '#222',
   },
   email: {
     fontSize: 16,
-    color: theme === DARK_THEME ? '#aaa' : '#666',
+    color: theme === 'dark' ? '#aaa' : '#666',
   },
   section: {
-    backgroundColor: theme === DARK_THEME ? '#222' : '#fff',
+    backgroundColor: theme === 'dark' ? '#222' : '#fff',
     marginTop: 20,
     padding: 15,
   },
@@ -615,14 +614,14 @@ const makeStyles = (theme: string) => StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 15,
-    color: theme === DARK_THEME ? '#fff' : '#222',
+    color: theme === 'dark' ? '#fff' : '#222',
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: theme === DARK_THEME ? '#333' : '#eee',
+    borderBottomColor: theme === 'dark' ? '#333' : '#eee',
   },
   lastMenuItem: {
     borderBottomWidth: 0,
@@ -631,7 +630,7 @@ const makeStyles = (theme: string) => StyleSheet.create({
     flex: 1,
     fontSize: 16,
     marginLeft: 15,
-    color: theme === DARK_THEME ? '#fff' : '#222',
+    color: theme === 'dark' ? '#fff' : '#222',
   },
   logoutButton: {
     margin: 20,

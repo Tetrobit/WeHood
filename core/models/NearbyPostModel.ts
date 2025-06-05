@@ -11,17 +11,20 @@ export class NearbyPostModel extends Realm.Object {
   type!: 'image' | 'video';
   views!: number;
   likes!: number;
+  liked!: boolean;
   dislikes!: number;
   createdAt!: Date;
   updatedAt!: Date;
   authorId!: string;
   authorVkId!: string;
-  authorAvatar!: string;
+  authorAvatar?: string;
   authorEmail!: string;
   authorFirstName!: string;
   authorLastName!: string;
   authorCreatedAt!: Date;
   authorUpdatedAt!: Date;
+  address?: string;
+  deleted?: boolean;
 
   get author() {
     return {
@@ -42,6 +45,7 @@ export class NearbyPostModel extends Realm.Object {
     properties: {
       id: 'int',
       title: 'string',
+      address: 'string?',
       description: 'string',
       latitude: 'double',
       longitude: 'double',
@@ -49,16 +53,18 @@ export class NearbyPostModel extends Realm.Object {
       type: 'string',
       views: 'int',
       likes: 'int',
+      liked: 'bool',
       createdAt: 'date',
       updatedAt: 'date',
       authorId: 'string',
       authorVkId: 'string',
-      authorAvatar: 'string',
+      authorAvatar: 'string?',
       authorEmail: 'string',
       authorFirstName: 'string',
       authorLastName: 'string',
       authorCreatedAt: 'date',
       authorUpdatedAt: 'date',
+      deleted: 'bool?',
     },
   };
 
@@ -67,12 +73,14 @@ export class NearbyPostModel extends Realm.Object {
       id: post.id,
       title: post.title,
       description: post.description,
-      latitude: post.latitude,
-      longitude: post.longitude,
+      latitude: parseFloat(post.latitude.toString()),
+      longitude: parseFloat(post.longitude.toString()),
       fileId: post.fileId,
       type: post.type,
       views: post.views,
       likes: post.likes,
+      liked: post.liked,
+      address: post.address,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
       authorId: post.author.id,
@@ -83,6 +91,7 @@ export class NearbyPostModel extends Realm.Object {
       authorLastName: post.author.lastName,
       authorCreatedAt: post.author.createdAt,
       authorUpdatedAt: post.author.updatedAt,
+      deleted: post.deleted,
     };
   }
 
@@ -90,6 +99,7 @@ export class NearbyPostModel extends Realm.Object {
     return {
       id: this.id,
       title: this.title,
+      address: this.address,
       description: this.description,
       latitude: this.latitude,
       longitude: this.longitude,
@@ -97,9 +107,11 @@ export class NearbyPostModel extends Realm.Object {
       type: this.type as 'image' | 'video',
       views: this.views,
       likes: this.likes,
+      liked: this.liked,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       author: this.author,
+      deleted: this.deleted,
     };
   }
 }

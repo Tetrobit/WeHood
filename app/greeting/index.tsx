@@ -1,53 +1,49 @@
 import React, { useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Linking, ActivityIndicator } from 'react-native';
 import PagerView from 'react-native-pager-view';
-import { useTheme, useThemeName, useSetTheme, THEMES } from '@/core/hooks/useTheme';
+import { useTheme, Theme } from '@/core/hooks/useTheme';
 import { useGeolocation } from '@/core/hooks/useGeolocation';
 import { router } from 'expo-router';
-import { setStatusBarBackgroundColor } from 'expo-status-bar';
+import { setStatusBarBackgroundColor, setStatusBarStyle } from 'expo-status-bar';
 import LottieView from 'lottie-react-native';
 import { wait } from '@/core/utils/time';
 import { useSharedValue } from 'react-native-reanimated';
-import { useQuery, useRealm } from '@realm/react';
-import Theme from '@/core/models/theme';
 import { useColorScheme } from 'react-native';
 import ToastManager, { Toast } from 'toastify-react-native';
-import { Greeting } from '@/core/models/greeting';
+import * as SecureStorage from 'expo-secure-store';
 
 export const GreetingScreen = () => {
   const systemTheme = useColorScheme();
   const pagerRef = useRef<PagerView>(null);
-  const themeName = useThemeName();
-  const setThemeName = useSetTheme();
-  const { lastLocation, location, requestGeolocation, errorMsg } = useGeolocation();
+  const [theme, setTheme] = useTheme();
+  const { location, requestGeolocation, errorMsg } = useGeolocation();
   const animationRef = useRef<LottieView>(null);
   const isSwitched = useSharedValue(true);
   const [isThemeSwitched, setIsThemeSwitched] = useState(true);
   const [isGeolocationLoading, setIsGeolocationLoading] = useState(false);
-  const [realmTheme] = useQuery(Theme)
-  const realm = useRealm();
 
   const handleNext = (page: number) => {
     pagerRef.current?.setPage(page);
   };
 
   const handleFinish = () => {
-    realm.write(() => {
-      realm.create(Greeting, Greeting.generate(true));
-    });
+    SecureStorage.setItem('passed_greeting', 'true');
     router.replace('/(tabs)');
   };
 
-  const handleThemeChange = async (theme: typeof THEMES[number]) => {
+  const handleThemeChange = async (theme: Theme) => {
     if (!isSwitched.value) return;
     setIsThemeSwitched(false);
     isSwitched.value = false;
-    setThemeName(theme);
+    setTheme(theme as Theme);
+
     setStatusBarBackgroundColor(theme === 'light' ? '#ffffff' : '#000000');
+    setStatusBarStyle(theme === 'light' ? 'dark' : 'light');
+
     if (theme === 'dark') {
       animationRef.current!.setState({ direction: 1 });
       animationRef.current?.play(60, 100);
-      await wait(800);
+      await wait(1000);
       animationRef.current?.pause();
     }
     else {
@@ -60,13 +56,10 @@ export const GreetingScreen = () => {
     setIsThemeSwitched(true);
   };
 
-  React.useEffect(() => {
+  React.useEffect(() => { 
     async function init() {
-      if (realmTheme) {
-        realm.write(() => {
-          realmTheme.name = systemTheme === 'dark' ? 'dark' : 'light';
-        });
-      }
+      setStatusBarBackgroundColor(systemTheme === 'dark' ? '#000000' : '#ffffff');
+      setStatusBarStyle(systemTheme === 'dark' ? 'light' : 'dark');
 
       if (systemTheme === 'dark') {
         animationRef.current?.play(100, 100);
@@ -79,11 +72,10 @@ export const GreetingScreen = () => {
     init();
   }, []);
 
-  const theme = useTheme();
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: theme.backgroundColor,
+      backgroundColor: theme === 'dark' ? '#000000' : '#ffffff',
     },
     pager: {
       flex: 1,
@@ -99,19 +91,19 @@ export const GreetingScreen = () => {
       fontWeight: 'bold',
       marginBottom: 30,
       textAlign: 'center',
-      color: theme.textColor,
+      color: theme === 'dark' ? '#ffffff' : '#000000',
     },
     subtitle: {
       fontSize: 18,
       marginBottom: 20,
       textAlign: 'center',
-      color: theme.textColor + '99',
+      color: theme === 'dark' ? '#ffffff' : '#000000',
     },
     description: {
       fontSize: 16,
       textAlign: 'center',
       marginBottom: 30,
-      color: theme.textColor + '99',
+      color: theme === 'dark' ? '#ffffff' : '#000000',
     },
     themeButtons: {
       flexDirection: 'row',
@@ -134,24 +126,24 @@ export const GreetingScreen = () => {
     themeButton: {
       padding: 15,
       borderRadius: 8,
-      backgroundColor: theme.backgroundColor,
+      backgroundColor: theme === 'dark' ? '#000000' : '#ffffff',
       borderWidth: 1,
-      borderColor: theme.borderColor,
+      borderColor: theme === 'dark' ? '#000000' : '#000000',
       width: '45%',
       alignItems: 'center',
     },
     activeTheme: {
-      backgroundColor: themeName == 'light' ? '#000000' : '#ffffff',
-      borderColor: themeName == 'light' ? '#000000' : '#ffffff',
-      color: themeName == 'light' ? '#ffffff' : '#000000',
+      backgroundColor: theme === 'light' ? '#000000' : '#ffffff',
+      borderColor: theme === 'light' ? '#000000' : '#ffffff',
+      color: theme === 'light' ? '#ffffff' : '#000000',
     },
     themeButtonText: {
       fontSize: 16,
       fontWeight: '500',
-      color: theme.textColor,
+      color: theme === 'dark' ? '#ffffff' : '#000000',
     },
     geoButton: {
-      backgroundColor: theme.buttonColor,
+      backgroundColor: theme === 'dark' ? '#ffffff' : '#000000',
       padding: 15,
       borderRadius: 8,
       width: '100%',
@@ -159,19 +151,19 @@ export const GreetingScreen = () => {
       marginBottom: 20,
     },
     geoButtonText: {
-      color: theme.buttonTextColor,
+      color: theme === 'dark' ? '#000000' : '#ffffff',
       fontSize: 16,
       fontWeight: '500',
     },
     nextButton: {
-      backgroundColor: theme.buttonColor,
+      backgroundColor: theme === 'dark' ? '#ffffff' : '#000000',
       padding: 15,
       borderRadius: 8,
       width: '100%',
       alignItems: 'center',
     },
     nextButtonText: {
-      color: theme.buttonTextColor,
+      color: theme === 'dark' ? '#000000' : '#ffffff',
       fontSize: 16,
       fontWeight: '500',
     },
@@ -221,7 +213,7 @@ export const GreetingScreen = () => {
           <View style={styles.themeContainer}>
             <Text style={styles.title}>Давайте настроим приложение</Text>
             <Text style={styles.subtitle}>Выберите тему</Text>
-            <TouchableOpacity activeOpacity={0.9} onPress={() => handleThemeChange(themeName === 'light' ? 'dark' : 'light')}>
+            <TouchableOpacity activeOpacity={0.9} onPress={() => handleThemeChange(theme === 'light' ? 'dark' : 'light')}>
               <LottieView 
                 ref={animationRef}
                 autoPlay={false}
@@ -230,7 +222,7 @@ export const GreetingScreen = () => {
               />
             </TouchableOpacity>
             <Text style={styles.description}>
-              {themeName === 'light' 
+              {theme === 'light' 
                 ? 'Мы выбрали светлую тему, так как она была выбрана в настройках вашего устройства'
                 : 'Мы выбрали тёмную тему, так как она была выбрана в настройках вашего устройства'}
             </Text>
@@ -260,7 +252,7 @@ export const GreetingScreen = () => {
               onPress={handleGeolocation}
             >
               {isGeolocationLoading ? (
-                <ActivityIndicator size="small" color={theme.buttonTextColor} />
+                <ActivityIndicator size="small" color={theme === 'dark' ? '#000000' : '#ffffff'} />
               ) : (
                 <Text style={styles.geoButtonText}>Разрешить доступ</Text>
               )}

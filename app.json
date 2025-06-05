@@ -2,7 +2,7 @@
   "expo": {
     "name": "Мой Район",
     "slug": "wehood",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "wehood",
@@ -55,7 +55,8 @@
           "microphonePermission": "Разрешение на использование микрофона",
           "recordAudioAndroid": true
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
