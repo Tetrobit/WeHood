@@ -1,2 +1,2 @@
-export const API_URL = 'https://user230874919-3yln4fo2.tunnel.vk-apps.com';
+export const API_URL = 'http://192.168.2.102:3000';
 export const MEDIA_URL = 'https://media.wehood.ru';

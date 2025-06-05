@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Alert, Platform, Animated, TextInput, BackHandler, Linking, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Alert, Platform, Animated, TextInput, BackHandler, Linking, RefreshControl, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/core/hooks/useTheme';
 import { useQuery } from '@realm/react';
@@ -19,6 +19,7 @@ import { Theme } from '@/core/hooks/useTheme';
 import { MEDIA_URL } from '@/core/constants/environment';
 import UserAvatar from '../components/UserAvatar';
 import { useUser } from '@/core/hooks/models/useUser';
+import LottieView from 'lottie-react-native';
 
 const HOBBIES = [
   'Спорт',
@@ -39,6 +40,7 @@ export default function ProfileScreen() {
   const [theme, setTheme] = useTheme();
   const styles = makeStyles(theme!);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadingModalVisible, setLoadingModalVisible] = useState(false);
 
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -259,6 +261,19 @@ export default function ProfileScreen() {
     }
   }, []);
 
+  const generateAvatar = async () => {
+    setModalVisible(false);
+    try {
+      setLoadingModalVisible(true);
+      const response = await api.generateAvatar();
+      await api.updateProfile({ avatar: response.avatar });
+    } catch (error) {
+      showToast('Ошибка при генерации аватара');
+    } finally {
+      setLoadingModalVisible(false);
+    }
+  }
+
   if (editTab) {
     return (
       <View style={[styles.container, { padding: 20 }]}> 
@@ -463,11 +478,10 @@ export default function ProfileScreen() {
               <Text style={{ color: '#fff', fontSize: 17, fontWeight: '600' }}>Выбрать из галереи</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={{ backgroundColor: theme === 'dark' ? '#444' : '#eee', borderRadius: 12, padding: 16, marginBottom: 16, alignItems: 'center' }}
-              onPress={() => {}}
-              disabled
+              style={{ backgroundColor: '#007AFF', borderRadius: 12, padding: 16, marginBottom: 16, alignItems: 'center' }}
+              onPress={() => generateAvatar()}
             >
-              <Text style={{ color: theme === 'dark' ? '#aaa' : '#888', fontSize: 17, fontWeight: '600' }}>Сгенерировать (скоро)</Text>
+              <Text style={{ color: '#fff', fontSize: 17, fontWeight: '600' }}>Сгенерировать</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={{ alignItems: 'center', marginTop: 4 }}
@@ -586,6 +600,27 @@ export default function ProfileScreen() {
             <TouchableOpacity style={{ alignItems: 'center', marginTop: 8 }} onPress={() => setPasswordModalVisible(false)}>
               <Text style={{ color: '#007AFF', fontSize: 16 }}>Отмена</Text>
             </TouchableOpacity>
+          </View>
+        </Modal>
+
+        {/* Модальное окно загрузки */}
+        <Modal
+          isVisible={loadingModalVisible}
+          backdropOpacity={0.35}
+          animationIn="fadeIn"
+          animationOut="fadeOut"
+          style={{ justifyContent: 'center', alignItems: 'center', margin: 0 }}
+        >
+          <View style={{ backgroundColor: theme === 'dark' ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 300, alignItems: 'center' }}>
+            <Text style={{ fontSize: 18, fontWeight: '600', color: theme === 'dark' ? '#fff' : '#222', marginBottom: 16, textAlign: 'center' }}>
+              Генерируем для вас изображение...
+            </Text>
+            <LottieView
+              source={require('@/assets/lottie/drawing.json')}
+              autoPlay
+              loop
+              style={{ width: 200, height: 200 }}
+            />
           </View>
         </Modal>
 
