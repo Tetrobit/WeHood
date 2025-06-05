@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { Card, Button } from 'react-native-paper';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Theme, useTheme } from '@/core/hooks/useTheme';
+import { useQuery } from '@realm/react';
+import UserModel from '@/core/models/UserModel';
 
 const mockNews = [
   {
@@ -32,6 +34,13 @@ const mockNews = [
   },
 ];
 
+const mockAvatars = [
+  'https://randomuser.me/api/portraits/men/32.jpg',
+  'https://randomuser.me/api/portraits/women/44.jpg',
+  'https://randomuser.me/api/portraits/men/65.jpg',
+];
+const defaultAvatar = 'https://randomuser.me/api/portraits/lego/1.jpg';
+
 export default function NewsDetailsScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
@@ -44,6 +53,9 @@ export default function NewsDetailsScreen() {
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState(news.comments);
   const commentsListRef = useRef<FlatList>(null);
+  const [user] = useQuery(UserModel);
+  const [commentLikes, setCommentLikes] = useState<Record<string, number>>({});
+  const [likedComments, setLikedComments] = useState<Record<string, boolean>>({});
 
   // Сохраняем лайки в AsyncStorage
   useEffect(() => {
@@ -54,12 +66,43 @@ export default function NewsDetailsScreen() {
         setLikes(parsed.likes);
         setLiked(parsed.liked);
       }
+      // Загружаем комментарии
+      const commentsStored = await AsyncStorage.getItem(`news_comments_${news.id}`);
+      if (commentsStored) {
+        try {
+          const commentsArr = JSON.parse(commentsStored);
+          if (Array.isArray(commentsArr)) setComments(commentsArr);
+        } catch {}
+      }
+      // Загружаем лайки комментариев
+      const commentLikesStored = await AsyncStorage.getItem(`comment_likes_${news.id}`);
+      if (commentLikesStored) {
+        try {
+          const likesObj = JSON.parse(commentLikesStored);
+          setCommentLikes(likesObj);
+        } catch {}
+      }
+      const likedCommentsStored = await AsyncStorage.getItem(`liked_comments_${news.id}`);
+      if (likedCommentsStored) {
+        try {
+          const likedObj = JSON.parse(likedCommentsStored);
+          setLikedComments(likedObj);
+        } catch {}
+      }
     })();
   }, [news.id]);
 
   useEffect(() => {
     AsyncStorage.setItem(`news_likes_${news.id}`, JSON.stringify({ likes, liked }));
   }, [likes, liked, news.id]);
+
+  useEffect(() => {
+    AsyncStorage.setItem(`comment_likes_${news.id}`, JSON.stringify(commentLikes));
+  }, [commentLikes, news.id]);
+
+  useEffect(() => {
+    AsyncStorage.setItem(`liked_comments_${news.id}`, JSON.stringify(likedComments));
+  }, [likedComments, news.id]);
 
   const handleLike = () => {
     if (!liked) {
@@ -73,11 +116,23 @@ export default function NewsDetailsScreen() {
 
   const handleAddComment = () => {
     if (comment.trim().length > 0) {
-      setComments(prev => [...prev, { id: Date.now().toString(), author: 'Вы', text: comment }]);
+      const newComments = [...comments, { id: Date.now().toString(), author: 'Вы', text: comment }];
+      setComments(newComments);
       setComment('');
+      AsyncStorage.setItem(`news_comments_${news.id}`, JSON.stringify(newComments));
       setTimeout(() => {
         commentsListRef.current?.scrollToEnd({ animated: true });
       }, 100);
+    }
+  };
+
+  const handleLikeComment = (id: string) => {
+    if (likedComments[id]) {
+      setCommentLikes(prev => ({ ...prev, [id]: Math.max((prev[id] || 1) - 1, 0) }));
+      setLikedComments(prev => ({ ...prev, [id]: false }));
+    } else {
+      setCommentLikes(prev => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
+      setLikedComments(prev => ({ ...prev, [id]: true }));
     }
   };
 
@@ -88,9 +143,12 @@ export default function NewsDetailsScreen() {
         <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
           <MaterialCommunityIcons name="arrow-left" size={28} color={isDark ? '#fff' : '#000'} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Новости</Text>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={styles.headerTitle}>Новости</Text>
+        </View>
+        <View style={{ width: 36 }} />
       </View>
-      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 16 }}>
+      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 80 }}>
         <Card style={styles.card}>
           <Card.Cover source={{ uri: news.image }} style={styles.image} />
           <Card.Content>
@@ -107,49 +165,54 @@ export default function NewsDetailsScreen() {
             </View>
           </Card.Content>
         </Card>
-        <View style={styles.commentsBlock}>
-          <Text style={styles.commentsTitle}>Комментарии</Text>
-          <FlatList
-            ref={commentsListRef}
-            data={comments}
-            keyExtractor={item => item.id}
-            renderItem={({ item }) => (
-              <View style={styles.commentItem}>
-                <MaterialCommunityIcons name="account-circle" size={22} color={isDark ? '#aaa' : '#666'} />
-                <View style={{ marginLeft: 8 }}>
-                  <Text style={styles.commentAuthor}>{item.author}</Text>
-                  <Text style={styles.commentText}>{item.text}</Text>
-                </View>
-              </View>
-            )}
-            style={styles.commentsList}
-            contentContainerStyle={{ paddingBottom: 8 }}
-            showsVerticalScrollIndicator={false}
-            scrollEnabled={comments.length > 3}
-            // Ограничим высоту списка
-            ListEmptyComponent={<Text style={{ color: isDark ? '#aaa' : '#666', fontSize: 14 }}>Комментариев пока нет</Text>}
-          />
-          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-            <View style={styles.addCommentRow}>
-              <TextInput
-                style={styles.input}
-                placeholder="Написать..."
-                value={comment}
-                onChangeText={setComment}
-                placeholderTextColor={isDark ? '#aaa' : '#888'}
-                multiline={false}
-                numberOfLines={1}
-                returnKeyType="send"
-                onSubmitEditing={handleAddComment}
+
+        {/* Список комментариев с аватарками и лайками */}
+        {comments.map((item, idx) => (
+          <View key={item.id} style={styles.commentItem}>
+            {item.author === 'Вы' ? (
+              <Image
+                source={{ uri: user?.avatar || defaultAvatar }}
+                style={styles.commentAvatar}
               />
-              <Button mode="contained" onPress={handleAddComment} style={[styles.sendButton, { backgroundColor: isDark ? '#00D26A' : '#00C060' }]}
-                labelStyle={{ color: '#fff' }}>
-                Отправить
-              </Button>
+            ) : (
+              <Image
+                source={{ uri: mockAvatars[idx % mockAvatars.length] }}
+                style={styles.commentAvatar}
+              />
+            )}
+            <View style={{ marginLeft: 12, flex: 1 }}>
+              <Text style={styles.commentAuthor}>{item.author}</Text>
+              <Text style={styles.commentText}>{item.text}</Text>
+              <View style={styles.commentLikeRow}>
+                <TouchableOpacity onPress={() => handleLikeComment(item.id)} style={styles.commentLikeBtn} activeOpacity={0.7}>
+                  <MaterialCommunityIcons name={likedComments[item.id] ? 'heart' : 'heart-outline'} size={22} color="#FF6B6B" style={styles.commentLikeIcon} />
+                  <Text style={styles.commentLikeCount}>{commentLikes[item.id] || 0}</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </KeyboardAvoidingView>
-        </View>
+          </View>
+        ))}
       </ScrollView>
+
+      {/* Фиксированная нижняя панель для ввода комментария */}
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={16} style={styles.inputBarWrapper}>
+        <View style={styles.inputBar}>
+          <TextInput
+            style={styles.inputBarInput}
+            placeholder="Добавить комментарий..."
+            value={comment}
+            onChangeText={setComment}
+            placeholderTextColor={isDark ? '#aaa' : '#888'}
+            multiline={false}
+            numberOfLines={1}
+            returnKeyType="send"
+            onSubmitEditing={handleAddComment}
+          />
+          <Button mode="contained" onPress={handleAddComment} style={styles.inputBarButton} labelStyle={{ color: '#fff' }}>
+            Отправить
+          </Button>
+        </View>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -227,56 +290,55 @@ const makeStyles = (theme: Theme) => {
       color: '#00D26A',
       fontSize: 15,
     },
-    commentsBlock: {
-      margin: 16,
-      backgroundColor: isDark ? '#222' : '#fff',
-      borderRadius: 16,
-      padding: 16,
-    },
-    commentsTitle: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: isDark ? '#fff' : '#000',
-      marginBottom: 12,
-    },
-    commentsList: {
-      maxHeight: 120,
-      marginBottom: 8,
-    },
     commentItem: {
       flexDirection: 'row',
       alignItems: 'flex-start',
       marginBottom: 12,
+      paddingLeft: 16,
     },
     commentAuthor: {
       fontWeight: 'bold',
       color: isDark ? '#fff' : '#000',
-      fontSize: 14,
+      fontSize: 17,
     },
     commentText: {
       color: isDark ? '#aaa' : '#666',
-      fontSize: 14,
+      fontSize: 16,
     },
-    addCommentRow: {
+    inputBarWrapper: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      padding: 16,
+      backgroundColor: isDark ? '#000' : '#f5f5f5',
+    },
+    inputBar: {
       flexDirection: 'row',
       alignItems: 'center',
-      marginTop: 0,
-    },
-    input: {
-      flex: 1,
-      backgroundColor: isDark ? '#111' : '#f0f0f0',
-      color: isDark ? '#fff' : '#000',
       borderRadius: 8,
-      paddingHorizontal: 12,
-      paddingVertical: 8,
-      marginRight: 8,
-      fontSize: 14,
-      minHeight: 40,
-      maxHeight: 40,
+      backgroundColor: isDark ? '#111' : '#f0f0f0',
     },
-    sendButton: {
+    inputBarInput: {
+      flex: 1,
+      backgroundColor: 'transparent',
+      color: isDark ? '#fff' : '#000',
+      padding: 12,
+      fontSize: 14,
+    },
+    inputBarButton: {
       borderRadius: 8,
       elevation: 0,
     },
+    commentAvatar: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      marginRight: 12,
+    },
+    commentLikeRow: { flexDirection: 'row', alignItems: 'center', marginTop: 4, marginLeft: -4 },
+    commentLikeBtn: { flexDirection: 'row', alignItems: 'center', marginLeft: 0, alignSelf: 'flex-start' },
+    commentLikeIcon: { marginBottom: -2, marginRight: 2 },
+    commentLikeCount: { color: '#FF6B6B', marginLeft: 2, fontSize: 15, marginBottom: -2 },
   });
 }; 

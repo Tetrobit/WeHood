@@ -1,26 +1,37 @@
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Dimensions } from 'react-native';
 import { Card, Button } from 'react-native-paper';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { router } from 'expo-router';
-import { useTheme } from '@/core/hooks/useTheme';
+import { router, useFocusEffect } from 'expo-router';
+import { Theme, useTheme } from '@/core/hooks/useTheme';
 import { useQuery } from '@realm/react';
 import UserModel from '@/core/models/UserModel';
 import Carousel from 'react-native-reanimated-carousel';
 import * as Network from 'expo-network';
 import * as Location from 'expo-location';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import useApi from '@/core/hooks/useApi';
 import { useGeolocation } from '@/core/hooks/useGeolocation';
 import useWeather from '@/core/hooks/useWeather';
-import { useState } from 'react';
 import { getWeatherIcon } from '@/core/utils/weather';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const { width } = Dimensions.get('window');
 
 type ServiceIcon = 'hand-heart' | 'calendar-star' | 'bullhorn' | 'account-group';
 
-const mockNews = [
+type NewsItem = {
+  id: string;
+  title: string;
+  description: string;
+  time: string;
+  image: string;
+  likes: number;
+  comments: number;
+  liked?: boolean;
+};
+
+const mockNews: NewsItem[] = [
   {
     id: '1',
     title: 'Субботник в парке',
@@ -88,6 +99,7 @@ export default function HomeScreen() {
   const styles = makeStyles(theme!);
   const { lastLocation, requestGeolocation } = useGeolocation();
   const { lastWeatherForecast } = useWeather();
+  const [newsList, setNewsList] = useState<NewsItem[]>(mockNews);
 
   const renderCarouselItem = ({ item }: { item: typeof carouselData[0] }) => (
     <View style={styles.carouselItem}>
@@ -121,6 +133,35 @@ export default function HomeScreen() {
   React.useEffect(() => {
     requestGeolocation();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchNewsData = async () => {
+        const updatedNews = await Promise.all(mockNews.map(async (item) => {
+          const stored = await AsyncStorage.getItem(`news_likes_${item.id}`);
+          let liked = false;
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            liked = !!parsed.liked;
+            // Для комментариев тоже пробуем получить из хранилища
+            const commentsStored = await AsyncStorage.getItem(`news_comments_${item.id}`);
+            let commentsCount = item.comments;
+            if (commentsStored) {
+              try {
+                const commentsArr = JSON.parse(commentsStored);
+                if (Array.isArray(commentsArr)) commentsCount = commentsArr.length;
+              } catch {}
+            }
+            return { ...item, likes: parsed.likes, comments: commentsCount, liked };
+          } else {
+            return { ...item, liked };
+          }
+        }));
+        setNewsList(updatedNews);
+      };
+      fetchNewsData();
+    }, [])
+  );
 
   return (
     <ScrollView style={styles.container}>
@@ -204,7 +245,7 @@ export default function HomeScreen() {
       {/* Лента новостей */}
       <View style={styles.newsContainer}>
         <Text style={styles.newsTitle}>Лента новостей</Text>
-        {mockNews.map((news) => (
+        {newsList.map((news) => (
           <TouchableOpacity key={news.id} activeOpacity={0.9} onPress={() => router.push({ pathname: '/news/[id]', params: { id: news.id } })}>
             <Card style={styles.newsCard}>
               <Card.Cover source={{ uri: news.image }} style={styles.newsImage} />
@@ -212,7 +253,7 @@ export default function HomeScreen() {
                 <Text style={styles.newsItemTitle}>{news.title}</Text>
                 <Text style={styles.newsDescription}>{news.description}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                  <MaterialCommunityIcons name="heart-outline" size={18} color="#FF6B6B" style={{ marginRight: 4 }} />
+                  <MaterialCommunityIcons name={news.liked ? 'heart' : 'heart-outline'} size={18} color="#FF6B6B" style={{ marginRight: 4 }} />
                   <Text style={{ color: '#FF6B6B', marginRight: 16, fontSize: 13 }}>{news.likes}</Text>
                   <MaterialCommunityIcons name="comment-outline" size={18} color="#00D26A" style={{ marginRight: 4 }} />
                   <Text style={{ color: '#00D26A', fontSize: 13 }}>{news.comments}</Text>
