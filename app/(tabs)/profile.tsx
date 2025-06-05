@@ -153,7 +153,6 @@ export default function ProfileScreen() {
 
       const file = await api.uploadFile(result.assets[0].uri, result.assets[0].mimeType || null);
       if (file.fileId) {
-        console.log(`${MEDIA_URL}/files/${file.fileId}`)
         await api.updateProfile({ avatar: `${MEDIA_URL}/files/${file.fileId}` });
       }
     } catch (error) {
