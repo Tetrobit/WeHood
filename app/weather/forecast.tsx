@@ -101,9 +101,7 @@ const WeatherDetailsScreen: React.FC = () => {
           <Ionicons name="calendar-outline" size={22} color={theme === 'dark' ? "white" : "black"} />
           <Text style={styles.headerText}>7 дней</Text>
         </View>
-        <TouchableOpacity>
-          <Ionicons name="ellipsis-vertical" size={24} color={theme === 'dark' ? "white" : "black"} />
-        </TouchableOpacity>
+        <View/>
       </View>
 
       <ScrollView>

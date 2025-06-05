@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { View, Text, StyleSheet, Image, SafeAreaView, TouchableOpacity, LayoutAnimation, UIManager, Dimensions, ScrollView, Animated, PanResponder } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Feather, Fontisto, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -9,6 +9,9 @@ import { setStatusBarBackgroundColor } from 'expo-status-bar';
 import useGeolocation from '@/core/hooks/useGeolocation';
 import useWeather from '@/core/hooks/useWeather';
 import { getWeatherCondition, getWeatherIcon } from '@/core/utils/weather';
+import WeatherAIAgent from '@/app/components/WeatherAIAgent';
+import { useApi, WeatherForecast, WeatherForecastResponse } from '@/core/hooks/useApi';
+import { wait } from '@/core/utils/time';
 
 const screenHeight = Dimensions.get('window').height;
 
@@ -27,6 +30,10 @@ const WeatherScreen: React.FC = () => {
   const [theme] = useTheme();
   const { lastLocation } = useGeolocation();
   const { lastWeatherForecast, lastWeatherForecastRecord } = useWeather();
+  const api = useApi();
+  const [isAIAgentVisible, setIsAIAgentVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [recommendation, setRecommendation] = useState<string | null>(null);
   const metrics: WeatherMetric[] = [
     { value: `${lastWeatherForecast?.list?.[0]?.wind?.speed} км/ч`, label: 'Ветер' },
     { value: `${lastWeatherForecast?.list?.[0]?.main?.humidity}%`, label: 'Влажность' },
@@ -59,6 +66,51 @@ const WeatherScreen: React.FC = () => {
     }),
   ).current;
 
+  const handleAIAgentPress = async () => {
+    if (lastWeatherForecast) {
+      setIsAIAgentVisible(true);
+      setIsLoading(true);
+      try {
+        const reducedForecast: WeatherForecastResponse = {
+          ...lastWeatherForecast,
+          city: {
+            ...lastWeatherForecast.city,
+            name: lastLocation?.district ?? lastLocation?.locality ?? 'Неизвестно',
+          },
+          list: lastWeatherForecast.list.slice(0, 4).map((item) => ({
+            ...item,
+            main: {
+              ...item.main,
+              temp: Math.round(item.main.temp - 273.15),
+              temp_min: Math.round(item.main.temp_min - 273.15),
+              temp_max: Math.round(item.main.temp_max - 273.15),
+            },
+          })),
+        };
+        const data = await api.getWeatherAIRecommendation(reducedForecast);
+        if (!data.ok) {
+          throw new Error('Failed to get AI recommendation');
+        }
+        await wait(1000);
+        setRecommendation(data.recommendation || 'Нет ответа от ИИ');
+      } catch (error) {
+        setRecommendation('Извините, не удалось получить рекомендации. Попробуйте позже.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  const onCloseAIAgent = () => {
+    if (recommendation) {
+      setRecommendation(null);
+      setIsAIAgentVisible(false);
+    }
+    else {
+      return false;
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollViewContainer}>
@@ -76,8 +128,8 @@ const WeatherScreen: React.FC = () => {
               <Ionicons name="location" size={18} color="white" />
               <Text style={styles.cityText}>{lastLocation?.district ?? lastLocation?.locality}</Text>
             </View>
-            <TouchableOpacity>
-              <Ionicons name="ellipsis-vertical" size={24} color="white" />
+            <TouchableOpacity onPress={handleAIAgentPress}>
+              <MaterialCommunityIcons name="robot" size={24} color="white" />
             </TouchableOpacity>
           </View>
 
@@ -158,6 +210,12 @@ const WeatherScreen: React.FC = () => {
         </View>
       </View>
       </ScrollView>
+      <WeatherAIAgent
+        visible={isAIAgentVisible}
+        onClose={() => onCloseAIAgent()}
+        isLoading={isLoading}
+        recommendation={recommendation}
+      />
     </SafeAreaView>
   );
 };

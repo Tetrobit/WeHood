@@ -246,6 +246,11 @@ export interface GenerateAvatarResponse {
   avatar: string;
 }
 
+export interface WeatherAIRecommendationResponse {
+  ok: boolean;
+  recommendation: string;
+}
+
 export const useApi = () => {
   const realm = useRealm();
   const codeVerifier = useSharedValue<string | null>(null);
@@ -660,6 +665,16 @@ export const useApi = () => {
     return await withAuth<SummarizeCommentsResponse>(`${API_URL}/api/nearby/posts/${postId}/comments/summarize`);
   };
 
+  const getWeatherAIRecommendation = async (weatherData: WeatherForecastResponse): Promise<WeatherAIRecommendationResponse> => {
+    return await withAuth<WeatherAIRecommendationResponse>(`${API_URL}/api/weather/ai-recommendation`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: weatherData,
+    });
+  };
+
   return {
     sendVerificationCode,
     verifyVerificationCode,
@@ -687,6 +702,7 @@ export const useApi = () => {
     getUserById,
     generateAvatar,
     summarizeComments,
+    getWeatherAIRecommendation,
   }
 }
 
