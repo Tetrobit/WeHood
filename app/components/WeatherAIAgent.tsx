@@ -25,15 +25,20 @@ export default function WeatherAIAgent({ visible, onClose, isLoading, recommenda
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <View style={styles.header}>
+
             <View style={styles.agentInfo}>
-              <LottieView
-                source={require('@/assets/lottie/ai-helper.json')}
-                style={styles.agentIcon}
-                autoPlay
-                loop={false}
-              />
-              <Text style={styles.title}>ИИ-помощник</Text>
+              {!isLoading && (
+                <LottieView
+                  source={require('@/assets/lottie/ai-helper.json')}
+                  style={styles.agentIcon}
+                  autoPlay
+                  loop={false}
+                />
+              )}
             </View>
+            <View style={{ width: 24 }} />
+            <Text style={styles.title}>ИИ-помощник</Text>
+            {isLoading && <View style={{ width: 24 }} />}
             {!isLoading && (
               <TouchableOpacity onPress={onClose} style={styles.closeButton}>
                 <MaterialCommunityIcons name="close" size={24} color={theme === 'dark' ? '#fff' : '#000'} />
@@ -90,22 +95,21 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-  agentIcon: {
-    width: 80,
-    height: 80,
+  agentInfo: {
     position: 'absolute',
     left: -20,
-  },
-  agentInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+  },
+  agentIcon: {
+    width: 80,
+    height: 80,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
     color: theme === 'dark' ? '#fff' : '#000',
-    marginLeft: 60,
   },
   closeButton: {
     padding: 5,
