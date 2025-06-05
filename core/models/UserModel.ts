@@ -49,6 +49,7 @@ class UserModel extends Realm.Object<UserModel, "id" | "firstName" | "lastName">
 
   static schema = {
     name: 'User',
+    primaryKey: 'id',
     properties: {
       id: 'string',
       firstName: 'string?',

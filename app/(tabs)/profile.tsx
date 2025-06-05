@@ -1,11 +1,11 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Alert, Platform, Animated, TextInput, BackHandler, Linking } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Switch, Alert, Platform, Animated, TextInput, BackHandler, Linking, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '@/core/hooks/useTheme';
 import { useQuery } from '@realm/react';
 import UserModel from '@/core/models/UserModel';
 import { router } from 'expo-router';
 import useApi from '@/core/hooks/useApi';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import * as ImagePicker from 'expo-image-picker';
 import * as Notifications from 'expo-notifications';
 import Modal from 'react-native-modal';
@@ -38,6 +38,7 @@ export default function ProfileScreen() {
   const api = useApi();
   const [theme, setTheme] = useTheme();
   const styles = makeStyles(theme!);
+  const [refreshing, setRefreshing] = useState(false);
 
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -254,6 +255,21 @@ export default function ProfileScreen() {
     }
   };
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      const userId = await SecureStorage.getItem('user_id');
+      if (userId) {
+        await api.getUserById(userId);
+      }
+    } catch (error) {
+      console.error('Ошибка при обновлении профиля:', error);
+      setRefreshing(false);
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
+
   if (editTab) {
     return (
       <View style={[styles.container, { padding: 20 }]}> 
@@ -384,7 +400,17 @@ export default function ProfileScreen() {
           </View>
         </Animated.View>
       )}
-      <ScrollView style={styles.container}>
+      <ScrollView 
+        style={styles.container}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#007AFF']}
+            tintColor={theme === 'dark' ? '#fff' : '#007AFF'}
+          />
+        }
+      >
         <View style={styles.header}>
           <View style={styles.avatarContainer}>
             <UserAvatar firstName={profile?.firstName || ''} lastName={profile?.lastName || ''} avatar={profile?.avatar || ''} size={100} />
@@ -392,7 +418,7 @@ export default function ProfileScreen() {
               <Ionicons name="camera" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
-          <Text style={styles.name}>{displayName.firstName} {displayName.lastName}</Text>
+          <Text style={styles.name}>{profile?.firstName} {profile?.lastName}</Text>
           <Text style={styles.email}>{profile?.email}</Text>
         </View>
 

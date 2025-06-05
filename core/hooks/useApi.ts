@@ -423,10 +423,17 @@ export const useApi = () => {
   };
 
   const getUserById = async (id: string): Promise<UserModel> => {
-    const response = await withAuth<UserModel>(`${API_URL}/api/auth/user/${id}`);
+    const response = await withAuth<UserModel>(`${API_URL}/api/auth/profile/${id}`);
     try {
       realm.write(() => {
-        realm.create(UserModel, response, Realm.UpdateMode.Modified);
+        realm.create(UserModel, {
+          id: response.id,
+          firstName: response.firstName,
+          lastName: response.lastName,
+          avatar: response.avatar,
+          email: response.email,
+          vkId: response.vkId,
+        }, Realm.UpdateMode.Modified);
       });
     } catch(error) {
       console.error('Не удалось сохранить пользователя в Realm', error);
