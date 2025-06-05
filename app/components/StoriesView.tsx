@@ -63,9 +63,13 @@ export default function StoriesView({ stories, initialIndex }: StoriesViewProps)
 
   return (
     <View style={styles.container}>
-      <View style={styles.progressContainer}>
+      <View style={[styles.progressContainer, {
+        backgroundColor: theme === 'dark' ? '#000' : '#fff',
+      }]}>
         {stories.map((_, index) => (
-          <View key={index} style={styles.progressBarContainer}>
+          <View key={index} style={[styles.progressBarContainer, {
+            backgroundColor: theme === 'dark' ? '#555' : '#ccc',
+          }]}>
             <Animated.View
               style={[
                 styles.progressBar,
