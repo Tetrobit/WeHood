@@ -104,6 +104,7 @@ export default function HomeScreen() {
   const renderCarouselItem = ({ item, index }: { item: typeof carouselData[0], index: number }) => (
     <TouchableOpacity 
       style={styles.carouselItem}
+      activeOpacity={0.9}
       onPress={() => router.push({ pathname: '/stories', params: { initialIndex: index.toString() } })}
     >
       <Image source={{ uri: item.image }} style={styles.carouselImage} />
