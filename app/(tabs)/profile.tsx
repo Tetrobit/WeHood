@@ -14,6 +14,8 @@ import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ArrowLeftIcon } from 'lucide-react-native';
+import * as SecureStorage from 'expo-secure-store';
+import { Theme } from '@/core/hooks/useTheme';
 
 const HOBBIES = [
   'Спорт',
@@ -29,7 +31,7 @@ const HOBBIES = [
 ];
 
 export default function ProfileScreen() {
-  const [profile] = useQuery(UserModel);
+  const [profile] = useQuery(UserModel).filtered(`id = "${SecureStorage.getItem('user_id')}"`);
   const api = useApi();
   const [theme, setTheme] = useTheme();
   const styles = makeStyles(theme!);
@@ -82,6 +84,27 @@ export default function ProfileScreen() {
     }
   }, [editTab]);
 
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (modalVisible) {
+        setModalVisible(false);
+        return true;
+      } else if (passwordModalVisible) {
+        setPasswordModalVisible(false);
+        return true;
+      } else if (notifModalVisible) {
+        setNotifModalVisible(false);
+        return true;
+      } else if (editTab) {
+        setEditTab(false);
+        return true;
+      }
+      return false;
+    });
+
+    return () => backHandler.remove();
+  }, [modalVisible, passwordModalVisible, notifModalVisible, editTab]);
+
   const handleEditChange = (field: string, value: string) => {
     setEditData(prev => ({ ...prev, [field]: value }));
   };
@@ -93,6 +116,7 @@ export default function ProfileScreen() {
         : [...prev.hobbies, hobby],
     }));
   };
+
   const handleSaveEdit = async () => {
     await AsyncStorage.setItem('profileEditData', JSON.stringify(editData));
     setDisplayName({ firstName: editData.firstName, lastName: editData.lastName });
