@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, RefreshControl } from 'react-native';
 import { Divider } from 'react-native-paper';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useTheme } from '@/core/hooks/useTheme';
@@ -12,6 +12,7 @@ const notificationIcons = {
   help: { icon: 'hand-heart', color: '#FF6B6B' },
   chat: { icon: 'chat', color: '#95E1D3' },
   system: { icon: 'cog', color: '#FFD93D' },
+  nearby_like: { icon: 'heart', color: '#FF6B6B' },
 };
 
 export default function NotificationsScreen() {
@@ -19,6 +20,10 @@ export default function NotificationsScreen() {
   const styles = makeStyles(theme);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   const {
@@ -28,8 +33,11 @@ export default function NotificationsScreen() {
   } = useApi();
 
   useEffect(() => {
-    setupNotifications();
+    const disposeSubscription = setupNotifications();
     loadNotifications();
+    return () => {
+      disposeSubscription.then(dispose => dispose());
+    };
   }, []);
   
   const registerForPushNotifications = useCallback(async () => {
@@ -64,7 +72,8 @@ export default function NotificationsScreen() {
     }
   }, []);
 
-  const setupNotifications = async () => {
+  const setupNotifications = async (): Promise<() => void> => {
+    console.log("setupNotifications");
     try {
       await registerForPushNotifications();
       
@@ -79,27 +88,49 @@ export default function NotificationsScreen() {
       });
 
       const subscription = Notifications.addNotificationReceivedListener(notification => {
-        loadNotifications();
+        console.log("Loading notifications");
+        loadNotifications(true);
       });
 
       return () => {
+        console.log("dispose");
         subscription.remove();
       };
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to setup notifications');
+      return () => {};
     }
   };
 
-  const loadNotifications = async () => {
+  const loadNotifications = async (isRefresh = false) => {
+    console.log("loadNotifications", isRefresh);
     try {
-      setIsLoading(true);
+      let currOffset = offset;
+      if (isRefresh) {
+        setIsRefreshing(true);
+        setOffset(0);
+        currOffset = 0;
+      } else {
+        setIsLoadingMore(true);
+      }
+      
       setError(null);
-      const data = await fetchNotifications();
-      setNotifications(data);
+      const data = await fetchNotifications(currOffset, 20);
+      
+      if (isRefresh) {
+        setNotifications(data);
+      } else {
+        setNotifications(prev => [...prev, ...data]);
+      }
+      
+      setHasMore(data.length === 20);
+      setOffset(prev => prev + data.length);
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Failed to load notifications');
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
+      setIsLoadingMore(false);
     }
   };
 
@@ -139,19 +170,41 @@ export default function NotificationsScreen() {
     }
   };
 
+  const handleLoadMore = () => {
+    if (!isLoadingMore && hasMore && !isRefreshing) {
+      loadNotifications();
+    }
+  };
+
+  const handleRefresh = () => {
+    loadNotifications(true);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Уведомления</Text>
-        <TouchableOpacity 
-          style={styles.markAllButton}
-          onPress={handleMarkAllAsRead}
-        >
-          <Text style={styles.markAllText}>Отметить все как прочитанные</Text>
-        </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.notificationsContainer}>
+      <ScrollView 
+        style={styles.notificationsContainer}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
+            colors={[theme === 'dark' ? '#000' : '#000']}
+            tintColor={theme === 'dark' ? '#000' : '#000'}
+          />
+        }
+        onScroll={({ nativeEvent }) => {
+          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+          const paddingToBottom = 20;
+          if (layoutMeasurement.height + contentOffset.y >= contentSize.height - paddingToBottom) {
+            handleLoadMore();
+          }
+        }}
+        scrollEventThrottle={400}
+      >
         {isLoading ? (
           <View style={styles.loadingContainer}>
             <Text style={styles.loadingText}>Загрузка уведомлений...</Text>
@@ -161,7 +214,7 @@ export default function NotificationsScreen() {
             <Text style={styles.errorText}>{error}</Text>
             <TouchableOpacity 
               style={styles.retryButton}
-              onPress={loadNotifications}
+              onPress={() => loadNotifications(true)}
             >
               <Text style={styles.retryText}>Повторить</Text>
             </TouchableOpacity>
@@ -171,37 +224,42 @@ export default function NotificationsScreen() {
             <Text style={styles.emptyText}>Нет новых уведомлений</Text>
           </View>
         ) : (
-          notifications.map((notification, index) => (
-            <View key={notification.id}>
-              <TouchableOpacity
-                style={[
-                  styles.notificationCard,
-                  !notification.isRead && styles.unreadNotification
-                ]}
-                activeOpacity={theme === 'dark' ? 0.8 : 0.7}
-                onPress={() => handleMarkAsRead(notification.id)}
-              >
-                <View style={[
-                  styles.iconContainer,
-                  { backgroundColor: notificationIcons[notification.type]?.color || '#666666' }
-                ]}>
-                  <MaterialCommunityIcons
-                    name={notificationIcons[notification.type]?.icon || 'bell' as any}
-                    size={24}
-                    color="#fff"
-                  />
-                </View>
-                <View style={styles.notificationContent}>
-                  <View style={styles.notificationHeader}>
-                    <Text style={styles.notificationTitle}>{notification.title}</Text>
-                    <Text style={styles.notificationTime}>{notification.time}</Text>
+          <>
+            {notifications.map((notification) => (
+              <View key={notification.id}>
+                <View
+                  style={[
+                    styles.notificationCard,
+                    !notification.isRead && styles.unreadNotification
+                  ]}
+                >
+                  <View style={[
+                    styles.iconContainer,
+                    { backgroundColor: notificationIcons[notification.type]?.color || '#666666' }
+                  ]}>
+                    <MaterialCommunityIcons
+                      name={notificationIcons[notification.type]?.icon || 'bell' as any}
+                      size={24}
+                      color="#fff"
+                    />
                   </View>
-                  <Text style={styles.notificationMessage}>{notification.message}</Text>
+                  <View style={styles.notificationContent}>
+                    <View style={styles.notificationHeader}>
+                      <Text style={styles.notificationTitle}>{notification.title}</Text>
+                      <Text style={styles.notificationTime}>{notification.time}</Text>
+                    </View>
+                    <Text style={styles.notificationMessage}>{notification.message}</Text>
+                  </View>
                 </View>
-              </TouchableOpacity>
-              {index < notifications.length - 1 && <Divider style={{ backgroundColor: theme === 'dark' ? '#555' : '#eee' }} />}
-            </View>
-          ))
+                {notification !== notifications[notifications.length - 1] && <Divider style={{ backgroundColor: theme === 'dark' ? '#555' : '#eee' }} />}
+              </View>
+            ))}
+            {isLoadingMore && (
+              <View style={styles.loadingMoreContainer}>
+                <Text style={styles.loadingMoreText}>Загрузка...</Text>
+              </View>
+            )}
+          </>
         )}
         <View style={styles.bottomSpacer} />
       </ScrollView>
@@ -311,5 +369,13 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
   emptyText: {
     color: theme === 'dark' ? '#aaa' : '#666',
     fontSize: 16,
+  },
+  loadingMoreContainer: {
+    padding: 10,
+    alignItems: 'center',
+  },
+  loadingMoreText: {
+    color: theme === 'dark' ? '#aaa' : '#666',
+    fontSize: 14,
   },
 }); 

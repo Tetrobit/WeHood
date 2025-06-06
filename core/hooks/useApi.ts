@@ -707,9 +707,9 @@ export const useApi = () => {
     });
   };
 
-  const fetchNotifications = useCallback(async (): Promise<Notification[]> => {
+  const fetchNotifications = useCallback(async (offset: number = 0, limit: number = 10): Promise<Notification[]> => {
     try {
-      const response = await withAuth<Notification[]>(`${API_URL}/api/notifications`);
+      const response = await withAuth<Notification[]>(`${API_URL}/api/notifications?offset=${offset}&limit=${limit}`);
       return response;
     } catch (error) {
       console.error('Failed to fetch notifications:', error);
