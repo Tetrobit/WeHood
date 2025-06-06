@@ -8,6 +8,9 @@ import Realm from "realm";
 import { CommentModel } from "../models/CommentModel";
 import * as SecureStorage from 'expo-secure-store';
 import axios, { AxiosRequestConfig } from "axios";
+import { useState, useCallback } from 'react';
+import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
 
 export interface VKParameters {
   vkAppId: string;
@@ -250,6 +253,15 @@ export interface WeatherAIRecommendationResponse {
   ok: boolean;
   recommendation: string;
 }
+
+export type Notification = {
+  id: string;
+  title: string;
+  message: string;
+  time: string;
+  type: 'event' | 'help' | 'chat' | 'system';
+  isRead: boolean;
+};
 
 export const useApi = () => {
   const realm = useRealm();
@@ -675,6 +687,40 @@ export const useApi = () => {
     });
   };
 
+  const fetchNotifications = useCallback(async (): Promise<Notification[]> => {
+    try {
+      const response = await withAuth<Notification[]>(`${API_URL}/api/notifications`);
+      return response;
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+      return [];
+    }
+  }, []);
+
+  const markNotificationAsRead = useCallback(async (id: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`${API_URL}/api/notifications/${id}/read`, {
+        method: 'PUT',
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+      return false;
+    }
+  }, []);
+
+  const markAllNotificationsAsRead = useCallback(async (): Promise<boolean> => {
+    try {
+      const response = await fetch(`${API_URL}/api/notifications/read-all`, {
+        method: 'PUT',
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error);
+      return false;
+    }
+  }, []);
+
   return {
     sendVerificationCode,
     verifyVerificationCode,
@@ -703,6 +749,9 @@ export const useApi = () => {
     generateAvatar,
     summarizeComments,
     getWeatherAIRecommendation,
+    fetchNotifications,
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
   }
 }
 
