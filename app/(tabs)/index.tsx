@@ -307,7 +307,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     zIndex: 2,
   },
   serviceModernTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
     color: theme === 'dark' ? '#fff' : '#111',
     marginBottom: 2,
