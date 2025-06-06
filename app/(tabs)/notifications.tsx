@@ -183,10 +183,10 @@ export default function NotificationsScreen() {
               >
                 <View style={[
                   styles.iconContainer,
-                  { backgroundColor: notificationIcons[notification.type].color }
+                  { backgroundColor: notificationIcons[notification.type]?.color || '#666666' }
                 ]}>
                   <MaterialCommunityIcons
-                    name={notificationIcons[notification.type].icon as any}
+                    name={notificationIcons[notification.type]?.icon || 'bell' as any}
                     size={24}
                     color="#fff"
                   />
