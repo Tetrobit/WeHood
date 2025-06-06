@@ -318,28 +318,6 @@ export default function ProfileScreen() {
           value={editData.lastName}
           onChangeText={v => handleEditChange('lastName', v)}
         />
-        <Text style={{ color: theme === 'dark' ? '#fff' : '#222', fontSize: 16, marginTop: 18, marginBottom: 8 }}>Увлечения:</Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-          {HOBBIES.map(hobby => (
-            <TouchableOpacity
-              key={hobby}
-              style={{
-                backgroundColor: editData.hobbies.includes(hobby)
-                  ? (theme === 'dark' ? '#007AFF' : '#007AFF')
-                  : (theme === 'dark' ? '#333' : '#eee'),
-                borderRadius: 16,
-                paddingHorizontal: 14,
-                paddingVertical: 7,
-                marginBottom: 6,
-                marginRight: 6,
-                marginTop: 0,
-              }}
-              onPress={() => handleToggleHobby(hobby)}
-            >
-              <Text style={{ color: editData.hobbies.includes(hobby) ? '#fff' : (theme === 'dark' ? '#fff' : '#222'), fontSize: 15 }}>{hobby}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
         <TouchableOpacity
           style={{ backgroundColor: '#007AFF', borderRadius: 12, padding: 16, marginTop: 24, alignItems: 'center' }}
           onPress={handleSaveEdit}
@@ -408,35 +386,17 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Личная информация</Text>
+          <Text style={styles.sectionTitle}>Настройки</Text>
           <TouchableOpacity style={styles.menuItem} onPress={() => setEditTab(true)}>
             <Ionicons name="person-outline" size={24} color={theme === 'dark' ? '#fff' : '#222'} />
             <Text style={styles.menuText}>Редактировать профиль</Text>
             <Ionicons name="chevron-forward" size={24} color={theme === 'dark' ? '#fff' : '#999'} />
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.menuItem, styles.lastMenuItem]} onPress={() => showToast('В разработке...')}>
-            <Ionicons name="settings-outline" size={24} color={theme === 'dark' ? '#fff' : '#222'} />
-            <Text style={styles.menuText}>Настройки</Text>
-            <Ionicons name="chevron-forward" size={24} color={theme === 'dark' ? '#fff' : '#999'} />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Безопасность</Text>
-          <TouchableOpacity style={styles.menuItem} onPress={() => setPasswordModalVisible(true)}>
-            <Ionicons name="lock-closed-outline" size={24} color={theme === 'dark' ? '#fff' : '#222'} />
-            <Text style={styles.menuText}>Изменить пароль</Text>
-            <Ionicons name="chevron-forward" size={24} color={theme === 'dark' ? '#fff' : '#999'} />
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.menuItem, styles.lastMenuItem]} onPress={() => setNotifModalVisible(true)}>
+          <TouchableOpacity style={styles.menuItem} onPress={() => setNotifModalVisible(true)}>
             <Ionicons name="notifications-outline" size={24} color={theme === 'dark' ? '#fff' : '#222'} />
             <Text style={styles.menuText}>Уведомления</Text>
             <Ionicons name="chevron-forward" size={24} color={theme === 'dark' ? '#fff' : '#999'} />
           </TouchableOpacity>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Настройки</Text>
           <View style={[styles.menuItem, styles.lastMenuItem]}>
             <Ionicons 
               name={theme === 'dark' ? "moon" : "sunny"} 
@@ -452,8 +412,9 @@ export default function ProfileScreen() {
             />
           </View>
         </View>
-        <TouchableOpacity style={[styles.rustoreBox, { backgroundColor: theme === 'dark' ? '#111' : '#f2f2f7' }]} activeOpacity={0.8} onPress={() => Linking.openURL('https://www.rustore.ru/catalog/app/com.so_dam.wehood')}>
-          <Text style={[styles.rustoreText, { color: theme === 'dark' ? '#fff' : '#222' }]}>Пожалуйста, оставьте отзыв на RuStore, нам важно знать ваше мнение</Text>
+
+        <TouchableOpacity style={[styles.rustoreBox, { backgroundColor: theme === 'dark' ? '#0077ff' : '#0077ff' }]} activeOpacity={0.8} onPress={() => Linking.openURL('https://www.rustore.ru/catalog/app/com.so_dam.wehood')}>
+          <Text style={[styles.rustoreText, { color: theme === 'dark' ? '#fff' : '#fff' }]}>Пожалуйста, оставьте отзыв на RuStore, нам важно знать ваше мнение 😇</Text>
         </TouchableOpacity> 
 
         <Modal
@@ -736,6 +697,5 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     backgroundColor: 'transparent',
     fontSize: 15,
     textAlign: 'center',
-    fontStyle: 'italic',
   },
 });
