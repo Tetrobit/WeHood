@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "869436070509",
+    "project_id": "wehood-ca622",
+    "storage_bucket": "wehood-ca622.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:869436070509:android:2481c262472e3b261bbd64",
+        "android_client_info": {
+          "package_name": "com.so_dam.wehood"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6PmY91nFmJy5FSZk9ZFe9YjbUzC-hRiI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
