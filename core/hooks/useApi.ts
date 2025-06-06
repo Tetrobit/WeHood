@@ -11,6 +11,7 @@ import axios, { AxiosRequestConfig } from "axios";
 import { useState, useCallback } from 'react';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
+import messaging from '@react-native-firebase/messaging';
 
 export interface VKParameters {
   vkAppId: string;
@@ -267,6 +268,16 @@ export const useApi = () => {
   const realm = useRealm();
   const codeVerifier = useSharedValue<string | null>(null);
 
+  const getFCMToken = async (): Promise<string | null> => {
+    try {
+      const token = await messaging().getToken();
+      return token;
+    } catch (error) {
+      console.error('Failed to get FCM token:', error);
+      return null;
+    }
+  };
+
   const getVKParameters = async (): Promise<VKParameters> => {
     const response = await fetch(`${API_URL}/api/auth/vk-parameters`);
     const data = await response.json();
@@ -281,6 +292,8 @@ export const useApi = () => {
   }
 
   const loginWithVK = async (code: string, device_id: string, state: string): Promise<LoginWithVKResponse> => {
+    const fcmToken = await getFCMToken();
+
     const response = await fetch(`${API_URL}/api/auth/login-vk`, {
       method: 'POST',
       headers: {
@@ -300,7 +313,8 @@ export const useApi = () => {
           brand: Device.brand,
           device_manufacturer: Device.manufacturer,
           device_model: Device.modelName,
-        }
+        },
+        fcm_token: fcmToken
       }),
     });
 
@@ -357,6 +371,8 @@ export const useApi = () => {
   }
 
   const register = async (email: string, password: string, verificationCodeId: string, firstName: string, lastName: string): Promise<RegisterResponse> => { 
+    const fcmToken = await getFCMToken();
+    
     const response = await fetch(`${API_URL}/api/auth/register`, {
       method: 'POST',
       headers: {
@@ -374,7 +390,8 @@ export const useApi = () => {
         device_params: {
           manufacturer: Device.manufacturer,
           model: Device.modelName,
-        }
+        },
+        fcm_token: fcmToken
       }),
     });
 
@@ -388,6 +405,8 @@ export const useApi = () => {
   }
 
   const login = async (email: string, password: string): Promise<LoginResponse> => {
+    const fcmToken = await getFCMToken();
+    
     const response = await fetch(`${API_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
@@ -402,7 +421,8 @@ export const useApi = () => {
         device_params: {
           manufacturer: Device.manufacturer,
           model: Device.modelName,
-        }
+        },
+        fcm_token: fcmToken
       }),
     });
 
