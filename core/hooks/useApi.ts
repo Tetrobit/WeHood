@@ -460,8 +460,8 @@ export const useApi = () => {
     return response;
   }
 
-  const generateAvatar = async (): Promise<GenerateAvatarResponse> => {
-    const response = await withAuth<GenerateAvatarResponse>(`${API_URL}/api/auth/generate-avatar`, {
+  const generateAvatar = async (prompt?: string): Promise<GenerateAvatarResponse> => {
+    const response = await withAuth<GenerateAvatarResponse>(`${API_URL}/api/auth/generate-avatar?prompt=${prompt}`, {
       method: 'POST',
       timeout: 60000,
       timeoutErrorMessage: 'Время ожидания истекло',
