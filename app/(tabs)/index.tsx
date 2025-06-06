@@ -19,7 +19,7 @@ import * as SecureStore from 'expo-secure-store';
 
 const { width } = Dimensions.get('window');
 
-type ServiceIcon = 'hand-heart' | 'calendar-star' | 'bullhorn' | 'account-group';
+type ServiceIcon = 'hand-heart' | 'calendar-star' | 'bullhorn' | 'poll';
 
 type NewsItem = {
   id: string;
@@ -62,7 +62,7 @@ const services: Array<{
   { id: '1', title: 'Помощь', icon: 'hand-heart', color: '#FF6B6B' },
   { id: '2', title: 'События', icon: 'calendar-star', color: '#4ECDC4' },
   { id: '3', title: 'Объявления', icon: 'bullhorn', color: '#FFD93D' },
-  { id: '4', title: 'Соседи', icon: 'account-group', color: '#95E1D3' },
+  { id: '4', title: 'Опросы', icon: 'poll', color: '#6A1B9A' },
 ];
 
 const carouselData = [
@@ -90,7 +90,7 @@ const serviceImages: Record<string, string> = {
   'Помощь': 'https://cdn-icons-png.flaticon.com/512/616/616494.png', // рукопожатие, цветная
   'События': 'https://cdn-icons-png.flaticon.com/512/2921/2921822.png', // календарь, цветной
   'Объявления': 'https://cdn-icons-png.flaticon.com/512/1827/1827349.png', // мегафон, цветной
-  'Соседи': 'https://cdn-icons-png.flaticon.com/512/2922/2922510.png', // люди, цветные
+  'Опросы': 'https://cdn-icons-png.flaticon.com/512/2922/2922510.png', // люди, цветные
 };
 
 export default function HomeScreen() {
@@ -225,7 +225,7 @@ export default function HomeScreen() {
                 } else if (service.title === 'Помощь') {
                   router.push('/services/help/events');
                 } else {
-                  router.push(`/services/${service.id}` as any);
+                  router.push(`/services/voting`);
                 }
               }}
             >
