@@ -73,12 +73,6 @@ export default function VotingScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Голосования</Text>
-        <Searchbar
-          placeholder="Поиск голосований"
-          onChangeText={setSearchQuery}
-          value={searchQuery}
-          style={styles.searchBar}
-        />
       </View>
 
       <ScrollView 

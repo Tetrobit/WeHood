@@ -787,8 +787,8 @@ export const useApi = () => {
     }
   }, []);
 
-  const getVotings = async (offset: number = 0, limit: number = 10): Promise<GetVotingsResponse> => {
-    return withAuth<GetVotingsResponse>(`${API_URL}/api/polls?offset=${offset}&limit=${limit}`);
+  const getVotings = async (offset: number = 0, limit: number = 10, userId: string | undefined = undefined): Promise<GetVotingsResponse> => {
+    return withAuth<GetVotingsResponse>(`${API_URL}/api/polls?offset=${offset}&limit=${limit}${userId ? `&userId=${userId}` : ''}`);
   };
 
   const getVotingById = async (id: string): Promise<VotingById> => {
