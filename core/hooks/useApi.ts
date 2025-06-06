@@ -260,8 +260,11 @@ export type Notification = {
   title: string;
   message: string;
   time: string;
-  type: 'event' | 'help' | 'chat' | 'system';
+  type: 'event' | 'help' | 'chat' | 'system' | 'nearby_like';
   isRead: boolean;
+  postId?: string;
+  userId?: string;
+  data?: Record<string, any>;
 };
 
 export const useApi = () => {
@@ -686,7 +689,6 @@ export const useApi = () => {
     const comment = await withAuth<CommentResponse>(`${API_URL}/api/nearby/comments/${commentId}`, {
       method: 'DELETE',
     });
-    console.log(comment);
     realm.write(() => {
       realm.create(CommentModel, CommentModel.fromApi(comment), Realm.UpdateMode.Modified);
     });

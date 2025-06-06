@@ -6,6 +6,7 @@ import { Theme } from '@/core/hooks/useTheme';
 import { useCallback, useEffect, useState } from 'react';
 import * as Notifications from 'expo-notifications';
 import { useApi, Notification } from '@/core/hooks/useApi';
+import { router } from 'expo-router';
 
 const notificationIcons = {
   event: { icon: 'calendar-star', color: '#4ECDC4' },
@@ -73,7 +74,6 @@ export default function NotificationsScreen() {
   }, []);
 
   const setupNotifications = async (): Promise<() => void> => {
-    console.log("setupNotifications");
     try {
       await registerForPushNotifications();
       
@@ -88,12 +88,10 @@ export default function NotificationsScreen() {
       });
 
       const subscription = Notifications.addNotificationReceivedListener(notification => {
-        console.log("Loading notifications");
         loadNotifications(true);
       });
 
       return () => {
-        console.log("dispose");
         subscription.remove();
       };
     } catch (error) {
@@ -102,8 +100,8 @@ export default function NotificationsScreen() {
     }
   };
 
+  console.log("notifications", notifications);
   const loadNotifications = async (isRefresh = false) => {
-    console.log("loadNotifications", isRefresh);
     try {
       let currOffset = offset;
       if (isRefresh) {
@@ -180,6 +178,14 @@ export default function NotificationsScreen() {
     loadNotifications(true);
   };
 
+  const handleGoToPost = (postId: string) => {
+    router.push(`/services/nearby/view?id=${postId}`);
+  };
+
+  const handleGoToProfile = (userId: string) => {
+    // router.push(`/profile/${userId}`);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -249,6 +255,14 @@ export default function NotificationsScreen() {
                       <Text style={styles.notificationTime}>{notification.time}</Text>
                     </View>
                     <Text style={styles.notificationMessage}>{notification.message}</Text>
+                    {notification.data?.postId && (
+                      <TouchableOpacity 
+                        style={styles.actionButton}
+                        onPress={() => handleGoToPost(notification.data!.postId)}
+                      >
+                        <Text style={styles.actionButtonText}>Перейти к посту</Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
                 </View>
                 {notification !== notifications[notifications.length - 1] && <Divider style={{ backgroundColor: theme === 'dark' ? '#555' : '#eee' }} />}
@@ -377,5 +391,18 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
   loadingMoreText: {
     color: theme === 'dark' ? '#aaa' : '#666',
     fontSize: 14,
+  },
+  actionButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#0077ff',
+    marginTop: 8,
+    alignSelf: 'flex-start',
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '500',
   },
 }); 
