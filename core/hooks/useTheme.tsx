@@ -26,8 +26,6 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme: (theme: Theme) => {
-      console.log('getTheme', SecureStorage.getItem('theme'));
-      console.log('setTheme', theme);
       setTheme(theme as Theme);
       SecureStorage.setItem('theme', theme as Theme);
     } }}>
