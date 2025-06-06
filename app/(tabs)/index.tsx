@@ -4,6 +4,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router, useFocusEffect } from 'expo-router';
 import { Theme, useTheme } from '@/core/hooks/useTheme';
 import { useQuery } from '@realm/react';
+import { useUser } from '@/core/hooks/models/useUser';
 import UserModel from '@/core/models/UserModel';
 import Carousel from 'react-native-reanimated-carousel';
 import * as Network from 'expo-network';
@@ -14,7 +15,7 @@ import { useGeolocation } from '@/core/hooks/useGeolocation';
 import useWeather from '@/core/hooks/useWeather';
 import { getWeatherIcon } from '@/core/utils/weather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import * as SecureStore from 'expo-secure-store';
 
 const { width } = Dimensions.get('window');
 
@@ -93,8 +94,7 @@ const serviceImages: Record<string, string> = {
 };
 
 export default function HomeScreen() {
-  const [profile] = useQuery(UserModel);
-  const [avatarUri, setAvatarUri] = useState(profile?.avatar);
+  const profile = useUser(SecureStore.getItem('user_id')!);
   const [theme] = useTheme();
   const styles = makeStyles(theme!);
   const { lastLocation, requestGeolocation } = useGeolocation();
