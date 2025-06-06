@@ -65,43 +65,52 @@ export default function VotingScreen() {
         {filteredVotings.map((voting) => (
           <Card key={voting.id} style={styles.votingCard}>
             <Card.Content>
-              <Image
-                source={{ uri: voting.image }}
-                style={styles.votingImage}
-                resizeMode="cover"
-              />
-              <Text style={styles.votingTitle}>{voting.title}</Text>
-              <Text style={styles.votingDescription}>{voting.description}</Text>
-              
-              <View style={styles.optionsContainer}>
-                {voting.options.map((option) => (
-                  <View key={option.id} style={styles.optionItem}>
-                    <View style={styles.optionHeader}>
-                      <Text style={styles.optionText}>{option.text}</Text>
-                      <Text style={styles.votesCount}>{option.votes} голосов</Text>
+              <TouchableOpacity 
+                onPress={() => router.push({
+                  pathname: '/services/voting/[id]',
+                  params: {
+                    id: voting.id.toString(),
+                  },
+                })}
+              >
+                <Image
+                  source={{ uri: voting.image }}
+                  style={styles.votingImage}
+                  resizeMode="cover"
+                />
+                <Text style={styles.votingTitle}>{voting.title}</Text>
+                <Text style={styles.votingDescription}>{voting.description}</Text>
+                
+                <View style={styles.optionsContainer}>
+                  {voting.options.map((option) => (
+                    <View key={option.id} style={styles.optionItem}>
+                      <View style={styles.optionHeader}>
+                        <Text style={styles.optionText}>{option.text}</Text>
+                        <Text style={styles.votesCount}>{option.votes} голосов</Text>
+                      </View>
+                      <View style={styles.progressBar}>
+                        <View 
+                          style={[
+                            styles.progressFill,
+                            { width: `${(option.votes / voting.totalVotes) * 100}%` }
+                          ]} 
+                        />
+                      </View>
                     </View>
-                    <View style={styles.progressBar}>
-                      <View 
-                        style={[
-                          styles.progressFill,
-                          { width: `${(option.votes / voting.totalVotes) * 100}%` }
-                        ]} 
-                      />
-                    </View>
-                  </View>
-                ))}
-              </View>
-
-              <View style={styles.votingFooter}>
-                <View style={styles.authorInfo}>
-                  <Image
-                    source={{ uri: voting.author.avatar }}
-                    style={styles.authorAvatar}
-                  />
-                  <Text style={styles.authorName}>{voting.author.name}</Text>
+                  ))}
                 </View>
-                <Text style={styles.dateText}>{voting.createdAt}</Text>
-              </View>
+
+                <View style={styles.votingFooter}>
+                  <View style={styles.authorInfo}>
+                    <Image
+                      source={{ uri: voting.author.avatar }}
+                      style={styles.authorAvatar}
+                    />
+                    <Text style={styles.authorName}>{voting.author.name}</Text>
+                  </View>
+                  <Text style={styles.dateText}>{voting.createdAt}</Text>
+                </View>
+              </TouchableOpacity>
             </Card.Content>
           </Card>
         ))}
