@@ -432,16 +432,21 @@ export default function ProfileScreen() {
           <View style={{ backgroundColor: theme === 'dark' ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 320, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
             <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === 'dark' ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Сменить фото профиля</Text>
             <TouchableOpacity
-              style={{ backgroundColor: '#007AFF', borderRadius: 12, padding: 16, marginBottom: 16, alignItems: 'center', shadowColor: '#007AFF', shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 }}
+              style={{ elevation: 2, backgroundColor: '#007AFF', borderRadius: 12, padding: 16, marginBottom: 16, alignItems: 'center', shadowColor: '#007AFF', shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 }}
               onPress={pickImage}
             >
               <Text style={{ color: '#fff', fontSize: 17, fontWeight: '600' }}>Выбрать из галереи</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={{ backgroundColor: '#007AFF', borderRadius: 12, padding: 16, marginBottom: 16, alignItems: 'center' }}
+              style={{ elevation: 2, flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 16, justifyContent: 'space-between' }}
               onPress={() => generateAvatar()}
+              activeOpacity={0.95}
             >
-              <Text style={{ color: '#fff', fontSize: 17, fontWeight: '600' }}>Сгенерировать</Text>
+              <View />
+              <Text style={{ color: '#000', fontSize: 17, fontWeight: '600' }}>Сгенерировать</Text>
+              <View style={{ height: '100%' }}>
+                <LottieView source={require('@/assets/lottie/ai-generation.json')} autoPlay loop style={{ position: 'absolute', right: -5, top: -16, width: 55, height: 55 }} />
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={{ alignItems: 'center', marginTop: 4 }}
