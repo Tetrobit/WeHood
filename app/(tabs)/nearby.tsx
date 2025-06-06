@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions, RefreshControl, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { LIGHT_THEME, useTheme } from '@/core/hooks/useTheme';
+import { useTheme } from '@/core/hooks/useTheme';
 import useGeolocation from '@/core/hooks/useGeolocation';
 import { useRouter } from 'expo-router';
 import useApi, { NearbyPost } from '@/core/hooks/useApi';
@@ -10,6 +10,8 @@ import { calculateFormattedDistance } from '@/core/utils/location';
 import { VideoPlayer } from 'expo-video';
 import { AutoVideoPlayer } from '../components/AutoVideoPlayer';
 import LottieView from 'lottie-react-native';
+import * as SecureStore from 'expo-secure-store';
+import { Theme } from '@/core/hooks/useTheme';
 
 const { width } = Dimensions.get('window');
 
@@ -64,7 +66,7 @@ export default function NearbyScreen() {
         return post.type == 'video';
       }
       if (activeTab === 'my') {
-        return post.author?.id == api.profile?.id;
+        return post.author?.id == SecureStore.getItem('user_id');
       }
     });
   }
@@ -155,7 +157,7 @@ export default function NearbyScreen() {
                 <Text style={styles.distanceText}>{calculateFormattedDistance(lastLocation.latitude, lastLocation.longitude, parseFloat(post.latitude.toString()), parseFloat(post.longitude.toString()))}</Text>
               </View>
 
-              {post.author?.id === api.profile?.id && (
+              {post.author?.id === SecureStore.getItem('user_id') && (
                 <TouchableOpacity 
                   style={styles.deleteButton}
                   onPress={(e) => {
