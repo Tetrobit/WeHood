@@ -1,67 +1,105 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator, RefreshControl } from 'react-native';
 import { Card, Searchbar } from 'react-native-paper';
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Theme, useTheme } from '@/core/hooks/useTheme';
 import { router } from 'expo-router';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-
-type Voting = {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  options: Array<{
-    id: string;
-    text: string;
-    votes: number;
-  }>;
-  totalVotes: number;
-  author: {
-    id: string;
-    name: string;
-    avatar: string;
-  };
-  createdAt: string;
-};
-
-const mockVotings: Voting[] = [
-  {
-    id: '1',
-    title: 'Выбор места для нового сквера',
-    description: 'Голосование за место расположения нового сквера в нашем районе',
-    image: 'https://example.com/park.jpg',
-    options: [
-      { id: '1-1', text: 'Улица Ленина, 15', votes: 45 },
-      { id: '1-2', text: 'Проспект Мира, 8', votes: 32 },
-      { id: '1-3', text: 'Площадь Свободы', votes: 28 },
-    ],
-    totalVotes: 105,
-    author: {
-      id: '1',
-      name: 'Иван Петров',
-      avatar: 'https://example.com/avatar1.jpg',
-    },
-    createdAt: '2024-03-20',
-  },
-];
+import { useApi } from '@/core/hooks/useApi';
+import { Voting } from '@/core/hooks/useApi';
+import { getFileUrl } from '@/core/utils/url';
 
 export default function VotingScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [theme] = useTheme();
   const styles = makeStyles(theme);
+  const api = useApi();
+  const [votings, setVotings] = useState<Voting[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const limit = 10;
+  
+  const loadVotings = useCallback(async (isRefreshing = false) => {
+    if (loading || (!hasMore && !isRefreshing)) return;
 
-  const filteredVotings = mockVotings.filter(voting =>
+    try {
+      setLoading(true);
+      const currentOffset = isRefreshing ? 0 : offset;
+      const response = await api.getVotings(currentOffset, limit);
+      if (!response.votings) {
+        return;
+      }
+      
+      if (isRefreshing) {
+        setVotings(response.votings);
+      } else {
+        setVotings(prev => [...prev, ...response.votings]);
+      }
+      
+      setOffset(currentOffset + response.votings.length);
+      setHasMore(response.votings.length === limit);
+    } catch (error) {
+      console.error('Error loading votings:', error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [loading, offset, hasMore, api]);
+
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true);
+    setOffset(0);
+    setHasMore(true);
+    loadVotings(true);
+  }, [loadVotings]);
+
+  const handleLoadMore = useCallback(() => {
+    if (!loading && hasMore) {
+      loadVotings();
+    }
+  }, [loading, hasMore, loadVotings]);
+
+  const filteredVotings = votings.filter(voting =>
     voting.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     voting.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  
+  useEffect(() => {
+    loadVotings(true);
+  }, []);
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Голосования</Text>
+        <Searchbar
+          placeholder="Поиск голосований"
+          onChangeText={setSearchQuery}
+          value={searchQuery}
+          style={styles.searchBar}
+        />
       </View>
 
-      <ScrollView style={styles.votingsContainer}>
+      <ScrollView 
+        style={styles.votingsContainer}
+        onScroll={({ nativeEvent }) => {
+          const { layoutMeasurement, contentOffset, contentSize } = nativeEvent;
+          const isCloseToBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 20;
+          
+          if (isCloseToBottom) {
+            handleLoadMore();
+          }
+        }}
+        scrollEventThrottle={400}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={['#6A1B9A']}
+          />
+        }
+      >
         {filteredVotings.map((voting) => (
           <Card key={voting.id} style={styles.votingCard}>
             <Card.Content>
@@ -74,7 +112,7 @@ export default function VotingScreen() {
                 })}
               >
                 <Image
-                  source={{ uri: voting.image }}
+                  source={{ uri: getFileUrl(voting.image) }}
                   style={styles.votingImage}
                   resizeMode="cover"
                 />
@@ -82,8 +120,8 @@ export default function VotingScreen() {
                 <Text style={styles.votingDescription}>{voting.description}</Text>
                 
                 <View style={styles.optionsContainer}>
-                  {voting.options.map((option) => (
-                    <View key={option.id} style={styles.optionItem}>
+                  {voting.options.map((option, index) => (
+                    <View key={index} style={styles.optionItem}>
                       <View style={styles.optionHeader}>
                         <Text style={styles.optionText}>{option.text}</Text>
                         <Text style={styles.votesCount}>{option.votes} голосов</Text>
@@ -103,17 +141,29 @@ export default function VotingScreen() {
                 <View style={styles.votingFooter}>
                   <View style={styles.authorInfo}>
                     <Image
-                      source={{ uri: voting.author.avatar }}
+                      source={{ uri: voting.createdBy.avatar || 'https://via.placeholder.com/24' }}
                       style={styles.authorAvatar}
                     />
-                    <Text style={styles.authorName}>{voting.author.name}</Text>
+                    <Text style={styles.authorName}>
+                      {voting.createdBy.firstName} {voting.createdBy.lastName}
+                    </Text>
                   </View>
-                  <Text style={styles.dateText}>{voting.createdAt}</Text>
+                  <Text style={styles.dateText}>{new Date(voting.createdAt).toLocaleDateString()}</Text>
                 </View>
               </TouchableOpacity>
             </Card.Content>
           </Card>
         ))}
+
+        {loading && !refreshing && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#6A1B9A" />
+          </View>
+        )}
+
+        {!hasMore && !loading && votings.length > 0 && (
+          <Text style={styles.endText}>Больше голосований нет</Text>
+        )}
       </ScrollView>
 
       <TouchableOpacity
@@ -237,5 +287,14 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 4,
+  },
+  loadingContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  endText: {
+    textAlign: 'center',
+    color: theme === 'dark' ? '#aaa' : '#666',
+    padding: 20,
   },
 }); 

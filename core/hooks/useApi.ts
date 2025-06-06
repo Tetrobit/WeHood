@@ -267,6 +267,50 @@ export type Notification = {
   data?: Record<string, any>;
 };
 
+export interface Voting {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  options: Array<{
+    id: string;
+    text: string;
+    votes: number;
+  }>;
+  totalVotes: number;
+  createdBy: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatar: string;
+  };
+  createdAt: string;
+}
+
+export interface VotingById extends Voting {
+  userVoted: boolean;
+  userVotedOption: number;
+}
+
+export interface GetVotingsResponse {
+  votings: Voting[];
+  total: number;
+}
+
+export interface VoteResponse {
+  ok: boolean;
+  message?: string;
+}
+
+export interface CreateVotingRequest {
+  title: string;
+  description: string;
+  image: string;
+  options: Array<string>
+}
+
+export interface CreateVotingResponse extends Voting {}
+
 export const useApi = () => {
   const realm = useRealm();
   const codeVerifier = useSharedValue<string | null>(null);
@@ -743,6 +787,28 @@ export const useApi = () => {
     }
   }, []);
 
+  const getVotings = async (offset: number = 0, limit: number = 10): Promise<GetVotingsResponse> => {
+    return withAuth<GetVotingsResponse>(`${API_URL}/api/polls?offset=${offset}&limit=${limit}`);
+  };
+
+  const getVotingById = async (id: string): Promise<VotingById> => {
+    return withAuth<VotingById>(`${API_URL}/api/polls/${id}`);
+  };
+
+  const vote = async (votingId: string, optionId: number): Promise<VoteResponse> => {
+    return withAuth<VoteResponse>(`${API_URL}/api/polls/vote`, {
+      method: 'POST',
+      data: { optionIndex: optionId, pollId: votingId }
+    });
+  };
+
+  const createVoting = async (data: CreateVotingRequest): Promise<CreateVotingResponse> => {
+    return withAuth<CreateVotingResponse>(`${API_URL}/api/polls`, {
+      method: 'POST',
+      data
+    });
+  };
+
   return {
     sendVerificationCode,
     verifyVerificationCode,
@@ -774,6 +840,10 @@ export const useApi = () => {
     fetchNotifications,
     markNotificationAsRead,
     markAllNotificationsAsRead,
+    getVotings,
+    getVotingById,
+    vote,
+    createVoting,
   }
 }
 

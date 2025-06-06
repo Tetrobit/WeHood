@@ -1,73 +1,77 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Theme, useTheme } from '@/core/hooks/useTheme';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { useState } from 'react';
-
-type Voting = {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  options: Array<{
-    id: string;
-    text: string;
-    votes: number;
-  }>;
-  totalVotes: number;
-  author: {
-    id: string;
-    name: string;
-    avatar: string;
-  };
-  createdAt: string;
-};
-
-const mockVotings: Voting[] = [
-  {
-    id: '1',
-    title: 'Выбор места для нового сквера',
-    description: 'Голосование за место расположения нового сквера в нашем районе',
-    image: 'https://example.com/park.jpg',
-    options: [
-      { id: '1-1', text: 'Улица Ленина, 15', votes: 45 },
-      { id: '1-2', text: 'Проспект Мира, 8', votes: 32 },
-      { id: '1-3', text: 'Площадь Свободы', votes: 28 },
-    ],
-    totalVotes: 105,
-    author: {
-      id: '1',
-      name: 'Иван Петров',
-      avatar: 'https://example.com/avatar1.jpg',
-    },
-    createdAt: '2024-03-20',
-  },
-];
+import { useState, useEffect } from 'react';
+import { useApi, VotingById } from '@/core/hooks/useApi';
+import { getFileUrl } from '@/core/utils/url';
 
 export default function VotingDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const [theme] = useTheme();
   const styles = makeStyles(theme);
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const api = useApi();
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [hasVoted, setHasVoted] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [voting, setVoting] = useState<VotingById | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const voting = mockVotings.find(v => v.id === id);
+  useEffect(() => {
+    loadVoting();
+  }, [id]);
 
-  if (!voting) {
+  const loadVoting = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await api.getVotingById(id);
+      setVoting(data);
+    } catch (err) {
+      setError('Не удалось загрузить голосование');
+      console.error('Error loading voting:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVote = async () => {
+    if (selectedOption !== null && !hasVoted && voting) {
+      try {
+        setLoading(true);
+        const response = await api.vote(voting.id, selectedOption);
+        if (response.ok) {
+          setHasVoted(true);
+          // Перезагружаем голосование для обновления результатов
+          await loadVoting();
+        } else {
+          setError(response.message || 'Не удалось проголосовать');
+        }
+      } catch (err) {
+        setError('Произошла ошибка при голосовании');
+        console.error('Error voting:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  if (loading && !voting) {
     return (
       <View style={styles.container}>
-        <Text style={styles.errorText}>Голосование не найдено</Text>
+        <ActivityIndicator size="large" color="#6A1B9A" />
       </View>
     );
   }
 
-  const handleVote = () => {
-    if (selectedOption && !hasVoted) {
-      // TODO: Отправить голос на сервер
-      setHasVoted(true);
-    }
-  };
+  if (error || !voting) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>{error || 'Голосование не найдено'}</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -79,7 +83,7 @@ export default function VotingDetailsScreen() {
       </View>
 
       <Image
-        source={{ uri: voting.image }}
+        source={{ uri: getFileUrl(voting.image) }}
         style={styles.image}
         resizeMode="cover"
       />
@@ -89,25 +93,27 @@ export default function VotingDetailsScreen() {
 
         <View style={styles.authorInfo}>
           <Image
-            source={{ uri: voting.author.avatar }}
+            source={{ uri: voting.createdBy.avatar || 'https://via.placeholder.com/32' }}
             style={styles.authorAvatar}
           />
-          <Text style={styles.authorName}>{voting.author.name}</Text>
-          <Text style={styles.dateText}>{voting.createdAt}</Text>
+          <Text style={styles.authorName}>
+            {voting.createdBy.firstName} {voting.createdBy.lastName}
+          </Text>
+          <Text style={styles.dateText}>{new Date(voting.createdAt).toLocaleDateString()}</Text>
         </View>
 
         <View style={styles.optionsContainer}>
           <Text style={styles.sectionTitle}>Варианты выбора</Text>
-          {voting.options.map((option) => (
+          {voting.options.map((option, index) => (
             <TouchableOpacity
-              key={option.id}
+              key={index}
               style={[
                 styles.optionItem,
-                selectedOption === option.id && styles.selectedOption,
-                hasVoted && styles.votedOption
+                selectedOption === index && styles.selectedOption,
+                voting?.userVoted && styles.votedOption
               ]}
-              onPress={() => !hasVoted && setSelectedOption(option.id)}
-              disabled={hasVoted}
+              onPress={() => !voting?.userVoted && setSelectedOption(index)}
+              disabled={voting?.userVoted || loading}
             >
               <View style={styles.optionHeader}>
                 <Text style={styles.optionText}>{option.text}</Text>
@@ -125,17 +131,21 @@ export default function VotingDetailsScreen() {
           ))}
         </View>
 
-        {!hasVoted && (
+        {!voting?.userVoted && (
           <TouchableOpacity
-            style={[styles.voteButton, !selectedOption && styles.disabledButton]}
+            style={[styles.voteButton, (selectedOption === null || loading) && styles.disabledButton]}
             onPress={handleVote}
-            disabled={!selectedOption}
+            disabled={selectedOption === null || loading}
           >
-            <Text style={styles.voteButtonText}>Проголосовать</Text>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.voteButtonText}>Проголосовать</Text>
+            )}
           </TouchableOpacity>
         )}
 
-        {hasVoted && (
+        {voting?.userVoted && (
           <View style={styles.votedMessage}>
             <MaterialCommunityIcons name="check-circle" size={24} color="#4CAF50" />
             <Text style={styles.votedMessageText}>Спасибо за ваш голос!</Text>
