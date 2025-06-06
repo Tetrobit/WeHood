@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-nati
 import { Divider } from 'react-native-paper';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useTheme } from '@/core/hooks/useTheme';
+import { Theme } from '@/core/hooks/useTheme';
 
 type Notification = {
   id: string;
