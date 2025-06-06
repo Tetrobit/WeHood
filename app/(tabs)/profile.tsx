@@ -41,6 +41,8 @@ export default function ProfileScreen() {
   const styles = makeStyles(theme!);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingModalVisible, setLoadingModalVisible] = useState(false);
+  const [promptModalVisible, setPromptModalVisible] = useState(false);
+  const [avatarPrompt, setAvatarPrompt] = useState('');
 
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -262,10 +264,20 @@ export default function ProfileScreen() {
 
   const generateAvatar = async () => {
     setModalVisible(false);
+    setPromptModalVisible(true);
+  }
+
+  const handleGenerateWithPrompt = async () => {
+    if (!avatarPrompt.trim()) {
+      showToast('Пожалуйста, введите описание');
+      return;
+    }
+    setPromptModalVisible(false);
     try {
       setLoadingModalVisible(true);
-      const response = await api.generateAvatar();
+      const response = await api.generateAvatar(avatarPrompt.trim());
       await api.updateProfile({ avatar: response.avatar });
+      setAvatarPrompt('');
     } catch (error) {
       showToast('Ошибка при генерации аватара');
     } finally {
@@ -432,7 +444,7 @@ export default function ProfileScreen() {
           <View style={{ backgroundColor: theme === 'dark' ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 320, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
             <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === 'dark' ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Сменить фото профиля</Text>
             <TouchableOpacity
-              style={{ elevation: 2, backgroundColor: '#007AFF', borderRadius: 12, padding: 16, marginBottom: 16, alignItems: 'center', shadowColor: '#007AFF', shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 }}
+              style={{ elevation: 2, backgroundColor: '#007AFF', borderRadius: 12, padding: 16, marginBottom: 16, alignItems: 'center', shadowColor: '#007AFF', shadowOpacity: 0.2, shadowRadius: 8,  }}
               onPress={pickImage}
             >
               <Text style={{ color: '#fff', fontSize: 17, fontWeight: '600' }}>Выбрать из галереи</Text>
@@ -563,6 +575,63 @@ export default function ProfileScreen() {
               <Text style={{ color: '#fff', fontSize: 17, fontWeight: '600' }}>Сохранить</Text>
             </TouchableOpacity>
             <TouchableOpacity style={{ alignItems: 'center', marginTop: 8 }} onPress={() => setPasswordModalVisible(false)}>
+              <Text style={{ color: '#007AFF', fontSize: 16 }}>Отмена</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
+
+        {/* Модальное окно для ввода промпта */}
+        <Modal
+          isVisible={promptModalVisible}
+          onBackdropPress={() => setPromptModalVisible(false)}
+          animationIn="zoomIn"
+          animationOut="zoomOut"
+          animationInTiming={350}
+          animationOutTiming={350}
+          backdropOpacity={0.35}
+          backdropTransitionInTiming={400}
+          backdropTransitionOutTiming={400}
+          style={{ justifyContent: 'center', alignItems: 'center', margin: 0 }}
+        >
+          <View style={{ backgroundColor: theme === 'dark' ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 320, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === 'dark' ? '#fff' : '#222', marginBottom: 16, textAlign: 'center' }}>Опишите желаемый аватар</Text>
+            <Text style={{ color: theme === 'dark' ? '#aaa' : '#666', fontSize: 14, marginBottom: 16, textAlign: 'center' }}>
+              Например: "Космонавт в стиле пиксель-арт" или "Аниме персонаж с розовыми волосами"
+            </Text>
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  color: theme === 'dark' ? '#fff' : '#222',
+                  backgroundColor: theme === 'dark' ? '#333' : '#f5f5f5',
+                  borderWidth: 1,
+                  borderColor: theme === 'dark' ? '#444' : '#ccc',
+                  borderRadius: 10,
+                  height: 80,
+                  textAlignVertical: 'top',
+                  paddingTop: 12,
+                },
+              ]}
+              placeholder="Введите описание..."
+              placeholderTextColor={theme === 'dark' ? '#888' : '#aaa'}
+              value={avatarPrompt}
+              onChangeText={setAvatarPrompt}
+              multiline
+              numberOfLines={3}
+            />
+            <TouchableOpacity
+              style={{ backgroundColor: '#007AFF', borderRadius: 12, padding: 16, marginTop: 16, alignItems: 'center' }}
+              onPress={handleGenerateWithPrompt}
+            >
+              <Text style={{ color: '#fff', fontSize: 17, fontWeight: '600' }}>Сгенерировать</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{ alignItems: 'center', marginTop: 8 }}
+              onPress={() => {
+                setPromptModalVisible(false);
+                setAvatarPrompt('');
+              }}
+            >
               <Text style={{ color: '#007AFF', fontSize: 16 }}>Отмена</Text>
             </TouchableOpacity>
           </View>
