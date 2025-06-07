@@ -208,11 +208,11 @@ export interface NearbyPost {
   address?: string;
   author: {
     id: string;
-    vkId: string;
+    vkId?: string;
     avatar?: string;
-    email: string;
-    firstName: string;
-    lastName: string;
+    email?: string;
+    firstName?: string;
+    lastName?: string;
     createdAt: Date;
     updatedAt: Date;
   },
@@ -628,6 +628,7 @@ export const useApi = () => {
     // Сохраняем посты в Realm
     realm.write(() => {
       posts.forEach(post => {
+        console.log(post);
         const postData = {
           ...post,
           latitude: Number(post.latitude),

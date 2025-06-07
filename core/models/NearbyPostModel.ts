@@ -16,11 +16,11 @@ export class NearbyPostModel extends Realm.Object {
   createdAt!: Date;
   updatedAt!: Date;
   authorId!: string;
-  authorVkId!: string;
+  authorVkId?: string;
   authorAvatar?: string;
-  authorEmail!: string;
-  authorFirstName!: string;
-  authorLastName!: string;
+  authorEmail?: string;
+  authorFirstName?: string;
+  authorLastName?: string;
   authorCreatedAt!: Date;
   authorUpdatedAt!: Date;
   address?: string;
@@ -57,11 +57,11 @@ export class NearbyPostModel extends Realm.Object {
       createdAt: 'date',
       updatedAt: 'date',
       authorId: 'string',
-      authorVkId: 'string',
+      authorVkId: 'string?',
       authorAvatar: 'string?',
-      authorEmail: 'string',
-      authorFirstName: 'string',
-      authorLastName: 'string',
+      authorEmail: 'string?',
+      authorFirstName: 'string?',
+      authorLastName: 'string?',
       authorCreatedAt: 'date',
       authorUpdatedAt: 'date',
       deleted: 'bool?',
