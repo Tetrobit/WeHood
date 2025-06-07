@@ -101,7 +101,6 @@ export default function NotificationsScreen() {
     }
   };
 
-  console.log("notifications", notifications);
   const loadNotifications = async (isRefresh = false) => {
     try {
       let currOffset = offset;
