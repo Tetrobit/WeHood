@@ -8,6 +8,7 @@ import { useApi } from '@/core/hooks/useApi';
 import { Voting } from '@/core/hooks/useApi';
 import { getFileUrl } from '@/core/utils/url';
 import * as SecureStore from 'expo-secure-store';
+import LottieView from 'lottie-react-native';
 
 export default function VotingScreen() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -165,6 +166,19 @@ export default function VotingScreen() {
         {!hasMore && !loading && votings.length > 0 && (
           <Text style={styles.endText}>Больше голосований нет</Text>
         )}
+        
+        {!votings.length && (
+          <>
+            <LottieView
+              source={require('@/assets/lottie/empty.json')}
+              autoPlay
+              loop
+              style={{ width: '100%', height: 300 }}
+            />
+            <Text style={styles.endText}>Нет голосований</Text>
+          </>
+        )}
+
       </ScrollView>
 
       <TouchableOpacity
