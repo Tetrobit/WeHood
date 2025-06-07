@@ -628,7 +628,6 @@ export const useApi = () => {
     // Сохраняем посты в Realm
     realm.write(() => {
       posts.forEach(post => {
-        console.log(post);
         const postData = {
           ...post,
           latitude: Number(post.latitude),
