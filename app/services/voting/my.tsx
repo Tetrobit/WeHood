@@ -131,7 +131,7 @@ export default function VotingScreen() {
                         <View 
                           style={[
                             styles.progressFill,
-                            { width: `${(option.votes / voting.totalVotes) * 100}%` }
+                            { width: `${(option.votes / voting.options.reduce((acc, option) => acc + option.votes, 0)) * 100}%` }
                           ]} 
                         />
                       </View>

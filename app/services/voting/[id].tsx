@@ -41,12 +41,12 @@ export default function VotingDetailsScreen() {
       try {
         setLoading(true);
         const response = await api.vote(voting.id, selectedOption);
-        if (response.ok) {
+        if (response.id) {
           setHasVoted(true);
           // Перезагружаем голосование для обновления результатов
           await loadVoting();
         } else {
-          setError(response.message || 'Не удалось проголосовать');
+          setError('Не удалось проголосовать');
         }
       } catch (err) {
         setError('Произошла ошибка при голосовании');
@@ -123,7 +123,7 @@ export default function VotingDetailsScreen() {
                 <View 
                   style={[
                     styles.progressFill,
-                    { width: `${(option.votes / voting.totalVotes) * 100}%` }
+                    { width: `${(option.votes / voting.options.reduce((acc, option) => acc + option.votes, 0)) * 100}%` }
                   ]} 
                 />
               </View>

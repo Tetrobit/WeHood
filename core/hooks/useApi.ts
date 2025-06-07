@@ -297,10 +297,7 @@ export interface GetVotingsResponse {
   total: number;
 }
 
-export interface VoteResponse {
-  ok: boolean;
-  message?: string;
-}
+export interface VoteResponse extends VotingById {}
 
 export interface CreateVotingRequest {
   title: string;
