@@ -8,6 +8,10 @@ import Realm from "realm";
 import { CommentModel } from "../models/CommentModel";
 import * as SecureStorage from 'expo-secure-store';
 import axios, { AxiosRequestConfig } from "axios";
+import { useState, useCallback } from 'react';
+import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
+import messaging from '@react-native-firebase/messaging';
 
 export interface VKParameters {
   vkAppId: string;
@@ -251,9 +255,72 @@ export interface WeatherAIRecommendationResponse {
   recommendation: string;
 }
 
+export type Notification = {
+  id: string;
+  title: string;
+  message: string;
+  time: string;
+  type: 'event' | 'help' | 'chat' | 'system' | 'nearby_like';
+  isRead: boolean;
+  postId?: string;
+  userId?: string;
+  data?: Record<string, any>;
+};
+
+export interface Voting {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  options: Array<{
+    id: string;
+    text: string;
+    votes: number;
+  }>;
+  totalVotes: number;
+  createdBy: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatar: string;
+  };
+  createdAt: string;
+}
+
+export interface VotingById extends Voting {
+  userVoted: boolean;
+  userVotedOption: number;
+}
+
+export interface GetVotingsResponse {
+  votings: Voting[];
+  total: number;
+}
+
+export interface VoteResponse extends VotingById {}
+
+export interface CreateVotingRequest {
+  title: string;
+  description: string;
+  image: string;
+  options: Array<string>
+}
+
+export interface CreateVotingResponse extends Voting {}
+
 export const useApi = () => {
   const realm = useRealm();
   const codeVerifier = useSharedValue<string | null>(null);
+
+  const getFCMToken = async (): Promise<string | null> => {
+    try {
+      const token = await messaging().getToken();
+      return token;
+    } catch (error) {
+      console.error('Failed to get FCM token:', error);
+      return null;
+    }
+  };
 
   const getVKParameters = async (): Promise<VKParameters> => {
     const response = await fetch(`${API_URL}/api/auth/vk-parameters`);
@@ -269,6 +336,8 @@ export const useApi = () => {
   }
 
   const loginWithVK = async (code: string, device_id: string, state: string): Promise<LoginWithVKResponse> => {
+    const fcmToken = await getFCMToken();
+
     const response = await fetch(`${API_URL}/api/auth/login-vk`, {
       method: 'POST',
       headers: {
@@ -288,7 +357,8 @@ export const useApi = () => {
           brand: Device.brand,
           device_manufacturer: Device.manufacturer,
           device_model: Device.modelName,
-        }
+        },
+        fcm_token: fcmToken
       }),
     });
 
@@ -345,6 +415,8 @@ export const useApi = () => {
   }
 
   const register = async (email: string, password: string, verificationCodeId: string, firstName: string, lastName: string): Promise<RegisterResponse> => { 
+    const fcmToken = await getFCMToken();
+    
     const response = await fetch(`${API_URL}/api/auth/register`, {
       method: 'POST',
       headers: {
@@ -362,7 +434,8 @@ export const useApi = () => {
         device_params: {
           manufacturer: Device.manufacturer,
           model: Device.modelName,
-        }
+        },
+        fcm_token: fcmToken
       }),
     });
 
@@ -376,6 +449,8 @@ export const useApi = () => {
   }
 
   const login = async (email: string, password: string): Promise<LoginResponse> => {
+    const fcmToken = await getFCMToken();
+    
     const response = await fetch(`${API_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
@@ -390,7 +465,8 @@ export const useApi = () => {
         device_params: {
           manufacturer: Device.manufacturer,
           model: Device.modelName,
-        }
+        },
+        fcm_token: fcmToken
       }),
     });
 
@@ -654,7 +730,6 @@ export const useApi = () => {
     const comment = await withAuth<CommentResponse>(`${API_URL}/api/nearby/comments/${commentId}`, {
       method: 'DELETE',
     });
-    console.log(comment);
     realm.write(() => {
       realm.create(CommentModel, CommentModel.fromApi(comment), Realm.UpdateMode.Modified);
     });
@@ -672,6 +747,62 @@ export const useApi = () => {
         'Content-Type': 'application/json',
       },
       data: weatherData,
+    });
+  };
+
+  const fetchNotifications = useCallback(async (offset: number = 0, limit: number = 10): Promise<Notification[]> => {
+    try {
+      const response = await withAuth<Notification[]>(`${API_URL}/api/notifications?offset=${offset}&limit=${limit}`);
+      return response;
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+      return [];
+    }
+  }, []);
+
+  const markNotificationAsRead = useCallback(async (id: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`${API_URL}/api/notifications/${id}/read`, {
+        method: 'PUT',
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+      return false;
+    }
+  }, []);
+
+  const markAllNotificationsAsRead = useCallback(async (): Promise<boolean> => {
+    try {
+      const response = await fetch(`${API_URL}/api/notifications/read-all`, {
+        method: 'PUT',
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error);
+      return false;
+    }
+  }, []);
+
+  const getVotings = async (offset: number = 0, limit: number = 10, userId: string | undefined = undefined): Promise<GetVotingsResponse> => {
+    return withAuth<GetVotingsResponse>(`${API_URL}/api/polls?offset=${offset}&limit=${limit}${userId ? `&userId=${userId}` : ''}`);
+  };
+
+  const getVotingById = async (id: string): Promise<VotingById> => {
+    return withAuth<VotingById>(`${API_URL}/api/polls/${id}`);
+  };
+
+  const vote = async (votingId: string, optionId: number): Promise<VoteResponse> => {
+    return withAuth<VoteResponse>(`${API_URL}/api/polls/vote`, {
+      method: 'POST',
+      data: { optionIndex: optionId, pollId: votingId }
+    });
+  };
+
+  const createVoting = async (data: CreateVotingRequest): Promise<CreateVotingResponse> => {
+    return withAuth<CreateVotingResponse>(`${API_URL}/api/polls`, {
+      method: 'POST',
+      data
     });
   };
 
@@ -703,6 +834,13 @@ export const useApi = () => {
     generateAvatar,
     summarizeComments,
     getWeatherAIRecommendation,
+    fetchNotifications,
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
+    getVotings,
+    getVotingById,
+    vote,
+    createVoting,
   }
 }
 

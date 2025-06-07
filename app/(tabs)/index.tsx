@@ -4,6 +4,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router, useFocusEffect } from 'expo-router';
 import { Theme, useTheme } from '@/core/hooks/useTheme';
 import { useQuery } from '@realm/react';
+import { useUser } from '@/core/hooks/models/useUser';
 import UserModel from '@/core/models/UserModel';
 import Carousel from 'react-native-reanimated-carousel';
 import * as Network from 'expo-network';
@@ -14,11 +15,11 @@ import { useGeolocation } from '@/core/hooks/useGeolocation';
 import useWeather from '@/core/hooks/useWeather';
 import { getWeatherIcon } from '@/core/utils/weather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import * as SecureStore from 'expo-secure-store';
 
 const { width } = Dimensions.get('window');
 
-type ServiceIcon = 'hand-heart' | 'calendar-star' | 'bullhorn' | 'account-group';
+type ServiceIcon = 'hand-heart' | 'calendar-star' | 'bullhorn' | 'poll';
 
 type NewsItem = {
   id: string;
@@ -61,7 +62,7 @@ const services: Array<{
   { id: '1', title: 'Помощь', icon: 'hand-heart', color: '#FF6B6B' },
   { id: '2', title: 'События', icon: 'calendar-star', color: '#4ECDC4' },
   { id: '3', title: 'Объявления', icon: 'bullhorn', color: '#FFD93D' },
-  { id: '4', title: 'Соседи', icon: 'account-group', color: '#95E1D3' },
+  { id: '4', title: 'Опросы', icon: 'poll', color: '#6A1B9A' },
 ];
 
 const carouselData = [
@@ -89,12 +90,11 @@ const serviceImages: Record<string, string> = {
   'Помощь': 'https://cdn-icons-png.flaticon.com/512/616/616494.png', // рукопожатие, цветная
   'События': 'https://cdn-icons-png.flaticon.com/512/2921/2921822.png', // календарь, цветной
   'Объявления': 'https://cdn-icons-png.flaticon.com/512/1827/1827349.png', // мегафон, цветной
-  'Соседи': 'https://cdn-icons-png.flaticon.com/512/2922/2922510.png', // люди, цветные
+  'Опросы': 'https://cdn-icons-png.flaticon.com/512/2922/2922510.png', // люди, цветные
 };
 
 export default function HomeScreen() {
-  const [profile] = useQuery(UserModel);
-  const [avatarUri, setAvatarUri] = useState(profile?.avatar);
+  const profile = useUser(SecureStore.getItem('user_id')!);
   const [theme] = useTheme();
   const styles = makeStyles(theme!);
   const { lastLocation, requestGeolocation } = useGeolocation();
@@ -225,7 +225,7 @@ export default function HomeScreen() {
                 } else if (service.title === 'Помощь') {
                   router.push('/services/help/events');
                 } else {
-                  router.push(`/services/${service.id}` as any);
+                  router.push(`/services/voting`);
                 }
               }}
             >
@@ -307,7 +307,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     zIndex: 2,
   },
   serviceModernTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
     color: theme === 'dark' ? '#fff' : '#111',
     marginBottom: 2,

@@ -1,14 +1,52 @@
 import { Stack } from "expo-router";
 import StorageProvider from "@/core/models";
-import React from "react";
+import React, { useEffect } from "react";
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import ToastManager from 'toastify-react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { useTheme } from "@/core/hooks/useTheme";
 import { ThemeProvider } from "@/core/hooks/useTheme";
+import messaging from '@react-native-firebase/messaging';
+import * as Notifications from 'expo-notifications';
 
 function RootLayout() {
   const [theme] = useTheme();
+
+  useEffect(() => {
+    const initializeFirebase = async () => {
+      try {
+        // Запрашиваем разрешение на уведомления
+        const authStatus = await messaging().requestPermission();
+        const enabled =
+          authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+          authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+        if (enabled) {
+          // Настраиваем обработчик уведомлений
+          messaging().onMessage(async remoteMessage => {
+            // Показываем уведомление, когда приложение открыто
+            await Notifications.scheduleNotificationAsync({
+              content: {
+                title: remoteMessage.notification?.title || 'Новое уведомление',
+                body: remoteMessage.notification?.body,
+                data: remoteMessage.data,
+              },
+              trigger: null,
+            });
+          });
+
+          // Обработка уведомлений, когда приложение в фоне
+          messaging().setBackgroundMessageHandler(async remoteMessage => {
+            console.log('Message handled in the background!', remoteMessage);
+          });
+        }
+      } catch (error) {
+        console.error('Failed to initialize Firebase:', error);
+      }
+    };
+
+    initializeFirebase();
+  }, []);
 
   const themedStatusBarStyle = theme === 'dark' ? 'light' : 'dark';
   const themedStatusBarBackgroundColor = theme === 'dark' ? '#000000' : '#ffffff';

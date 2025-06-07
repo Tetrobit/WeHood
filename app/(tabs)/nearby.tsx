@@ -112,13 +112,6 @@ export default function NearbyScreen() {
           <Text style={styles.district}>{lastLocation?.district}</Text>
           <Text style={styles.city}>{lastLocation?.locality}</Text>
         </View>
-        <TouchableOpacity style={styles.filterBtn}>
-          <MaterialIcons 
-            name="tune" 
-            size={24} 
-            color={theme === 'dark' ? '#fff' : '#222'} 
-          />
-        </TouchableOpacity>
       </View>
 
       {/* Табы */}

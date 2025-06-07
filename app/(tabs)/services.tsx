@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Touchable 
 import { Card, Searchbar } from 'react-native-paper';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useState } from 'react';
-import { useTheme } from '@/core/hooks/useTheme';
+import { Theme, useTheme } from '@/core/hooks/useTheme';
 import { Href, router } from 'expo-router';
 
 type Service = {
@@ -136,6 +136,35 @@ const services: Service[] = [
     category: 'Объявления',
     isAccordion: false,
     target: { pathname: '/services/local-services' },
+  },
+  {
+    id: '8',
+    title: 'Голосования',
+    description: 'Создавайте голосования и участвуйте в них',
+    icon: 'vote',
+    color: '#6A1B9A',
+    category: 'События',
+    isAccordion: true,
+    actions: [
+      {
+        id: '8-1',
+        title: 'Все голосования',
+        icon: 'format-list-bulleted',
+        target: { pathname: '/services/voting' },
+      },
+      {
+        id: '8-2',
+        title: 'Создать голосование',
+        icon: 'plus-circle',
+        target: { pathname: '/services/voting/new' },
+      },
+      {
+        id: '8-3',
+        title: 'Мои голосования',
+        icon: 'account',
+        target: { pathname: '/services/voting/my' },
+      }
+    ]
   }
 ];
 

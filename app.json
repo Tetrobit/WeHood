@@ -56,7 +56,23 @@
           "recordAudioAndroid": true
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-video",
+      "@react-native-firebase/app",
+      [
+        "@react-native-firebase/messaging",
+        {
+          "android": {
+            "notificationChannelId": "default",
+            "notificationChannelName": "Основной канал уведомлений",
+            "notificationChannelDescription": "Канал для основных уведомлений приложения",
+            "notificationChannelImportance": "max",
+            "notificationChannelShowBadge": true,
+            "notificationChannelEnableVibration": true,
+            "notificationChannelEnableLights": true
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
@@ -70,7 +86,12 @@
     "owner": "tetrobit",
     "android": {
       "package": "com.so_dam.wehood",
-      "permissions": []
+      "permissions": [
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE",
+        "WAKE_LOCK"
+      ],
+      "googleServicesFile": "./google-services.json"
     }
   }
 }
