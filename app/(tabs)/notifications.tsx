@@ -14,6 +14,7 @@ const notificationIcons = {
   chat: { icon: 'chat', color: '#95E1D3' },
   system: { icon: 'cog', color: '#FFD93D' },
   nearby_like: { icon: 'heart', color: '#FF6B6B' },
+  nearby_poll: { icon: 'poll', color: '#6A1B9A' },
 };
 
 export default function NotificationsScreen() {
@@ -179,11 +180,25 @@ export default function NotificationsScreen() {
   };
 
   const handleGoToPost = (postId: string) => {
-    router.push(`/services/nearby/view?id=${postId}`);
+    router.push({
+      pathname: '/services/nearby/view',
+      params: {
+        id: postId
+      }
+    });
   };
 
   const handleGoToProfile = (userId: string) => {
     // router.push(`/profile/${userId}`);
+  };
+
+  const handleGoToPoll = (pollId: string) => {
+    router.push({
+      pathname: '/services/voting/[id]',
+      params: {
+        id: pollId
+      }
+    });
   };
 
   return (
@@ -261,6 +276,14 @@ export default function NotificationsScreen() {
                         onPress={() => handleGoToPost(notification.data!.postId)}
                       >
                         <Text style={styles.actionButtonText}>Перейти к посту</Text>
+                      </TouchableOpacity>
+                    )}
+                    {notification.data?.pollId && (
+                      <TouchableOpacity 
+                        style={styles.actionButton}
+                        onPress={() => handleGoToPoll(notification.data!.pollId)}
+                      >
+                        <Text style={styles.actionButtonText}>Перейти к опросу</Text>
                       </TouchableOpacity>
                     )}
                   </View>
