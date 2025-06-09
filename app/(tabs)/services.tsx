@@ -165,6 +165,16 @@ const services: Service[] = [
         target: { pathname: '/services/voting/my' },
       }
     ]
+  },
+  {
+    id: '9',
+    title: 'Соседи',
+    description: 'Чаты и общение с соседями',
+    icon: 'account-group',
+    color: '#4CAF50',
+    category: 'Соседи',
+    isAccordion: false,
+    target: { pathname: '/services/neighbors/chats' },
   }
 ];
 

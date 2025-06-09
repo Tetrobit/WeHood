@@ -40,6 +40,8 @@ export default function ServicesLayout() {
       <Stack.Screen name="nearby/view" options={{...defaultConfig, statusBarBackgroundColor: 'black', statusBarStyle: 'light'}} />
       <Stack.Screen name="nearby/add" options={{...defaultConfig, title: 'Опубликовать пост'}} />
       <Stack.Screen name="profile/[id]" options={{...defaultConfig, title: 'Профиль'}} />
+      <Stack.Screen name="neighbors/chats" options={{...defaultConfig, title: 'Чаты соседей'}} />
+      <Stack.Screen name="neighbors/chat/[id]" options={{...defaultConfig, title: 'Чат'}} />
     </Stack>
   );
 }

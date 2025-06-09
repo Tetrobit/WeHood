@@ -19,7 +19,7 @@ import * as SecureStore from 'expo-secure-store';
 
 const { width } = Dimensions.get('window');
 
-type ServiceIcon = 'hand-heart' | 'calendar-star' | 'bullhorn' | 'poll';
+type ServiceIcon = 'hand-heart' | 'calendar-star' | 'bullhorn' | 'poll' | 'account-group';
 
 type NewsItem = {
   id: string;
@@ -63,6 +63,7 @@ const services: Array<{
   { id: '2', title: 'События', icon: 'calendar-star', color: '#4ECDC4' },
   { id: '3', title: 'Объявления', icon: 'bullhorn', color: '#FFD93D' },
   { id: '4', title: 'Опросы', icon: 'poll', color: '#6A1B9A' },
+  { id: '5', title: 'Соседи', icon: 'account-group', color: '#4CAF50' },
 ];
 
 const carouselData = [
@@ -87,10 +88,11 @@ const carouselData = [
 ];
 
 const serviceImages: Record<string, string> = {
-  'Помощь': 'https://cdn-icons-png.flaticon.com/512/616/616494.png', // рукопожатие, цветная
-  'События': 'https://cdn-icons-png.flaticon.com/512/2921/2921822.png', // календарь, цветной
-  'Объявления': 'https://cdn-icons-png.flaticon.com/512/1827/1827349.png', // мегафон, цветной
-  'Опросы': 'https://cdn-icons-png.flaticon.com/512/2922/2922510.png', // люди, цветные
+  'Помощь': 'https://cdn-icons-png.flaticon.com/512/616/616494.png',
+  'События': 'https://cdn-icons-png.flaticon.com/512/2921/2921822.png',
+  'Объявления': 'https://cdn-icons-png.flaticon.com/512/1827/1827349.png',
+  'Опросы': 'https://cdn-icons-png.flaticon.com/512/2922/2922510.png',
+  'Соседи': 'https://cdn-icons-png.flaticon.com/512/476/476863.png',
 };
 
 export default function HomeScreen() {
@@ -212,37 +214,79 @@ export default function HomeScreen() {
       <View style={styles.findAllContainer}>
         <Text style={styles.findAllTitle}>Сервисы</Text>
         <View style={styles.servicesGridModern}>
-          {services.map((service) => (
-            <TouchableOpacity
-              key={service.id}
-              style={styles.serviceModernCard}
-              activeOpacity={0.85}
-              onPress={() => {
-                if (service.title === 'Объявления') {
-                  router.push('/services/events/events');
-                } else if (service.title === 'События') {
-                  router.push('/services/events-city/events');
-                } else if (service.title === 'Помощь') {
-                  router.push('/services/help/events');
-                } else {
-                  router.push(`/services/voting`);
-                }
-              }}
-            >
-              <View style={styles.serviceModernContent}>
-                <View style={styles.serviceModernTextBlock}>
-                  <Text style={styles.serviceModernTitle}>{service.title}</Text>
+          {services.map((service, idx) => {
+            // Если "Соседи" — делаем отдельный ряд и растягиваем на 2 колонки
+            if (service.title === 'Соседи') {
+              return (
+                <View key={service.id} style={{ width: '100%', alignItems: 'center' }}>
+                  <TouchableOpacity
+                    style={[styles.serviceModernCard, { width: '100%' }]}
+                    activeOpacity={0.85}
+                    onPress={() => {
+                      if (service.title === 'Объявления') {
+                        router.push('/services/events/events');
+                      } else if (service.title === 'События') {
+                        router.push('/services/events-city/events');
+                      } else if (service.title === 'Помощь') {
+                        router.push('/services/help/events');
+                      } else if (service.title === 'Соседи') {
+                        router.push('/services/neighbors/chats');
+                      } else {
+                        router.push(`/services/voting`);
+                      }
+                    }}
+                  >
+                    <View style={styles.serviceModernContent}>
+                      <View style={styles.serviceModernTextBlock}>
+                        <Text style={styles.serviceModernTitle}>{service.title}</Text>
+                      </View>
+                      <View style={styles.serviceModernImage}>
+                        <MaterialCommunityIcons
+                          name={service.icon}
+                          size={32}
+                          color={service.color}
+                        />
+                      </View>
+                    </View>
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.serviceModernImage}>
-                  <MaterialCommunityIcons
-                    name={service.icon}
-                    size={32}
-                    color={service.color}
-                  />
+              );
+            }
+            // Обычные сервисы
+            return (
+              <TouchableOpacity
+                key={service.id}
+                style={styles.serviceModernCard}
+                activeOpacity={0.85}
+                onPress={() => {
+                  if (service.title === 'Объявления') {
+                    router.push('/services/events/events');
+                  } else if (service.title === 'События') {
+                    router.push('/services/events-city/events');
+                  } else if (service.title === 'Помощь') {
+                    router.push('/services/help/events');
+                  } else if (service.title === 'Соседи') {
+                    router.push('/services/neighbors/chats');
+                  } else {
+                    router.push(`/services/voting`);
+                  }
+                }}
+              >
+                <View style={styles.serviceModernContent}>
+                  <View style={styles.serviceModernTextBlock}>
+                    <Text style={styles.serviceModernTitle}>{service.title}</Text>
+                  </View>
+                  <View style={styles.serviceModernImage}>
+                    <MaterialCommunityIcons
+                      name={service.icon}
+                      size={32}
+                      color={service.color}
+                    />
+                  </View>
                 </View>
-              </View>
-            </TouchableOpacity>
-          ))}
+              </TouchableOpacity>
+            );
+          })}
         </View>
       </View>
 
