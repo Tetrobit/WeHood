@@ -45,8 +45,92 @@ const mockMessages = [
   },
 ];
 
+const INTERESTS_CHAT_MOCKS: Record<string, any[]> = {
+  'Игры': [
+    {
+      id: '1',
+      author: { firstName: 'Артём', lastName: 'Петров', avatar: 'https://i.pravatar.cc/150?img=4' },
+      text: 'Всем привет! Кто идёт на турнир по настолкам в субботу?',
+      createdAt: '2024-03-20T12:00:00',
+      isAuthor: false,
+    },
+    {
+      id: '2',
+      author: { firstName: 'Светлана', lastName: 'Иванова', avatar: 'https://i.pravatar.cc/150?img=5' },
+      text: 'Я! Уже готовлю свою коллекцию игр :)',
+      createdAt: '2024-03-20T12:05:00',
+      isAuthor: false,
+    },
+  ],
+  'Музыка': [
+    {
+      id: '1',
+      author: { firstName: 'Игорь', lastName: 'Смирнов', avatar: 'https://i.pravatar.cc/150?img=6' },
+      text: 'Кто идёт на концерт в парке в пятницу?',
+      createdAt: '2024-03-19T18:00:00',
+      isAuthor: false,
+    },
+    {
+      id: '2',
+      author: { firstName: 'Мария', lastName: 'Кузнецова', avatar: 'https://i.pravatar.cc/150?img=7' },
+      text: 'Я иду! Давайте соберёмся вместе.',
+      createdAt: '2024-03-19T18:10:00',
+      isAuthor: false,
+    },
+  ],
+  'музыка': [
+    {
+      id: '1',
+      author: { firstName: 'Игорь', lastName: 'Смирнов', avatar: 'https://i.pravatar.cc/150?img=6' },
+      text: 'Кто идёт на концерт в парке в пятницу?',
+      createdAt: '2024-03-19T18:00:00',
+      isAuthor: false,
+    },
+    {
+      id: '2',
+      author: { firstName: 'Мария', lastName: 'Кузнецова', avatar: 'https://i.pravatar.cc/150?img=7' },
+      text: 'Я иду! Давайте соберёмся вместе.',
+      createdAt: '2024-03-19T18:10:00',
+      isAuthor: false,
+    },
+  ],
+  'Спорт': [
+    {
+      id: '1',
+      author: { firstName: 'Денис', lastName: 'Воробьёв', avatar: 'https://i.pravatar.cc/150?img=8' },
+      text: 'Завтра пробежка в 7:00 на стадионе. Кто с нами?',
+      createdAt: '2024-03-18T07:00:00',
+      isAuthor: false,
+    },
+    {
+      id: '2',
+      author: { firstName: 'Ольга', lastName: 'Соколова', avatar: 'https://i.pravatar.cc/150?img=9' },
+      text: 'Я присоединяюсь! Беру воду и хорошее настроение.',
+      createdAt: '2024-03-18T07:05:00',
+      isAuthor: false,
+    },
+  ],
+  'Живопись': [
+    {
+      id: '1',
+      author: { firstName: 'Елена', lastName: 'Миронова', avatar: 'https://i.pravatar.cc/150?img=10' },
+      text: 'В воскресенье пленэр в парке. Приглашаю всех художников!',
+      createdAt: '2024-03-17T11:00:00',
+      isAuthor: false,
+    },
+    {
+      id: '2',
+      author: { firstName: 'Павел', lastName: 'Громов', avatar: 'https://i.pravatar.cc/150?img=11' },
+      text: 'Я обязательно буду! Уже готовлю краски.',
+      createdAt: '2024-03-17T11:10:00',
+      isAuthor: false,
+    },
+  ],
+  // ... можно добавить для других интересов аналогично ...
+};
+
 export default function ChatScreen() {
-  const { id } = useLocalSearchParams();
+  const { id, title } = useLocalSearchParams();
   const [theme] = useTheme();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState(mockMessages);
@@ -63,7 +147,14 @@ export default function ChatScreen() {
         if (saved) {
           setMessages(JSON.parse(saved));
         } else {
-          setMessages(mockMessages);
+          // Если чат по интересу — подгружаем свой мок
+          if (typeof id === 'string' && id.startsWith('interest-')) {
+            let interest = id.replace('interest-', '');
+            if (interest.toLowerCase() === 'музыка' || interest === 'Музыка') interest = 'Музыка';
+            setMessages(INTERESTS_CHAT_MOCKS[interest] || []);
+          } else {
+            setMessages(mockMessages);
+          }
         }
         const draft = await AsyncStorage.getItem(`chat_draft_${id}`);
         if (draft) setMessage(draft);
@@ -129,7 +220,9 @@ export default function ChatScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.headerBackBtn}>
           <MaterialCommunityIcons name="arrow-left" size={28} color={theme === 'dark' ? '#fff' : '#000'} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Обсуждение мероприятий Вахитовского района</Text>
+        <Text style={styles.headerTitle} numberOfLines={2}>
+          {typeof title === 'string' ? title : 'Обсуждение мероприятий Вахитовского района'}
+        </Text>
         <TouchableOpacity onPress={() => setNotifModalVisible(true)} style={styles.headerDotsBtn}>
           <MaterialCommunityIcons name="dots-vertical" size={28} color={theme === 'dark' ? '#fff' : '#000'} />
         </TouchableOpacity>
@@ -236,6 +329,8 @@ const makeStyles = (theme: 'light' | 'dark') => StyleSheet.create({
     fontWeight: 'bold',
     color: theme === 'dark' ? '#fff' : '#000',
     zIndex: 1,
+    flexShrink: 1,
+    maxWidth: '80%',
   },
   headerDotsBtn: {
     position: 'absolute',

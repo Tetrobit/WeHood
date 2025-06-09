@@ -20,17 +20,17 @@ import { useUser } from '@/core/hooks/models/useUser';
 import LottieView from 'lottie-react-native';
 import { Easing } from 'react-native';
 
-const HOBBIES = [
-  'Спорт',
+const INTERESTS = [
   'Музыка',
+  'Живопись',
   'Игры',
-  'Путешествия',
-  'Кулинария',
-  'Чтение',
+  'Спорт',
   'Кино',
+  'Кулинария',
+  'Путешествия',
   'Технологии',
-  'Искусство',
   'Фотография',
+  'Чтение',
 ];
 
 export default function ProfileScreen() {
@@ -67,6 +67,7 @@ export default function ProfileScreen() {
     firstName: '',
     lastName: '',
     hobbies: [] as string[],
+    interests: [] as string[],
   });
 
   // Загрузка данных из AsyncStorage при открытии формы
@@ -76,6 +77,10 @@ export default function ProfileScreen() {
         firstName: profile?.firstName || '',
         lastName: profile?.lastName || '',
         hobbies: [],
+        interests: [],
+      });
+      AsyncStorage.getItem('user_interests').then(val => {
+        if (val) setEditData(prev => ({ ...prev, interests: JSON.parse(val) }));
       });
     }
   }, [editTab]);
@@ -113,8 +118,18 @@ export default function ProfileScreen() {
     }));
   };
 
+  const handleToggleInterest = (interest: string) => {
+    setEditData(prev => ({
+      ...prev,
+      interests: prev.interests?.includes(interest)
+        ? prev.interests.filter(i => i !== interest)
+        : [...(prev.interests || []), interest],
+    }));
+  };
+
   const handleSaveEdit = async () => {
     await api.updateProfile({ firstName: editData.firstName, lastName: editData.lastName });
+    await AsyncStorage.setItem('user_interests', JSON.stringify(editData.interests || []));
     setEditTab(false);
   };
 
@@ -329,6 +344,24 @@ export default function ProfileScreen() {
           value={editData.lastName}
           onChangeText={v => handleEditChange('lastName', v)}
         />
+        <Text style={{ color: theme === 'dark' ? '#aaa' : '#666', fontSize: 15, marginBottom: 2, marginTop: 8, marginLeft: 4 }}>Интересы</Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 12 }}>
+          {INTERESTS.map((interest) => (
+            <TouchableOpacity
+              key={interest}
+              style={{
+                backgroundColor: editData.interests?.includes(interest) ? '#007AFF' : (theme === 'dark' ? '#333' : '#eee'),
+                borderRadius: 16,
+                paddingHorizontal: 14,
+                paddingVertical: 7,
+                margin: 4,
+              }}
+              onPress={() => handleToggleInterest(interest)}
+            >
+              <Text style={{ color: editData.interests?.includes(interest) ? '#fff' : (theme === 'dark' ? '#fff' : '#222'), fontSize: 15 }}>{interest}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
         <TouchableOpacity
           style={{ backgroundColor: '#007AFF', borderRadius: 12, padding: 16, marginTop: 24, alignItems: 'center' }}
           onPress={handleSaveEdit}
