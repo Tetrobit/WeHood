@@ -6,6 +6,7 @@ import React from "react";
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import ToastManager from 'toastify-react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
+import '@/core/i18n/i18n';
 
 function RootLayout() {
   const themeName = useThemeName();

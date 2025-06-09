@@ -14,26 +14,29 @@ import React from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ArrowLeftIcon } from 'lucide-react-native';
-
-const HOBBIES = [
-  'Спорт',
-  'Музыка',
-  'Игры',
-  'Путешествия',
-  'Кулинария',
-  'Чтение',
-  'Кино',
-  'Технологии',
-  'Искусство',
-  'Фотография',
-];
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 export default function ProfileScreen() {
+  const { t } = useTranslation();
   const [profile] = useQuery(Profile);
   const api = useApi();
   const theme = useThemeName();
   const styles = makeStyles(theme!);
   const setTheme = useSetTheme();
+
+  const HOBBIES = [
+    t('hobbies.sport'),
+    t('hobbies.music'),
+    t('hobbies.games'),
+    t('hobbies.travel'),
+    t('hobbies.cooking'),
+    t('hobbies.reading'),
+    t('hobbies.cinema'),
+    t('hobbies.technology'),
+    t('hobbies.art'),
+    t('hobbies.photography'),
+  ];
 
   const [modalVisible, setModalVisible] = useState(false);
   const [avatarUri, setAvatarUri] = useState(profile?.avatar);
@@ -105,14 +108,14 @@ export default function ProfileScreen() {
   }
 
   const onLogout = () => {
-    Alert.alert('Мы будем скучать', 'Вы уверены, что хотите выйти?', [
-      { text: 'Отмена', style: 'cancel' },
-      { text: 'Выйти', style: 'destructive', onPress: async () => {
+    Alert.alert(t('profile.logoutConfirm'), t('profile.logoutConfirmMessage'), [
+      { text: t('profile.logoutCancel'), style: 'cancel' },
+      { text: t('profile.logoutConfirmButton'), style: 'destructive', onPress: async () => {
         try {
           await api.logout();
           router.replace('/auth');
         } catch (error) {
-          Alert.alert('Что-то пошло не так', error instanceof Error ? error.message : 'Произошла ошибка при выходе из системы');
+          Alert.alert(t('errors.somethingWentWrong'), error instanceof Error ? error.message : t('errors.unknownError'));
         }
       }},
     ]);
@@ -197,21 +200,20 @@ export default function ProfileScreen() {
 
   const handleChangePassword = async (data: { oldPassword: string; newPassword: string; repeatPassword: string }) => {
     if (data.newPassword.length < 6) {
-      showToast('Пароль должен содержать минимум 6 символов');
+      showToast(t('auth.passwordTooShort'));
       return;
     }
     if (data.newPassword !== data.repeatPassword) {
-      showToast('Пароли не совпадают');
+      showToast(t('auth.passwordMismatch'));
       return;
     }
     try {
-      // Мок: имитируем успешную смену пароля
       await new Promise(res => setTimeout(res, 1000));
-      showToast('Пароль успешно изменён');
+      showToast(t('profile.passwordChanged'));
       setPasswordModalVisible(false);
       reset();
     } catch (e) {
-      showToast('Ошибка смены пароля');
+      showToast(t('profile.passwordChangeError'));
     }
   };
 
@@ -260,7 +262,7 @@ export default function ProfileScreen() {
           value={editData.lastName}
           onChangeText={v => handleEditChange('lastName', v)}
         />
-        <Text style={{ color: theme === DARK_THEME ? '#aaa' : '#666', fontSize: 15, marginBottom: 2, marginTop: 8, marginLeft: 4 }}>Возраст</Text>
+        <Text style={{ color: theme === DARK_THEME ? '#aaa' : '#666', fontSize: 15, marginBottom: 2, marginTop: 8, marginLeft: 4 }}>{t('profile.age')}</Text>
         <TextInput
           style={[
             styles.input,
@@ -278,7 +280,7 @@ export default function ProfileScreen() {
           onChangeText={v => handleEditChange('age', v.replace(/[^0-9]/g, ''))}
           keyboardType="numeric"
         />
-        <Text style={{ color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 16, marginTop: 18, marginBottom: 8 }}>Увлечения:</Text>
+        <Text style={{ color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 16, marginTop: 18, marginBottom: 8 }}>{t('profile.hobbies')}:</Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
           {HOBBIES.map(hobby => (
             <TouchableOpacity
@@ -361,42 +363,42 @@ export default function ProfileScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Личная информация</Text>
+          <Text style={styles.sectionTitle}>{t('profile.personalInfo')}</Text>
           <TouchableOpacity style={styles.menuItem} onPress={() => setEditTab(true)}>
             <Ionicons name="person-outline" size={24} color={theme === DARK_THEME ? '#fff' : '#222'} />
-            <Text style={styles.menuText}>Редактировать профиль</Text>
+            <Text style={styles.menuText}>{t('profile.editProfile')}</Text>
             <Ionicons name="chevron-forward" size={24} color={theme === DARK_THEME ? '#fff' : '#999'} />
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.menuItem, styles.lastMenuItem]} onPress={() => showToast('В разработке...')}>
+          <TouchableOpacity style={[styles.menuItem, styles.lastMenuItem]} onPress={() => showToast(t('profile.inDevelopment'))}>
             <Ionicons name="settings-outline" size={24} color={theme === DARK_THEME ? '#fff' : '#222'} />
-            <Text style={styles.menuText}>Настройки</Text>
+            <Text style={styles.menuText}>{t('profile.settings')}</Text>
             <Ionicons name="chevron-forward" size={24} color={theme === DARK_THEME ? '#fff' : '#999'} />
           </TouchableOpacity>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Безопасность</Text>
+          <Text style={styles.sectionTitle}>{t('profile.security')}</Text>
           <TouchableOpacity style={styles.menuItem} onPress={() => setPasswordModalVisible(true)}>
             <Ionicons name="lock-closed-outline" size={24} color={theme === DARK_THEME ? '#fff' : '#222'} />
-            <Text style={styles.menuText}>Изменить пароль</Text>
+            <Text style={styles.menuText}>{t('profile.changePassword')}</Text>
             <Ionicons name="chevron-forward" size={24} color={theme === DARK_THEME ? '#fff' : '#999'} />
           </TouchableOpacity>
           <TouchableOpacity style={[styles.menuItem, styles.lastMenuItem]} onPress={() => setNotifModalVisible(true)}>
             <Ionicons name="notifications-outline" size={24} color={theme === DARK_THEME ? '#fff' : '#222'} />
-            <Text style={styles.menuText}>Уведомления</Text>
+            <Text style={styles.menuText}>{t('profile.notifications')}</Text>
             <Ionicons name="chevron-forward" size={24} color={theme === DARK_THEME ? '#fff' : '#999'} />
           </TouchableOpacity>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Настройки</Text>
+          <Text style={styles.sectionTitle}>{t('profile.settings')}</Text>
           <View style={[styles.menuItem, styles.lastMenuItem]}>
             <Ionicons 
               name={theme === DARK_THEME ? "moon" : "sunny"} 
               size={24} 
               color={theme === DARK_THEME ? '#fff' : '#222'} 
             />
-            <Text style={styles.menuText}>Тёмная тема</Text>
+            <Text style={styles.menuText}>{t('common.darkTheme')}</Text>
             <Switch
               value={theme === DARK_THEME}
               onValueChange={onChangeTheme}
@@ -404,9 +406,10 @@ export default function ProfileScreen() {
               thumbColor={theme === DARK_THEME ? '#007AFF' : '#f4f3f4'}
             />
           </View>
+          <LanguageSwitcher />
         </View>
         <TouchableOpacity style={[styles.rustoreBox, { backgroundColor: theme === DARK_THEME ? '#111' : '#f2f2f7' }]} activeOpacity={0.8} onPress={() => Linking.openURL('https://www.rustore.ru/catalog/app/com.so_dam.wehood')}>
-          <Text style={[styles.rustoreText, { color: theme === DARK_THEME ? '#fff' : '#222' }]}>Пожалуйста, оставьте отзыв на RuStore, нам важно знать ваше мнение</Text>
+          <Text style={[styles.rustoreText, { color: theme === DARK_THEME ? '#fff' : '#222' }]}>{t('profile.leaveReview')}</Text>
         </TouchableOpacity> 
 
         <Modal
@@ -422,25 +425,25 @@ export default function ProfileScreen() {
           style={{ justifyContent: 'center', alignItems: 'center', margin: 0 }}
         >
           <View style={{ backgroundColor: theme === DARK_THEME ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 320, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Сменить фото профиля</Text>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>{t('profile.changePhoto')}</Text>
             <TouchableOpacity
               style={{ backgroundColor: '#007AFF', borderRadius: 12, padding: 16, marginBottom: 16, alignItems: 'center', shadowColor: '#007AFF', shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 }}
               onPress={pickImage}
             >
-              <Text style={{ color: '#fff', fontSize: 17, fontWeight: '600' }}>Выбрать из галереи</Text>
+              <Text style={{ color: '#fff', fontSize: 17, fontWeight: '600' }}>{t('profile.selectFromGallery')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={{ backgroundColor: theme === DARK_THEME ? '#444' : '#eee', borderRadius: 12, padding: 16, marginBottom: 16, alignItems: 'center' }}
               onPress={() => {}}
               disabled
             >
-              <Text style={{ color: theme === DARK_THEME ? '#aaa' : '#888', fontSize: 17, fontWeight: '600' }}>Сгенерировать (скоро)</Text>
+              <Text style={{ color: theme === DARK_THEME ? '#aaa' : '#888', fontSize: 17, fontWeight: '600' }}>{t('profile.generatePhoto')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={{ alignItems: 'center', marginTop: 4 }}
               onPress={() => setModalVisible(false)}
             >
-              <Text style={{ color: '#007AFF', fontSize: 16 }}>Отмена</Text>
+              <Text style={{ color: '#007AFF', fontSize: 16 }}>{t('common.cancel')}</Text>
             </TouchableOpacity>
           </View>
         </Modal>
@@ -458,9 +461,9 @@ export default function ProfileScreen() {
           style={{ justifyContent: 'center', alignItems: 'center', margin: 0 }}
         >
           <View style={{ backgroundColor: theme === DARK_THEME ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 340, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Настройки уведомлений</Text>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>{t('profile.notificationSettings')}</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 22 }}>
-              <Text style={{ flex: 1, color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 17 }}>Отключение уведомлений</Text>
+              <Text style={{ flex: 1, color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 17 }}>{t('profile.disableNotifications')}</Text>
               <Switch
                 value={!notificationsEnabled ? false : true}
                 onValueChange={v => toggleNotifications(v)}
@@ -469,7 +472,7 @@ export default function ProfileScreen() {
               />
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 22 }}>
-              <Text style={{ flex: 1, color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 17 }}>Беззвучные уведомления</Text>
+              <Text style={{ flex: 1, color: theme === DARK_THEME ? '#fff' : '#222', fontSize: 17 }}>{t('profile.silentNotifications')}</Text>
               <Switch
                 value={silentNotifications}
                 onValueChange={v => toggleSilent(v)}
@@ -479,12 +482,11 @@ export default function ProfileScreen() {
               />
             </View>
             <TouchableOpacity style={{ alignItems: 'center', marginTop: 4 }} onPress={() => setNotifModalVisible(false)}>
-              <Text style={{ color: '#007AFF', fontSize: 16 }}>Закрыть</Text>
+              <Text style={{ color: '#007AFF', fontSize: 16 }}>{t('common.close')}</Text>
             </TouchableOpacity>
           </View>
         </Modal>
 
-        {/* Модальное окно смены пароля */}
         <Modal
           isVisible={passwordModalVisible}
           onBackdropPress={() => setPasswordModalVisible(false)}
@@ -498,9 +500,9 @@ export default function ProfileScreen() {
           style={{ justifyContent: 'center', alignItems: 'center', margin: 0 }}
         >
           <View style={{ backgroundColor: theme === DARK_THEME ? '#222' : '#fff', borderRadius: 24, padding: 28, width: 340, shadowColor: '#000', shadowOpacity: 0.2, shadowRadius: 16, elevation: 10 }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>Изменить пароль</Text>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme === DARK_THEME ? '#fff' : '#222', marginBottom: 24, textAlign: 'center' }}>{t('profile.changePassword')}</Text>
             <Text style={{ color: theme === DARK_THEME ? '#aaa' : '#666', fontSize: 14, marginBottom: 10, textAlign: 'center' }}>
-              Введите старый пароль (если вход через VK — оставьте поле пустым)
+              {t('profile.oldPassword')}
             </Text>
             <Controller
               control={control}
@@ -508,7 +510,7 @@ export default function ProfileScreen() {
               render={({ field: { onChange, value } }) => (
                 <TextInput
                   style={[styles.input, { color: theme === DARK_THEME ? '#fff' : '#222', backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5' }]}
-                  placeholder="Старый пароль"
+                  placeholder={t('profile.oldPassword')}
                   placeholderTextColor={theme === DARK_THEME ? '#888' : '#aaa'}
                   secureTextEntry
                   value={value}
@@ -522,7 +524,7 @@ export default function ProfileScreen() {
               render={({ field: { onChange, value } }) => (
                 <TextInput
                   style={[styles.input, { color: theme === DARK_THEME ? '#fff' : '#222', backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5' }]}
-                  placeholder="Новый пароль"
+                  placeholder={t('profile.newPassword')}
                   placeholderTextColor={theme === DARK_THEME ? '#888' : '#aaa'}
                   secureTextEntry
                   value={value}
@@ -536,7 +538,7 @@ export default function ProfileScreen() {
               render={({ field: { onChange, value } }) => (
                 <TextInput
                   style={[styles.input, { color: theme === DARK_THEME ? '#fff' : '#222', backgroundColor: theme === DARK_THEME ? '#333' : '#f5f5f5' }]}
-                  placeholder="Повторите пароль"
+                  placeholder={t('profile.repeatPassword')}
                   placeholderTextColor={theme === DARK_THEME ? '#888' : '#aaa'}
                   secureTextEntry
                   value={value}
@@ -548,16 +550,16 @@ export default function ProfileScreen() {
               style={{ backgroundColor: '#007AFF', borderRadius: 12, padding: 16, marginTop: 10, alignItems: 'center' }}
               onPress={handleSubmit(handleChangePassword)}
             >
-              <Text style={{ color: '#fff', fontSize: 17, fontWeight: '600' }}>Сохранить</Text>
+              <Text style={{ color: '#fff', fontSize: 17, fontWeight: '600' }}>{t('common.save')}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={{ alignItems: 'center', marginTop: 8 }} onPress={() => setPasswordModalVisible(false)}>
-              <Text style={{ color: '#007AFF', fontSize: 16 }}>Отмена</Text>
+              <Text style={{ color: '#007AFF', fontSize: 16 }}>{t('common.cancel')}</Text>
             </TouchableOpacity>
           </View>
         </Modal>
 
         <TouchableOpacity activeOpacity={0.7} style={styles.logoutButton} onPress={onLogout}>
-          <Text style={styles.logoutText}>Выйти</Text>
+          <Text style={styles.logoutText}>{t('profile.logout')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </>

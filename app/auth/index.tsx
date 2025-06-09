@@ -19,6 +19,8 @@ import { AppLogo, CompanyLogo } from "../components/Logo";
 import ToastManager, { Toast } from 'toastify-react-native'
 import { useQuery } from "@realm/react";
 import Greeting from "@/core/models/greeting";
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 const screenHeight = Dimensions.get('window').height;
 
@@ -29,6 +31,7 @@ const gradientColors: [ColorValue, ColorValue][] = [
 ];
 
 const App = () => {
+  const { t } = useTranslation();
   const [greeting] = useQuery(Greeting)
   const [gradientIndex, updateGradientIndex] = React.useReducer((state: number) => (state + 1) % gradientColors.length, 2);
   const { generateVKAuthUrl, loginWithVK, checkEmailExists, sendVerificationCode, verifyVerificationCode, register, login } = useApi();
@@ -276,38 +279,39 @@ const App = () => {
           <View key="1" style={styles.authWrapper}>
             {(status === 'idle' || status === 'vk-open' || status === 'email-check') && (
               <View style={styles.authForm}>
-              <>
-                <Text style={styles.authTitle}>Вход</Text>
-                <TextInput
-                  onChangeText={setEmail}
-                  value={email}
-                  style={styles.input}
-                  placeholder="Почта"
-                  placeholderTextColor="#ffffff88"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-                <TouchableOpacity disabled={status !== 'idle'} style={styles.submitButton} onPress={handleEmailSubmit}>
-                  {status === 'email-check' && (
-                    <ActivityIndicator size="large" color="#000000" />
-                  )}
-                  {status !== 'email-check' && (
-                    <Text style={styles.submitButtonText}>
-                      Войти с почтой
-                    </Text>
-                  )}
-                </TouchableOpacity>
-                <TouchableOpacity disabled={status !== 'idle'} style={styles.vkButton} onPress={handleVKAuth}>
-                  <VKLogo width={35} />
-                  {status === 'vk-open' && (
-                    <ActivityIndicator size="large" color="#ffffff" />
-                  )}
-                  {status !== 'vk-open' && (
-                    <Text style={styles.vkButtonText}>Продолжить с VK</Text>
-                  )}
-                  <View style={{width: 40}}></View>
-                </TouchableOpacity>
-              </>
+                <>
+                  <Text style={styles.authTitle}>{t('auth.login')}</Text>
+                  <TextInput
+                    onChangeText={setEmail}
+                    value={email}
+                    style={styles.input}
+                    placeholder={t('auth.email')}
+                    placeholderTextColor="#ffffff88"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+                  <TouchableOpacity disabled={status !== 'idle'} style={styles.submitButton} onPress={handleEmailSubmit}>
+                    {status === 'email-check' && (
+                      <ActivityIndicator size="large" color="#000000" />
+                    )}
+                    {status !== 'email-check' && (
+                      <Text style={styles.submitButtonText}>
+                        {t('auth.loginWithEmail')}
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity style={styles.vkButton} onPress={handleVKAuth}>
+                    <VKLogo width={35} />
+                    {status === 'vk-open' && (
+                      <ActivityIndicator size="large" color="#ffffff" />
+                    )}
+                    {status !== 'vk-open' && (
+                      <Text style={styles.vkButtonText}>{t('auth.continueWithVK')}</Text>
+                    )}
+                    <View style={{width: 40}}></View>
+                  </TouchableOpacity>
+                </>
               </View>
             )}
             {status === 'vk-login' && (
@@ -453,6 +457,10 @@ const App = () => {
             )}
           </View>
         </PagerView>
+
+        <View style={styles.languageSwitcherContainer}>
+          <LanguageSwitcher />
+        </View>
 
         <Neighbourhood
           width={Dimensions.get('screen').width}
@@ -647,6 +655,14 @@ const styles = StyleSheet.create({
     borderColor: 'white',
     right: 50,
     bottom: 50,
+  },
+  languageSwitcherContainer: {
+    position: 'absolute',
+    bottom: 100,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 2,
   },
 })
 

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { DARK_THEME } from '@/core/hooks/useTheme';
 import { useThemeName } from '@/core/hooks/useTheme';
 import { Href, router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
 type Service = {
   id: string;
@@ -13,148 +14,105 @@ type Service = {
   icon: string;
   color: string;
   category: string;
+  isAccordion: boolean;
   target?: Href;
-  isAccordion?: boolean;
-  actions?: Array<{
+  actions?: {
     id: string;
     title: string;
     icon: string;
     target: Href;
-  }>;
+  }[];
 };
 
-const services: Service[] = [
-  {
-    id: '1',
-    title: 'Недвижимость',
-    description: 'Поиск квартиры или дома',
-    icon: 'warehouse',
-    color: '#44944A',
-    category: 'Помощь',
-    isAccordion: true,
-    actions: [
-      {
-        id: '1-1',
-        title: 'Снять квартиру',
-        icon: 'home-search',
-        target: { pathname: '/services/flats' },
-      },
-      {
-        id: '1-2',
-        title: 'Просмотренные',
-        icon: 'eye',
-        target: { pathname: '/services/flats/viewed' },
-      },
-      {
-        id: '1-3',
-        title: 'Избранное',
-        icon: 'heart',
-        target: { pathname: '/services/flats/favorites' },
-      },
-      {
-        id: '1-4',
-        title: 'Сдать в аренду',
-        icon: 'key-variant',
-        target: { pathname: '/services/flats/new' },
-      },
-      {
-        id: '1-5',
-        title: 'Мои объявления',
-        icon: 'clipboard-list',
-        target: { pathname: '/services/flats/my' },
-      }
-    ]
-  },
-  {
-    id: '2',
-    title: 'Детские секции',
-    description: 'Поиск и запись в секции и кружки',
-    icon: 'school',
-    color: '#9C27B0',
-    category: 'Помощь',
-    isAccordion: true,
-    actions: [
-      {
-        id: '2-1',
-        title: 'Найти секцию',
-        icon: 'magnify',
-        target: { pathname: '/services/activities' },
-      },
-      {
-        id: '2-2',
-        title: 'Мои заявки',
-        icon: 'clipboard-list',
-        target: { pathname: '/services/activities/my' },
-      }
-    ]
-  },
-  {
-    id: '3',
-    title: 'Барахолка',
-    description: 'Покупка, продажа и обмен вещами',
-    icon: 'tshirt-crew',
-    color: '#FF9800',
-    category: 'Объявления',
-    isAccordion: false,
-    target: { pathname: '/services/flea-market' },
-  },
-  {
-    id: '4',
-    title: 'Объявления',
-    description: 'Городские мероприятия и новости',
-    icon: 'bullhorn',
-    color: '#007AFF',
-    category: 'Объявления',
-    isAccordion: false,
-    target: { pathname: '/services/events/events' },
-  },
-  {
-    id: '5',
-    title: 'События',
-    description: 'Городские события и встречи',
-    icon: 'calendar-star',
-    color: '#4ECDC4',
-    category: 'События',
-    isAccordion: false,
-    target: { pathname: '/services/events-city/events' },
-  },
-  {
-    id: '6',
-    title: 'Помощь',
-    description: 'Запросить или предложить помощь',
-    icon: 'hand-heart',
-    color: '#FF6B6B',
-    category: 'Помощь',
-    isAccordion: false,
-    target: { pathname: '/services/help/events' },
-  },
-  {
-    id: '7',
-    title: 'Местные службы',
-    description: 'Сантехники, электрики, ремонт и другие услуги',
-    icon: 'account-wrench',
-    color: '#00B894',
-    category: 'Объявления',
-    isAccordion: false,
-    target: { pathname: '/services/local-services' },
-  }
-];
-
-const categories = ['Все', 'Помощь', 'События', 'Объявления', 'Соседи'];
-
 export default function ServicesScreen() {
+  const theme = useThemeName();
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Все');
+  const [selectedCategory, setSelectedCategory] = useState(t('common.all'));
   const [expandedService, setExpandedService] = useState<string | null>(null);
+
+  const services: Service[] = [
+    {
+      id: '1',
+      title: t('services.help'),
+      description: t('services.helpDescription'),
+      icon: 'hand-heart',
+      color: '#FF6B6B',
+      category: t('services.help'),
+      isAccordion: false,
+      target: { pathname: '/services/help/events' },
+    },
+    {
+      id: '2',
+      title: t('services.events'),
+      description: t('services.eventsDescription'),
+      icon: 'calendar-star',
+      color: '#4ECDC4',
+      category: t('services.events'),
+      isAccordion: false,
+      target: { pathname: '/services/events-city/events' },
+    },
+    {
+      id: '3',
+      title: t('services.fleaMarket'),
+      description: t('services.fleaMarketDescription'),
+      icon: 'tshirt-crew',
+      color: '#FF9800',
+      category: t('services.announcements'),
+      isAccordion: false,
+      target: { pathname: '/services/flea-market' },
+    },
+    {
+      id: '4',
+      title: t('services.announcements'),
+      description: t('services.announcementsDescription'),
+      icon: 'bullhorn',
+      color: '#007AFF',
+      category: t('services.announcements'),
+      isAccordion: false,
+      target: { pathname: '/services/events/events' },
+    },
+    {
+      id: '5',
+      title: t('services.events'),
+      description: t('services.eventsDescription'),
+      icon: 'calendar-star',
+      color: '#4ECDC4',
+      category: t('services.events'),
+      isAccordion: false,
+      target: { pathname: '/services/events-city/events' },
+    },
+    {
+      id: '6',
+      title: t('services.help'),
+      description: t('services.helpDescription'),
+      icon: 'hand-heart',
+      color: '#FF6B6B',
+      category: t('services.help'),
+      isAccordion: false,
+      target: { pathname: '/services/help/events' },
+    },
+    {
+      id: '7',
+      title: t('services.localServices'),
+      description: t('services.localServicesDescription'),
+      icon: 'account-wrench',
+      color: '#00B894',
+      category: t('services.announcements'),
+      isAccordion: false,
+      target: { pathname: '/services/local-services' },
+    }
+  ];
+
+  const categories = [t('common.all'), t('services.help'), t('services.events'), t('services.announcements'), t('services.neighbors')];
 
   const filteredServices = services.filter(service => {
     const matchesSearch = service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         service.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'Все' || service.category === selectedCategory;
+      service.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === t('common.all') || service.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const theme = useThemeName();
   const styles = makeStyles(theme);
 
   const handleServicePress = (service: Service) => {
@@ -168,13 +126,13 @@ export default function ServicesScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Сервисы</Text>
+        <Text style={styles.title}>{t('services.title')}</Text>
         <Searchbar
           iconColor={theme === DARK_THEME ? '#fff' : '#000'}
           cursorColor={theme === DARK_THEME ? '#fff' : '#000'}
           placeholderTextColor={theme === DARK_THEME ? '#fff' : '#000'}
           inputStyle={{ color: theme === DARK_THEME ? '#fff' : '#000' }}
-          placeholder="Поиск сервисов"
+          placeholder={t('services.searchPlaceholder')}
           onChangeText={setSearchQuery}
           value={searchQuery}
           style={styles.searchBar}
