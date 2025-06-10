@@ -180,7 +180,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
   photoButtonOutline: {
     flex: 1,
     borderWidth: 2,
-    borderColor: '#FFD600',
+    borderColor: '#007AFF',
     borderRadius: 12,
     padding: 12,
     marginRight: 8,
@@ -189,7 +189,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     backgroundColor: 'transparent',
   },
   photoButtonOutlineText: {
-    color: '#FFD600',
+    color: '#007AFF',
     fontSize: 15,
     fontWeight: '500',
   },
@@ -200,7 +200,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     marginBottom: 18,
   },
   publishButton: {
-    backgroundColor: '#FFD600',
+    backgroundColor: '#007AFF',
     borderRadius: 14,
     padding: 16,
     alignItems: 'center',

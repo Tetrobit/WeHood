@@ -75,12 +75,12 @@ export default function EventsScreen() {
             <Switch
               value={notifications}
               onValueChange={handleToggleNotifications}
-              trackColor={{ false: '#767577', true: '#FFD600' }}
-              thumbColor={theme === 'dark' ? '#FFD600' : '#f4f3f4'}
+              trackColor={{ false: '#767577', true: '#007AFF' }}
+              thumbColor={theme === 'dark' ? '#007AFF' : '#007AFF'}
             />
           </View>
           <TouchableOpacity style={{ alignItems: 'center', marginTop: 4 }} onPress={() => setNotifModalVisible(false)}>
-            <Text style={{ color: '#FFD600', fontSize: 16 }}>Закрыть</Text>
+            <Text style={{ color: '#007AFF', fontSize: 16 }}>Закрыть</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -107,7 +107,7 @@ export default function EventsScreen() {
 
       <FAB
         icon="plus"
-        style={styles.fabSmall}
+        style={[styles.fabSmall, { backgroundColor: '#007AFF' }]}
         onPress={() => router.push({ pathname: '/services/events/new' })}
       />
     </View>
@@ -173,7 +173,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     margin: 16,
     right: 0,
     bottom: 0,
-    backgroundColor: '#FFD600',
+    backgroundColor: '#007AFF',
     width: 48,
     height: 48,
     borderRadius: 24,
