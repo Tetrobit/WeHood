@@ -26,7 +26,7 @@ const demoServices: Service[] = [
     price: 1200,
     description: 'Устранение протечек, замена смесителей, установка сантехники',
     category: 'Сантехник',
-    image: 'https://31tv.ru/wp-content/uploads/2023/08/сантехник.jpg',
+    image: 'https://img.freepik.com/free-photo/plumbing-professional-doing-his-job_23-2150721533.jpg',
     author: { name: 'Павел', rating: 4.8 },
   },
   {

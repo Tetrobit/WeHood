@@ -65,6 +65,47 @@ const services: Service[] = [
     ]
   },
   {
+    id: '10',
+    title: 'Организации',
+    description: 'Медицинские организации, малый бизнес и другие',
+    icon: 'office-building',
+    color: '#E91E63',
+    category: 'Помощь',
+    isAccordion: true,
+    actions: [
+      {
+        id: '10-1',
+        title: 'Все организации',
+        icon: 'format-list-bulleted',
+        target: { pathname: '/services/organizations' },
+      },
+      {
+        id: '10-2',
+        title: 'Медицинские',
+        icon: 'hospital',
+        target: { pathname: '/services/organizations', params: { category: 'Медицинские организации' } },
+      },
+      {
+        id: '10-3',
+        title: 'Образование',
+        icon: 'school',
+        target: { pathname: '/services/organizations', params: { category: 'Образование' } },
+      },
+      {
+        id: '10-4',
+        title: 'Спорт и здоровье',
+        icon: 'dumbbell',
+        target: { pathname: '/services/organizations', params: { category: 'Спорт и здоровье' } },
+      },
+      {
+        id: '10-5',
+        title: 'Малый бизнес',
+        icon: 'store',
+        target: { pathname: '/services/organizations', params: { category: 'Малый бизнес' } },
+      }
+    ]
+  },
+  {
     id: '2',
     title: 'Детские секции',
     description: 'Поиск и запись в секции и кружки',
@@ -94,8 +135,27 @@ const services: Service[] = [
     icon: 'tshirt-crew',
     color: '#FF9800',
     category: 'Объявления',
-    isAccordion: false,
-    target: { pathname: '/services/flea-market' },
+    isAccordion: true,
+    actions: [
+      {
+        id: '3-1',
+        title: 'Все объявления',
+        icon: 'format-list-bulleted',
+        target: { pathname: '/services/flea-market' },
+      },
+      {
+        id: '3-2',
+        title: 'Мои объявления',
+        icon: 'account',
+        target: { pathname: '/services/flea-market/my' },
+      },
+      {
+        id: '3-3',
+        title: 'Добавить объявление',
+        icon: 'plus-circle',
+        target: { pathname: '/services/flea-market/new' },
+      },
+    ],
   },
   {
     id: '4',
@@ -114,8 +174,27 @@ const services: Service[] = [
     icon: 'calendar-star',
     color: '#4ECDC4',
     category: 'События',
-    isAccordion: false,
-    target: { pathname: '/services/events-city/events' },
+    isAccordion: true,
+    actions: [
+      {
+        id: '5-1',
+        title: 'Все события',
+        icon: 'format-list-bulleted',
+        target: { pathname: '/services/events-city/events' },
+      },
+      {
+        id: '5-2',
+        title: 'Мои события',
+        icon: 'account',
+        target: { pathname: '/services/events-city/my' },
+      },
+      {
+        id: '5-3',
+        title: 'Добавить событие',
+        icon: 'plus-circle',
+        target: { pathname: '/services/events-city/new' },
+      },
+    ],
   },
   {
     id: '6',
@@ -124,8 +203,27 @@ const services: Service[] = [
     icon: 'hand-heart',
     color: '#FF6B6B',
     category: 'Помощь',
-    isAccordion: false,
-    target: { pathname: '/services/help/events' },
+    isAccordion: true,
+    actions: [
+      {
+        id: '6-1',
+        title: 'Все заявки',
+        icon: 'format-list-bulleted',
+        target: { pathname: '/services/help/events' },
+      },
+      {
+        id: '6-2',
+        title: 'Мои заявки',
+        icon: 'account',
+        target: { pathname: '/services/help/my' },
+      },
+      {
+        id: '6-3',
+        title: 'Добавить заявку',
+        icon: 'plus-circle',
+        target: { pathname: '/services/help/new' },
+      },
+    ],
   },
   {
     id: '7',
@@ -134,8 +232,27 @@ const services: Service[] = [
     icon: 'account-wrench',
     color: '#00B894',
     category: 'Объявления',
-    isAccordion: false,
-    target: { pathname: '/services/local-services' },
+    isAccordion: true,
+    actions: [
+      {
+        id: '7-1',
+        title: 'Все службы',
+        icon: 'format-list-bulleted',
+        target: { pathname: '/services/local-services' },
+      },
+      {
+        id: '7-2',
+        title: 'Мои услуги',
+        icon: 'account',
+        target: { pathname: '/services/local-services/my' },
+      },
+      {
+        id: '7-3',
+        title: 'Добавить услугу',
+        icon: 'plus-circle',
+        target: { pathname: '/services/local-services/new' },
+      },
+    ],
   },
   {
     id: '8',
@@ -165,6 +282,16 @@ const services: Service[] = [
         target: { pathname: '/services/voting/my' },
       }
     ]
+  },
+  {
+    id: '9',
+    title: 'Соседи',
+    description: 'Чаты и общение с соседями',
+    icon: 'account-group',
+    color: '#4CAF50',
+    category: 'Соседи',
+    isAccordion: false,
+    target: { pathname: '/services/neighbors/chats' },
   }
 ];
 
