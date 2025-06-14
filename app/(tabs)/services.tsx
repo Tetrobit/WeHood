@@ -65,6 +65,47 @@ const services: Service[] = [
     ]
   },
   {
+    id: '10',
+    title: 'Организации',
+    description: 'Медицинские организации, малый бизнес и другие',
+    icon: 'office-building',
+    color: '#E91E63',
+    category: 'Помощь',
+    isAccordion: true,
+    actions: [
+      {
+        id: '10-1',
+        title: 'Все организации',
+        icon: 'format-list-bulleted',
+        target: { pathname: '/services/organizations' },
+      },
+      {
+        id: '10-2',
+        title: 'Медицинские',
+        icon: 'hospital',
+        target: { pathname: '/services/organizations', params: { category: 'Медицинские организации' } },
+      },
+      {
+        id: '10-3',
+        title: 'Образование',
+        icon: 'school',
+        target: { pathname: '/services/organizations', params: { category: 'Образование' } },
+      },
+      {
+        id: '10-4',
+        title: 'Спорт и здоровье',
+        icon: 'dumbbell',
+        target: { pathname: '/services/organizations', params: { category: 'Спорт и здоровье' } },
+      },
+      {
+        id: '10-5',
+        title: 'Малый бизнес',
+        icon: 'store',
+        target: { pathname: '/services/organizations', params: { category: 'Малый бизнес' } },
+      }
+    ]
+  },
+  {
     id: '2',
     title: 'Детские секции',
     description: 'Поиск и запись в секции и кружки',
