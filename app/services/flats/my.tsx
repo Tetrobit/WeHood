@@ -281,7 +281,7 @@ export default function MyListingsScreen() {
                       backgroundGradientFrom: theme === 'dark' ? '#222' : '#fff',
                       backgroundGradientTo: theme === 'dark' ? '#222' : '#fff',
                       decimalPlaces: 0,
-                      color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`,
+                      color: (opacity = 1) => `rgba(68, 148, 74, ${opacity})`,
                       style: {
                         borderRadius: 16
                       }
@@ -530,7 +530,7 @@ export default function MyListingsScreen() {
                         <MaterialCommunityIcons 
                           name="lightbulb-outline" 
                           size={20} 
-                          color={theme === 'dark' ? '#FFD700' : '#FFA500'} 
+                          color={theme === 'dark' ? '#44944A' : '#44944A'} 
                         />
                         <Text style={styles.suggestionText}>{suggestion}</Text>
                       </View>
@@ -613,7 +613,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
   listingPrice: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#007AFF',
+    color: '#44944A',
     marginBottom: 4,
   },
   listingAddress: {
@@ -625,7 +625,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
   },
   expiryText: {
     fontSize: 12,
-    color: '#FF6B6B',
+    color: '#44944A',
     marginBottom: 4,
   },
   statsRow: {
@@ -660,7 +660,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
   metricValue: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#007AFF',
+    color: '#44944A',
     marginBottom: 4,
   },
   metricLabel: {
@@ -708,7 +708,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
   editButton: {
     flex: 1,
     marginRight: 8,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#44944A',
   },
   aiSuggestionContainer: {
     backgroundColor: theme === 'dark' ? '#2c2c2c' : '#f0f0f0',

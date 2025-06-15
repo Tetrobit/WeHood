@@ -240,10 +240,14 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 4,
+    flexWrap: 'wrap',
+    alignItems: 'center',
   },
   optionText: {
     fontSize: 14,
     color: theme === 'dark' ? '#fff' : '#000',
+    flexShrink: 1,
+    flex: 1,
   },
   votesCount: {
     fontSize: 12,

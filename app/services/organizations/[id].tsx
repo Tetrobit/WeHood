@@ -150,7 +150,7 @@ export default function OrganizationDetailsScreen() {
               <Text style={styles.sectionTitle}>Услуги</Text>
               {organization.services.map((service, index) => (
                 <View key={index} style={styles.serviceItem}>
-                  <MaterialCommunityIcons name="check-circle" size={20} color="#FF6B6B" />
+                  <MaterialCommunityIcons name="check-circle" size={20} color="#E91E63" />
                   <Text style={styles.serviceText}>{service}</Text>
                 </View>
               ))}

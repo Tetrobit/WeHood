@@ -193,7 +193,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     color: theme === 'dark' ? '#fff' : '#000',
   },
   submitButton: {
-    backgroundColor: '#4ECDC4',
+    backgroundColor: '#44944A',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,

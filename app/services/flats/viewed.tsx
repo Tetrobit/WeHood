@@ -131,6 +131,7 @@ export default function ViewedFlatsScreen() {
             selected={sortBy === 'date'} 
             onPress={() => handleSort('date')}
             style={styles.chip}
+            textStyle={styles.chipText}
           >
             По дате просмотра
           </Chip>
@@ -138,6 +139,7 @@ export default function ViewedFlatsScreen() {
             selected={sortBy === 'price-asc'} 
             onPress={() => handleSort('price-asc')}
             style={styles.chip}
+            textStyle={styles.chipText}
           >
             Сначала дешевле
           </Chip>
@@ -145,6 +147,7 @@ export default function ViewedFlatsScreen() {
             selected={sortBy === 'price-desc'} 
             onPress={() => handleSort('price-desc')}
             style={styles.chip}
+            textStyle={styles.chipText}
           >
             Сначала дороже
           </Chip>
@@ -152,6 +155,7 @@ export default function ViewedFlatsScreen() {
             selected={showHidden} 
             onPress={() => setShowHidden(!showHidden)}
             style={styles.chip}
+            textStyle={styles.chipText}
           >
             Показать скрытые
           </Chip>
@@ -266,6 +270,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: theme === 'dark' ? '#fff' : '#000',
+    textAlign: 'center',
   },
   filterContainer: {
     padding: 16,
@@ -273,7 +278,11 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
   },
   chip: {
     marginRight: 8,
-    backgroundColor: theme === 'dark' ? '#fff' : '#f5f5f5'
+    backgroundColor: '#44944A',
+  },
+  chipText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
   content: {
     flex: 1,
