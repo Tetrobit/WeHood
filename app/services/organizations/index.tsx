@@ -136,12 +136,12 @@ export default function OrganizationsScreen() {
             <Switch
               value={notifications}
               onValueChange={handleToggleNotifications}
-              trackColor={{ false: '#767577', true: '#FF6B6B' }}
-              thumbColor={theme === 'dark' ? '#FF6B6B' : '#f4f3f4'}
+              trackColor={{ false: '#767577', true: '#E91E63' }}
+              thumbColor={theme === 'dark' ? '#E91E63' : '#E91E63'}
             />
           </View>
           <TouchableOpacity style={{ alignItems: 'center', marginTop: 4 }} onPress={() => setNotifModalVisible(false)}>
-            <Text style={{ color: '#FF6B6B', fontSize: 16 }}>Закрыть</Text>
+            <Text style={{ color: '#E91E63', fontSize: 16 }}>Закрыть</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -189,7 +189,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
   },
   orgCategory: {
     fontSize: 14,
-    color: '#FF6B6B',
+    color: '#E91E63',
     marginTop: 8,
     fontWeight: '500',
   },

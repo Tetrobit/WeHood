@@ -4,6 +4,7 @@ import { IFlat } from '@/app/types/flat';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useTheme } from '@/core/hooks/useTheme';
+import type { Theme } from '@/core/hooks/useTheme';
 
 interface FlatCardProps {
   flat: IFlat;
@@ -50,7 +51,7 @@ export default function FlatCard({ flat }: FlatCardProps) {
           </View>
         </View>
         <View style={styles.distance}>
-          <MaterialCommunityIcons name="map-marker" size={16} color="#4ECDC4" />
+          <MaterialCommunityIcons name="map-marker" size={16} color="#44944A" />
           <Text style={styles.distanceText}>
             {flat.distance < 1000 
               ? `${flat.distance} м` 
@@ -139,6 +140,6 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
   distanceText: {
     marginLeft: 4,
     fontSize: 14,
-    color: '#4ECDC4',
+    color: '#44944A',
   },
 }); 

@@ -116,12 +116,12 @@ export default function FlatDetailsScreen() {
         {/* Статистика просмотров */}
         <View style={styles.stats}>
           <View style={styles.statItem}>
-            <MaterialCommunityIcons name="eye" size={24} color="#4ECDC4" />
+            <MaterialCommunityIcons name="eye" size={24} color="#44944A" />
             <Text style={styles.statValue}>{flat.views}</Text>
             <Text style={styles.statLabel}>просмотров</Text>
           </View>
           <View style={styles.statItem}>
-            <MaterialCommunityIcons name="account-group" size={24} color="#4ECDC4" />
+            <MaterialCommunityIcons name="account-group" size={24} color="#44944A" />
             <Text style={styles.statValue}>{flat.currentViewers}</Text>
             <Text style={styles.statLabel}>смотрят сейчас</Text>
           </View>
@@ -277,7 +277,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
   callButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#4ECDC4',
+    backgroundColor: '#44944A',
     borderRadius: 8,
     paddingVertical: 8,
     paddingHorizontal: 16,

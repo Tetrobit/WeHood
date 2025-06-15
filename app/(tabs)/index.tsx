@@ -238,13 +238,13 @@ export default function HomeScreen() {
                   >
                     <View style={styles.serviceModernContent}>
                       <View style={styles.serviceModernTextBlock}>
-                        <Text style={styles.serviceModernTitle}>{service.title}</Text>
+                        <Text style={[styles.serviceModernTitle, { fontSize: 19, fontWeight: 'bold' }]} numberOfLines={1} ellipsizeMode="tail">{service.title}</Text>
                       </View>
                       <View style={styles.serviceModernImage}>
                         <MaterialCommunityIcons
                           name={service.icon}
-                          size={32}
-                          color={service.color}
+                          size={44}
+                          color={'#388e3c'}
                         />
                       </View>
                     </View>
@@ -355,6 +355,8 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     fontWeight: 'bold',
     color: theme === 'dark' ? '#fff' : '#111',
     marginBottom: 2,
+    flexShrink: 1,
+    flexWrap: 'nowrap',
   },
   serviceModernImage: {
     marginTop: 10,

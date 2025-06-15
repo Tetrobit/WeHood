@@ -144,6 +144,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: theme === 'dark' ? '#fff' : '#000',
+    textAlign: 'center',
   },
   searchBar: {
     margin: 16,
@@ -160,7 +161,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     position: 'absolute',
     right: 16,
     bottom: 16,
-    backgroundColor: '#4ECDC4',
+    backgroundColor: '#44944A',
   },
   headerButtons: {
     flexDirection: 'row',
