@@ -16,6 +16,7 @@ import useWeather from '@/core/hooks/useWeather';
 import { getWeatherIcon } from '@/core/utils/weather';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
+import { SearchBar } from '@/app/components/SearchBar';
 
 const { width } = Dimensions.get('window');
 
@@ -169,6 +170,16 @@ export default function HomeScreen() {
     }, [])
   );
 
+  const handleSearch = (text: string) => {
+    console.log('Search text:', text);
+    // Здесь будет логика поиска
+  };
+
+  const handleVoiceSearch = (audioUri: string) => {
+    console.log('Voice search audio URI:', audioUri);
+    // Здесь будет логика обработки голосового поиска
+  };
+
   return (
     <ScrollView style={styles.container}>
       {/* Погода и локация */}
@@ -177,8 +188,6 @@ export default function HomeScreen() {
           <TouchableOpacity onPress={() => {router.push('/weather')}} style={styles.weatherContainer}>
             {getWeatherIcon(lastWeatherForecast?.list?.[0]?.weather?.[0]?.main || 'Clear', weatherColor, 30)}
             <Text style={[styles.temperature, { color: weatherColor }]}>{Math.round(lastWeatherForecast?.list?.[0]?.main?.temp - 273.15) || '0'}°C</Text>
-            
-            
           </TouchableOpacity>
           <View style={styles.locationTextContainer}>
             <Text style={styles.location}>{lastLocation?.locality}</Text>
@@ -192,6 +201,9 @@ export default function HomeScreen() {
           />
         </TouchableOpacity>
       </View>
+
+      {/* Поиск */}
+      <SearchBar onSearch={handleSearch} onVoiceSearch={handleVoiceSearch} />
       
       {/* Слайдер */}
       <View style={styles.carouselContainer}>
@@ -319,7 +331,7 @@ export default function HomeScreen() {
 const makeStyles = (theme: Theme) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme === 'dark' ? '#000' : '#f5f5f5',
+    backgroundColor: theme === 'dark' ? '#000' : '#fff',
   },
   servicesGridModern: {
     flexDirection: 'row',
@@ -370,10 +382,9 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 12,
-    paddingVertical: 8,
-    backgroundColor: theme === 'dark' ? '#000000' : '#fff',
-    elevation: 2,
+    paddingHorizontal: 15,
+    paddingTop: 10,
+    paddingBottom: 5,
   },
   locationContainer: {
     flexDirection: 'row',

@@ -94,7 +94,8 @@
     "realm": "^12.14.2",
     "three": "^0.176.0",
     "toastify-react-native": "^7.2.0",
-    "zod": "^3.25.28"
+    "zod": "^3.25.28",
+    "expo-av": "~15.1.6"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
