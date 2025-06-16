@@ -24,7 +24,7 @@
     "@mui/material": "^7.1.0",
     "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-native-community/blur": "^4.4.1",
-    "@react-native-community/slider": "^4.4.2",
+    "@react-native-community/slider": "^4.5.7",
     "@react-native-firebase/app": "^22.2.0",
     "@react-native-firebase/messaging": "^22.2.0",
     "@react-navigation/bottom-tabs": "^7.3.10",
@@ -38,6 +38,7 @@
     "date-fns": "^4.1.0",
     "expo": "53.0.10",
     "expo-asset": "^11.1.5",
+    "expo-av": "~15.1.6",
     "expo-blur": "~14.1.5",
     "expo-camera": "~16.1.7",
     "expo-constants": "~17.1.5",
@@ -94,8 +95,7 @@
     "realm": "^12.14.2",
     "three": "^0.176.0",
     "toastify-react-native": "^7.2.0",
-    "zod": "^3.25.28",
-    "expo-av": "~15.1.6"
+    "zod": "^3.25.28"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

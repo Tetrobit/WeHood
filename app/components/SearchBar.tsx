@@ -6,6 +6,7 @@ import { Theme, useTheme } from '@/core/hooks/useTheme';
 import LottieView from 'lottie-react-native';
 import axios, { AxiosRequestConfig } from 'axios';
 import useApi from '@/core/hooks/useApi';
+import Slider from '@react-native-community/slider';
 
 const { width, height } = Dimensions.get('window');
 
@@ -28,39 +29,78 @@ const AudioMessage: React.FC<{ message: Message }> = ({ message }) => {
   const [sound, setSound] = React.useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [showTranscript, setShowTranscript] = React.useState(message.showTranscript || false);
+  const [position, setPosition] = React.useState(0);
+  const [duration, setDuration] = React.useState(1);
+  const [isSeeking, setIsSeeking] = React.useState(false);
   const [theme] = useTheme();
   const styles = makeStyles(theme!);
 
+  // React.useEffect(() => {
+  //   return () => {
+  //     if (sound) {
+  //       sound.unloadAsync();
+  //     }
+  //   };
+  // }, [sound]);
+
   const playAudio = async () => {
     if (sound) {
+      sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
       await sound.replayAsync();
       setIsPlaying(true);
       return;
     }
-    const { sound: newSound } = await Audio.Sound.createAsync({ uri: message.audioUri! });
+    const { sound: newSound, status } = await Audio.Sound.createAsync(
+      { uri: message.audioUri! },
+      // {},
+      // onPlaybackStatusUpdate
+    );
     setSound(newSound);
     setIsPlaying(true);
-    newSound.setOnPlaybackStatusUpdate((status) => {
-      if (!status.isLoaded) return;
-      if (status.didJustFinish) setIsPlaying(false);
-    });
+    if (status.isLoaded) {
+      setDuration(status.durationMillis || 1);
+      setPosition(status.positionMillis || 0);
+    }
     await newSound.playAsync();
   };
 
   const stopAudio = async () => {
     if (sound) {
-      await sound.stopAsync();
+      await sound.pauseAsync();
       setIsPlaying(false);
     }
   };
 
-  React.useEffect(() => {
-    return () => {
-      if (sound) {
-        sound.unloadAsync();
-      }
-    };
-  }, [sound]);
+  const onPlaybackStatusUpdate = (status: any) => {
+    if (!status.isLoaded) return;
+    if (!isSeeking) {
+      setPosition(status.positionMillis || 0);
+    }
+    setDuration(status.durationMillis || 1);
+    if (status.didJustFinish) {
+      setIsPlaying(false);
+      setPosition(0);
+    }
+  };
+
+  const handleSlidingStart = () => {
+    setIsSeeking(true);
+  };
+
+  const handleSlidingComplete = async (value: number) => {
+    if (sound) {
+      await sound.setPositionAsync(value);
+      setPosition(value);
+    }
+    setIsSeeking(false);
+  };
+
+  const formatTime = (millis: number) => {
+    const totalSeconds = Math.floor(millis / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  };
 
   return (
     <View style={[
@@ -71,16 +111,29 @@ const AudioMessage: React.FC<{ message: Message }> = ({ message }) => {
         styles.messageBubble,
         message.isUser ? styles.userBubble : styles.aiBubble
       ]}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
           <TouchableOpacity onPress={isPlaying ? stopAudio : playAudio} style={{ marginRight: 10 }}>
             <MaterialCommunityIcons name={isPlaying ? 'pause' : 'play'} size={28} color={message.isUser ? '#fff' : '#007AFF'} />
           </TouchableOpacity>
-          {/* Имитация волны */}
-          <View style={{ width: 60, height: 24, justifyContent: 'center', marginRight: 10 }}>
-            <View style={{ height: 16, backgroundColor: message.isUser ? '#fff' : '#007AFF', borderRadius: 8, opacity: 0.3 }} />
-          </View>
-          <Text style={{ color: message.isUser ? '#fff' : '#007AFF', marginRight: 10 }}>0:30</Text>
-          <TouchableOpacity onPress={() => setShowTranscript(!showTranscript)} style={{ backgroundColor: '#e6f0ff', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 2 }}>
+          <Text style={{ color: message.isUser ? '#fff' : '#007AFF', width: 44, textAlign: 'right', fontVariant: ['tabular-nums'], fontSize: 13, marginRight: 6 }}>
+            {formatTime(position)}
+          </Text>
+          <Slider
+            style={{ flex: 1, height: 24, marginRight: 6, marginLeft: 0 }}
+            minimumValue={0}
+            maximumValue={duration}
+            value={position}
+            minimumTrackTintColor={message.isUser ? '#fff' : '#007AFF'}
+            maximumTrackTintColor={theme === 'dark' ? '#555' : '#ccc'}
+            thumbTintColor={message.isUser ? '#fff' : '#007AFF'}
+            onSlidingStart={handleSlidingStart}
+            onSlidingComplete={handleSlidingComplete}
+            disabled={!sound}
+          />
+          <Text style={{ color: message.isUser ? '#fff' : '#007AFF', width: 44, textAlign: 'left', fontVariant: ['tabular-nums'], fontSize: 13, marginLeft: 0 }}>
+            {formatTime(duration)}
+          </Text>
+          <TouchableOpacity onPress={() => setShowTranscript(!showTranscript)} style={{ backgroundColor: '#e6f0ff', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 2, marginLeft: 8 }}>
             <Text style={{ color: '#007AFF', fontWeight: 'bold' }}>Aa</Text>
           </TouchableOpacity>
         </View>
@@ -335,6 +388,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
               onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
             >
               {messages.map((msg) => <MessageItem key={msg.id} message={msg} />)}
+              <View style={{height: 20}}></View>
             </ScrollView>
 
             <View style={styles.inputContainer}>
@@ -437,7 +491,8 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
   },
   messageContainer: {
     marginVertical: 5,
-    maxWidth: '80%',
+    minWidth: '80%',
+    maxWidth: '98%',
   },
   userMessage: {
     alignSelf: 'flex-end',
