@@ -237,15 +237,19 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
   const handleMessage = async (text: string) => {
     setIsLoading(true);
     const pushMessage = async (message: any) => {
-      await wait(1000);
-      const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        text: message.content,
-        isUser: false,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, aiResponse]);
-      setIsLoading(false);
+      try {
+        await wait(1000);
+        const aiResponse: Message = {
+          id: (Date.now() + 1).toString(),
+          text: message.content,
+          isUser: false,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, aiResponse]);
+        setIsLoading(false);
+      } catch (e) {
+
+      }
     }
 
     for (let i = 0; i < 3; i++) {
@@ -360,33 +364,33 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
         animationType="fade"
         onRequestClose={handleExit}
       >
-        <KeyboardAvoidingView 
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.modalContainer}
-        >
-          <Animated.View style={[
-            styles.modalContent,
-            {
-              opacity: expandAnim,
-              transform: [{
-                translateY: expandAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [50, 0],
-                }),
-              }],
-            },
-          ]}>
-            <View style={styles.searchHeader}>
-              <TouchableOpacity onPress={toggleExpand} style={styles.backButton}>
-                <MaterialCommunityIcons 
-                  name="arrow-left" 
-                  size={24} 
-                  color={theme === 'dark' ? '#fff' : '#000'} 
-                />
-              </TouchableOpacity>
-              <Text style={styles.headerTitle}>Поиск</Text>
-            </View>
-
+        <Animated.View style={[
+          styles.modalContent,
+          {
+            opacity: expandAnim,
+            transform: [{
+              translateY: expandAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [50, 0],
+              }),
+            }],
+          },
+        ]}>
+          <View style={styles.searchHeader}>
+            <TouchableOpacity onPress={toggleExpand} style={styles.backButton}>
+              <MaterialCommunityIcons 
+                name="arrow-left" 
+                size={24} 
+                color={theme === 'dark' ? '#fff' : '#000'} 
+              />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Поиск</Text>
+          </View>
+            <KeyboardAvoidingView 
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={styles.modalContainer}
+              keyboardVerticalOffset={20}
+            >
             {!messages.length && (
               <View style={{flex: 1, justifyContent: 'center', flexDirection: 'row', padding: 100}}>
                 <LottieView
@@ -464,8 +468,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
                 </View>
               )}
             </View>
-          </Animated.View>
-        </KeyboardAvoidingView>
+          </KeyboardAvoidingView>
+        </Animated.View>
       </Modal>
     </>
   );
