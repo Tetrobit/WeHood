@@ -245,6 +245,11 @@ export interface UserUpdateResponse {
   vkId: string;
 }
 
+export interface SearchChatResponse {
+  thread_id: string;
+  message: any;
+}
+
 export interface GenerateAvatarResponse {
   id: string;
   avatar: string;
@@ -844,6 +849,16 @@ export const useApi = () => {
     });
   }
 
+  const searchChat = async (message: string, thread_id: string | undefined = undefined): Promise<SearchChatResponse> => {
+    return withAuth<SearchChatResponse>(`${API_URL}/api/search/chat`, {
+      method: 'POST',
+      data: {
+        text: message,
+        thread_id
+      }
+    });
+  }
+
   return {
     sendVerificationCode,
     verifyVerificationCode,
@@ -880,6 +895,7 @@ export const useApi = () => {
     vote,
     createVoting,
     recognize,
+    searchChat,
   }
 }
 

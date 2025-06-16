@@ -7,6 +7,7 @@ import LottieView from 'lottie-react-native';
 import axios, { AxiosRequestConfig } from 'axios';
 import useApi from '@/core/hooks/useApi';
 import Slider from '@react-native-community/slider';
+import { wait } from '@/core/utils/time';
 
 const { width, height } = Dimensions.get('window');
 
@@ -185,6 +186,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
   const [theme] = useTheme();
   const styles = makeStyles(theme!);
   const [isLoading, setIsLoading] = useState(false);
+  const [threadId, setThreadId] = useState<string | undefined>(undefined);
   
   const recording = useRef<Audio.Recording | null>(null);
   const expandAnim = useRef(new Animated.Value(0)).current;
@@ -205,12 +207,14 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
             style: 'destructive',
             onPress: () => {
               setMessages([]);
+              setThreadId(undefined);
               setIsExpanded(false);
             }
           }
         ]
       );
     } else {
+      setThreadId(undefined);
       setIsExpanded(false);
     }
   };
@@ -232,17 +236,32 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
 
   const handleMessage = async (text: string) => {
     setIsLoading(true);
-    // Имитация ответа ИИ
-    setTimeout(() => {
+    const pushMessage = async (message: any) => {
+      await wait(1000);
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
-        text: "Я ищу информацию по вашему запросу...",
+        text: message.content,
         isUser: false,
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, aiResponse]);
       setIsLoading(false);
-    }, 2500);
+    }
+
+    for (let i = 0; i < 3; i++) {
+      try {
+        const response = await api.searchChat(text, threadId);
+        if (response.thread_id) {
+          setThreadId(response.thread_id);
+        }
+        await pushMessage(response.message);
+        return;
+      }
+      catch (e) {
+        
+      }
+    }
+    setIsLoading(false);
   }
 
   const handleSendMessage = () => {
