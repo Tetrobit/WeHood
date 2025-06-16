@@ -135,6 +135,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
+  const [isRecognizing, setIsRecognizing] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [theme] = useTheme();
   const styles = makeStyles(theme!);
@@ -230,19 +231,19 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
   const stopRecording = async () => {
     if (!recording.current) return;
 
+    setIsRecognizing(true);
+    setIsRecording(false);
+    await recording.current!.stopAndUnloadAsync();
+    const uri = recording.current!.getURI();
+    recording.current = null;
     for (let i = 0; i < 3; i++) {
       try {
-        await recording.current!.stopAndUnloadAsync();
-        const uri = recording.current!.getURI();
-        setIsRecording(false);
-        recording.current = null;
-        
         if (uri) {
           onVoiceSearch(uri);
-          // Получаем расшифровку
+          // Показываем лоадер, пока идет распознавание
           const response = await api.recognize(uri);
           const text = response.result[0];
-  
+
           const newMessage: Message = {
             id: Date.now().toString(),
             audioUri: uri,
@@ -252,11 +253,14 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
             showTranscript: false,
           };
           setMessages(prev => [...prev, newMessage]);
+          setIsRecognizing(false);
+          return true;
         }
       } catch (err) {
-        console.error('Failed to stop recording', err);
+        // Ignore
       }
     }
+    setIsRecognizing(false);
   };
 
   const handleVoicePress = () => {
@@ -342,25 +346,40 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
                 onChangeText={setSearchText}
                 onSubmitEditing={handleSendMessage}
                 returnKeyType="send"
+                editable={!isRecognizing && !isRecording}
               />
-              <TouchableOpacity onPress={handleVoicePress} style={styles.voiceButton}>
-                <MaterialCommunityIcons 
-                  name={isRecording ? "microphone" : "microphone-outline"} 
-                  size={24} 
-                  color={isRecording ? '#ff4444' : (theme === 'dark' ? '#fff' : '#000')} 
-                />
-              </TouchableOpacity>
-              <TouchableOpacity 
-                onPress={handleSendMessage}
-                style={styles.sendButton}
-                disabled={!searchText.trim()}
-              >
-                <MaterialCommunityIcons 
-                  name="send" 
-                  size={24} 
-                  color={searchText.trim() ? (theme === 'dark' ? '#fff' : '#000') : '#666'} 
-                />
-              </TouchableOpacity>
+              {!searchText.trim() && !isRecognizing &&
+                <TouchableOpacity onPress={handleVoicePress} style={styles.voiceButton} disabled={isRecognizing}>
+                  <MaterialCommunityIcons 
+                    name={isRecording ? "microphone" : "microphone-outline"} 
+                    size={24} 
+                    color={isRecording ? '#ff4444' : (theme === 'dark' ? '#fff' : '#000')} 
+                  />
+                </TouchableOpacity>
+              }
+              {searchText.trim() &&
+                <TouchableOpacity 
+                  onPress={handleSendMessage}
+                  style={styles.sendButton}
+                  disabled={!searchText.trim() || isRecognizing || isRecording}
+                >
+                  <MaterialCommunityIcons 
+                    name="send" 
+                    size={24} 
+                    color={searchText.trim() && !isRecognizing && !isRecording ? (theme === 'dark' ? '#fff' : '#000') : '#666'} 
+                  />
+                </TouchableOpacity>
+              }
+              {isRecognizing && (
+                <View style={{ marginLeft: 10 }}>
+                  <LottieView
+                    style={{ width: 40, height: 40 }}
+                    source={require('@/assets/lottie/loader.json')}
+                    autoPlay
+                    loop
+                  />
+                </View>
+              )}
             </View>
           </Animated.View>
         </KeyboardAvoidingView>
