@@ -3,6 +3,7 @@ import { View, TextInput, TouchableOpacity, StyleSheet, Animated, Dimensions, Te
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import { Theme, useTheme } from '@/core/hooks/useTheme';
+import LottieView from 'lottie-react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -186,6 +187,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
               </TouchableOpacity>
               <Text style={styles.headerTitle}>Поиск</Text>
             </View>
+
+            {!messages.length && (
+              <LottieView source={require('@/assets/lottie/ai-search')} />
+            )}
 
             <ScrollView
               ref={scrollViewRef}
