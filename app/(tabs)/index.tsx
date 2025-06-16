@@ -385,6 +385,7 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
     paddingHorizontal: 15,
     paddingTop: 10,
     paddingBottom: 5,
+    marginBottom: 20,
   },
   locationContainer: {
     flexDirection: 'row',
