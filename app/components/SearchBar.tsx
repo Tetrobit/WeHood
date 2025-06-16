@@ -8,6 +8,7 @@ import axios, { AxiosRequestConfig } from 'axios';
 import useApi from '@/core/hooks/useApi';
 import Slider from '@react-native-community/slider';
 import { wait } from '@/core/utils/time';
+import { MEDIA_URL } from '@/core/constants/environment';
 
 const { width, height } = Dimensions.get('window');
 
@@ -236,19 +237,36 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
 
   const handleMessage = async (text: string) => {
     setIsLoading(true);
-    const pushMessage = async (message: any) => {
+    const pushMessage = async (response: any) => {
       try {
         await wait(1000);
         const aiResponse: Message = {
           id: (Date.now() + 1).toString(),
-          text: message.content,
+          text: response.message.content,
           isUser: false,
           timestamp: new Date(),
         };
+
+        if (response.audio_id) {
+          const audioUri = `${MEDIA_URL}/files/${response.audio_id}`;
+          console.log(audioUri);
+          const { sound } = await Audio.Sound.createAsync(
+            { uri: audioUri },
+            { shouldPlay: true }
+          );
+          sound.setOnPlaybackStatusUpdate((status) => {
+            if (status.isLoaded && status.didJustFinish) {
+              sound.unloadAsync();
+            }
+          });
+          sound.playAsync();
+        }
+
         setMessages(prev => [...prev, aiResponse]);
         setIsLoading(false);
       } catch (e) {
-
+        console.error('Error playing audio:', e);
+        setIsLoading(false);
       }
     }
 
@@ -258,7 +276,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
         if (response.thread_id) {
           setThreadId(response.thread_id);
         }
-        await pushMessage(response.message);
+
+        await pushMessage(response);
         return;
       }
       catch (e) {

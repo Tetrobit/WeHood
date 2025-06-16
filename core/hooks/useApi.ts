@@ -248,6 +248,7 @@ export interface UserUpdateResponse {
 export interface SearchChatResponse {
   thread_id: string;
   message: any;
+  audio_id: string;
 }
 
 export interface GenerateAvatarResponse {

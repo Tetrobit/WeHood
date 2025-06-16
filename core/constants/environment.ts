@@ -1,2 +1,2 @@
-export const API_URL = 'http://192.168.0.103:3000';
-export const MEDIA_URL = 'http://192.168.0.103:3004';
+export const API_URL = 'https://api.wehood.ru';
+export const MEDIA_URL = 'https://media.wehood.ru';
