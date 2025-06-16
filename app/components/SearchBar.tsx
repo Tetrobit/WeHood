@@ -35,14 +35,6 @@ const AudioMessage: React.FC<{ message: Message }> = ({ message }) => {
   const [theme] = useTheme();
   const styles = makeStyles(theme!);
 
-  // React.useEffect(() => {
-  //   return () => {
-  //     if (sound) {
-  //       sound.unloadAsync();
-  //     }
-  //   };
-  // }, [sound]);
-
   const playAudio = async () => {
     if (sound) {
       sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
@@ -192,6 +184,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
   const [messages, setMessages] = useState<Message[]>([]);
   const [theme] = useTheme();
   const styles = makeStyles(theme!);
+  const [isLoading, setIsLoading] = useState(false);
   
   const recording = useRef<Audio.Recording | null>(null);
   const expandAnim = useRef(new Animated.Value(0)).current;
@@ -237,6 +230,21 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
     }
   };
 
+  const handleMessage = async (text: string) => {
+    setIsLoading(true);
+    // Имитация ответа ИИ
+    setTimeout(() => {
+      const aiResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "Я ищу информацию по вашему запросу...",
+        isUser: false,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, aiResponse]);
+      setIsLoading(false);
+    }, 2500);
+  }
+
   const handleSendMessage = () => {
     if (!searchText.trim()) return;
 
@@ -251,16 +259,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
     onSearch(searchText);
     setSearchText('');
 
-    // Имитация ответа ИИ
-    setTimeout(() => {
-      const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        text: "Я ищу информацию по вашему запросу...",
-        isUser: false,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, aiResponse]);
-    }, 1000);
+    handleMessage(searchText);
   };
 
   const startRecording = async () => {
@@ -307,6 +306,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
           };
           setMessages(prev => [...prev, newMessage]);
           setIsRecognizing(false);
+          handleMessage(text);
           return true;
         }
       } catch (err) {
@@ -388,6 +388,16 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
               onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
             >
               {messages.map((msg) => <MessageItem key={msg.id} message={msg} />)}
+              {isLoading && (
+                <View style={styles.loadingContainer}>
+                  <LottieView
+                    style={{ width: 100, height: 40 }}
+                    source={require('@/assets/lottie/message-loader.json')}
+                    autoPlay
+                    loop
+                  />
+                </View>
+              )}
               <View style={{height: 20}}></View>
             </ScrollView>
 
@@ -550,5 +560,12 @@ const makeStyles = (theme: Theme) => StyleSheet.create({
   },
   sendButton: {
     padding: 8,
+  },
+  loadingContainer: {
+    alignSelf: 'flex-start',
+    marginVertical: 10,
+    padding: 10,
+    backgroundColor: theme === 'dark' ? '#333' : '#f0f0f0',
+    borderRadius: 20,
   },
 }); 
