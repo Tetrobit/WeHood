@@ -308,6 +308,21 @@ export interface CreateVotingRequest {
 
 export interface CreateVotingResponse extends Voting {}
 
+export interface RecognizeResponse {
+  result: Array<string>;
+  emotions: Array<{
+    negative: number;
+    neutral: number;
+    positive: number;
+  }>;
+  person_identity: {
+    age: string;
+    gender: string;
+    age_score: number;
+    gender_score: number;
+  },
+}
+
 export const useApi = () => {
   const realm = useRealm();
   const codeVerifier = useSharedValue<string | null>(null);
@@ -806,6 +821,29 @@ export const useApi = () => {
     });
   };
 
+  const recognize = async (uri: string): Promise<RecognizeResponse> => {
+    const formData = new FormData();
+    const mimeType = 'audio/mpeg'
+
+    const blob = await fetch(uri).then(res => res.blob());
+    
+    formData.append('file', {
+      uri: uri,
+      name: uri.split('/').pop(),
+      type: blob.type,
+    } as any);
+
+    console.log(`Upload file: ${(blob.size / 1024 / 1024).toPrecision(2)} MB`);
+
+    return withAuth<RecognizeResponse>(`${API_URL}/api/speech/recognize`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      data: formData,
+    });
+  }
+
   return {
     sendVerificationCode,
     verifyVerificationCode,
@@ -841,6 +879,7 @@ export const useApi = () => {
     getVotingById,
     vote,
     createVoting,
+    recognize,
   }
 }
 

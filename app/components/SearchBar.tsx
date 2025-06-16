@@ -4,14 +4,19 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import { Theme, useTheme } from '@/core/hooks/useTheme';
 import LottieView from 'lottie-react-native';
+import axios, { AxiosRequestConfig } from 'axios';
+import useApi from '@/core/hooks/useApi';
 
 const { width, height } = Dimensions.get('window');
 
 interface Message {
   id: string;
-  text: string;
+  text?: string;
   isUser: boolean;
   timestamp: Date;
+  audioUri?: string;
+  transcript?: string;
+  showTranscript?: boolean;
 }
 
 interface SearchBarProps {
@@ -19,7 +24,114 @@ interface SearchBarProps {
   onVoiceSearch: (audioUri: string) => void;
 }
 
+const AudioMessage: React.FC<{ message: Message }> = ({ message }) => {
+  const [sound, setSound] = React.useState<Audio.Sound | null>(null);
+  const [isPlaying, setIsPlaying] = React.useState(false);
+  const [showTranscript, setShowTranscript] = React.useState(message.showTranscript || false);
+  const [theme] = useTheme();
+  const styles = makeStyles(theme!);
+
+  const playAudio = async () => {
+    if (sound) {
+      await sound.replayAsync();
+      setIsPlaying(true);
+      return;
+    }
+    const { sound: newSound } = await Audio.Sound.createAsync({ uri: message.audioUri! });
+    setSound(newSound);
+    setIsPlaying(true);
+    newSound.setOnPlaybackStatusUpdate((status) => {
+      if (!status.isLoaded) return;
+      if (status.didJustFinish) setIsPlaying(false);
+    });
+    await newSound.playAsync();
+  };
+
+  const stopAudio = async () => {
+    if (sound) {
+      await sound.stopAsync();
+      setIsPlaying(false);
+    }
+  };
+
+  React.useEffect(() => {
+    return () => {
+      if (sound) {
+        sound.unloadAsync();
+      }
+    };
+  }, [sound]);
+
+  return (
+    <View style={[
+      styles.messageContainer,
+      message.isUser ? styles.userMessage : styles.aiMessage
+    ]}>
+      <View style={[
+        styles.messageBubble,
+        message.isUser ? styles.userBubble : styles.aiBubble
+      ]}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <TouchableOpacity onPress={isPlaying ? stopAudio : playAudio} style={{ marginRight: 10 }}>
+            <MaterialCommunityIcons name={isPlaying ? 'pause' : 'play'} size={28} color={message.isUser ? '#fff' : '#007AFF'} />
+          </TouchableOpacity>
+          {/* Имитация волны */}
+          <View style={{ width: 60, height: 24, justifyContent: 'center', marginRight: 10 }}>
+            <View style={{ height: 16, backgroundColor: message.isUser ? '#fff' : '#007AFF', borderRadius: 8, opacity: 0.3 }} />
+          </View>
+          <Text style={{ color: message.isUser ? '#fff' : '#007AFF', marginRight: 10 }}>0:30</Text>
+          <TouchableOpacity onPress={() => setShowTranscript(!showTranscript)} style={{ backgroundColor: '#e6f0ff', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 2 }}>
+            <Text style={{ color: '#007AFF', fontWeight: 'bold' }}>Aa</Text>
+          </TouchableOpacity>
+        </View>
+        {showTranscript && (
+          <Text style={[
+            styles.messageText,
+            message.isUser ? styles.userMessageText : styles.aiMessageText,
+            { marginTop: 8 }
+          ]}>{message.transcript}</Text>
+        )}
+        <Text style={styles.timestamp}>
+          {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </Text>
+      </View>
+    </View>
+  );
+};
+
+const MessageItem: React.FC<{ message: Message }> = ({ message }) => {
+  const [theme] = useTheme();
+  const styles = makeStyles(theme!);
+  if (message.audioUri) {
+    return <AudioMessage message={message} />;
+  }
+  return (
+    <View 
+      style={[
+        styles.messageContainer,
+        message.isUser ? styles.userMessage : styles.aiMessage
+      ]}
+    >
+      <View style={[
+        styles.messageBubble,
+        message.isUser ? styles.userBubble : styles.aiBubble
+      ]}>
+        <Text style={[
+          styles.messageText,
+          message.isUser ? styles.userMessageText : styles.aiMessageText
+        ]}>
+          {message.text}
+        </Text>
+        <Text style={styles.timestamp}>
+          {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </Text>
+      </View>
+    </View>
+  );
+};
+
 export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch }) => {
+  const api = useApi();
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
@@ -118,25 +230,32 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
   const stopRecording = async () => {
     if (!recording.current) return;
 
-    try {
-      await recording.current.stopAndUnloadAsync();
-      const uri = recording.current.getURI();
-      setIsRecording(false);
-      recording.current = null;
-      
-      if (uri) {
-        onVoiceSearch(uri);
-        // Добавляем сообщение о голосовом запросе
-        const newMessage: Message = {
-          id: Date.now().toString(),
-          text: "🎤 Голосовое сообщение",
-          isUser: true,
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, newMessage]);
+    for (let i = 0; i < 3; i++) {
+      try {
+        await recording.current!.stopAndUnloadAsync();
+        const uri = recording.current!.getURI();
+        setIsRecording(false);
+        recording.current = null;
+        
+        if (uri) {
+          onVoiceSearch(uri);
+          // Получаем расшифровку
+          const response = await api.recognize(uri);
+          const text = response.result[0];
+  
+          const newMessage: Message = {
+            id: Date.now().toString(),
+            audioUri: uri,
+            transcript: text,
+            isUser: true,
+            timestamp: new Date(),
+            showTranscript: false,
+          };
+          setMessages(prev => [...prev, newMessage]);
+        }
+      } catch (err) {
+        console.error('Failed to stop recording', err);
       }
-    } catch (err) {
-      console.error('Failed to stop recording', err);
     }
   };
 
@@ -147,31 +266,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
       startRecording();
     }
   };
-
-  const renderMessage = (message: Message) => (
-    <View 
-      key={message.id} 
-      style={[
-        styles.messageContainer,
-        message.isUser ? styles.userMessage : styles.aiMessage
-      ]}
-    >
-      <View style={[
-        styles.messageBubble,
-        message.isUser ? styles.userBubble : styles.aiBubble
-      ]}>
-        <Text style={[
-          styles.messageText,
-          message.isUser ? styles.userMessageText : styles.aiMessageText
-        ]}>
-          {message.text}
-        </Text>
-        <Text style={styles.timestamp}>
-          {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </Text>
-      </View>
-    </View>
-  );
 
   return (
     <>
@@ -236,7 +330,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
               style={styles.messagesContainer}
               onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
             >
-              {messages.map(renderMessage)}
+              {messages.map((msg) => <MessageItem key={msg.id} message={msg} />)}
             </ScrollView>
 
             <View style={styles.inputContainer}>
