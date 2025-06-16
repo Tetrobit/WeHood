@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, TextInput, TouchableOpacity, StyleSheet, Animated, Dimensions, Text, Modal, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, TextInput, TouchableOpacity, StyleSheet, Animated, Dimensions, Text, Modal, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import { Theme, useTheme } from '@/core/hooks/useTheme';
@@ -31,15 +31,44 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
   const expandAnim = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef<ScrollView>(null);
 
+  const handleExit = () => {
+    if (messages.length > 0) {
+      Alert.alert(
+        'Подтверждение',
+        'Вы уверены, что хотите выйти? Все сообщения будут удалены.',
+        [
+          {
+            text: 'Отмена',
+            style: 'cancel'
+          },
+          {
+            text: 'Выйти',
+            style: 'destructive',
+            onPress: () => {
+              setMessages([]);
+              setIsExpanded(false);
+            }
+          }
+        ]
+      );
+    } else {
+      setIsExpanded(false);
+    }
+  };
+
   const toggleExpand = () => {
-    const toValue = isExpanded ? 0 : 1;
-    setIsExpanded(!isExpanded);
-    Animated.spring(expandAnim, {
-      toValue,
-      useNativeDriver: false,
-      tension: 40,
-      friction: 7,
-    }).start();
+    if (isExpanded) {
+      handleExit();
+    } else {
+      const toValue = 1;
+      setIsExpanded(true);
+      Animated.spring(expandAnim, {
+        toValue,
+        useNativeDriver: false,
+        tension: 40,
+        friction: 7,
+      }).start();
+    }
   };
 
   const handleSendMessage = () => {
@@ -159,7 +188,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
         visible={isExpanded}
         transparent={true}
         animationType="fade"
-        onRequestClose={toggleExpand}
+        onRequestClose={handleExit}
       >
         <KeyboardAvoidingView 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -189,7 +218,17 @@ export const SearchBar: React.FC<SearchBarProps> = ({ onSearch, onVoiceSearch })
             </View>
 
             {!messages.length && (
-              <LottieView source={require('@/assets/lottie/ai-search')} />
+              <View style={{flex: 1, justifyContent: 'center', flexDirection: 'row', padding: 100}}>
+                <LottieView
+                  style={{
+                    width: 200,
+                    height: 200,
+                  }}
+                  source={require('@/assets/lottie/ai-search')}
+                  autoPlay
+                  speed={0.6}
+                />
+              </View>
             )}
 
             <ScrollView
